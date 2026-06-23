@@ -1,41 +1,53 @@
-import type { TestCase } from "../../../ai/src/models/TestCase.js";
-import type { TestData } from "../../../ai/src/models/TestData.js";
+import type { TestCase }
+  from "../../../ai/src/models/TestCase.js";
 
-import { PlaywrightActionGenerator }
-  from "../../../ai/src/playwright-generator/PlaywrightActionGenerator.js";
+import type { TestData }
+  from "../../../ai/src/models/TestData.js";
+
+import { AIActionModelGenerator }
+  from "../../../ai/src/action-model/AIActionModelGenerator.js";
+
+import { PlaywrightRenderer }
+  from "../renderers/PlaywrightRenderer.js";
 
 import { AssertionGenerator }
   from "../../../ai/src/assertion-generator/AssertionGenerator.js";
 
-import { KnowledgeBaseService }
-  from "../../../knowledge-base/KnowledgeBaseService.js";
-
 export class PlaywrightGenerator {
   constructor(
-    private actionGenerator: PlaywrightActionGenerator,
-    private assertionGenerator: AssertionGenerator
-  ) {}
+    private actionModelGenerator:
+      AIActionModelGenerator,
+
+    private renderer:
+      PlaywrightRenderer,
+
+    private assertionGenerator:
+      AssertionGenerator
+  ) { }
 
   async generate(
     testCases: TestCase[],
-    testData: TestData
+    testData: TestData,
+    knowledgeBase: any
   ): Promise<string> {
-
-    const kbService =
-      new KnowledgeBaseService();
-
-    const knowledgeBase =
-      kbService.load("login-page");
 
     const testBlocks = await Promise.all(
       testCases.map(async (testCase) => {
 
         const actions = await Promise.all(
-          testCase.steps.map(step =>
-            this.actionGenerator.generateAction(
-              step,
-              knowledgeBase
-            )
+          testCase.steps.map(
+            async (step) => {
+
+              const actionModel =
+                await this.actionModelGenerator.generate(
+                  step
+                );
+
+              return this.renderer.renderAction(
+                actionModel,
+                knowledgeBase
+              );
+            }
           )
         );
 
@@ -49,12 +61,12 @@ export class PlaywrightGenerator {
 test('${testCase.title}', async ({ page }) => {
 
   const testData = ${JSON.stringify(
-    testData,
-    null,
-    2
-  )};
+          testData,
+          null,
+          2
+        )};
 
-${actions.join("\n  ")}
+${actions.join("\n")}
 
   ${assertion}
 

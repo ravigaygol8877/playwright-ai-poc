@@ -20,10 +20,27 @@ You are a QA automation expert.
 Convert the step into JSON.
 
 Allowed actions:
-
 goto
 fill
 click
+
+Allowed dataKey values ONLY:
+
+validUsername
+invalidUsername
+validPassword
+invalidPassword
+empty
+
+Never invent any other value.
+Never return:
+maxLengthValidUsername
+anyPassword
+specialCharacterPassword
+usernameWithDifferentCase
+SQLInjectionString
+
+Only use one of the allowed values.
 
 Examples:
 
@@ -43,7 +60,7 @@ Output:
 {
   "action":"fill",
   "target":"username",
-  "value":"validUsername"
+  "dataKey":"validUsername"
 }
 
 Step:
@@ -53,7 +70,7 @@ Output:
 {
   "action":"fill",
   "target":"password",
-  "value":"validPassword"
+  "dataKey":"validPassword"
 }
 
 Step:

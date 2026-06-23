@@ -17,14 +17,24 @@ await page.goto(
 );
 `;
 
-            case "fill":
+            case "fill": { 
+
+                if (action.dataKey === "empty") {
+                    return `
+await page.fill(
+  '${knowledgeBase.selectors[action.target]}',
+  ''
+);
+`;
+                }
 
                 return `
 await page.fill(
   '${knowledgeBase.selectors[action.target]}',
-  testData.${action.value}
+  testData.${action.dataKey}
 );
 `;
+            }
 
             case "click":
 
