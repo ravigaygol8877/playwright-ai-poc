@@ -1,6 +1,7 @@
 import type { LLMProvider } from "../../../llm/src/interfaces/LLMProvider.js";
-import { JsonExtractor } from "../utils/JsonExtractor.js";
 import type { TestData } from "../models/TestData.js";
+import { AIJsonParser }
+    from "../utils/AIJsonParser.js";
 export class TestDataGenerator {
     constructor(private llmProvider: LLMProvider) { }
 
@@ -36,9 +37,7 @@ ${requirement}
 
         console.log("Raw AI Response:");
         console.log(response);
-        const cleaned =
-            JsonExtractor.extract(response);
 
-        return JSON.parse(cleaned) as TestData;
+        return AIJsonParser.parse<TestData>(response);
     }
 }

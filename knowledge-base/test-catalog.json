@@ -1,0 +1,11 @@
+{
+  "testSuites": [
+    "Login Tests",
+    "Registration Tests",
+    "Password Reset Tests",
+    "User Profile Tests",
+    "Search Tests",
+    "Checkout Tests",
+    "Order Tests"
+  ]
+}

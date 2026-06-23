@@ -1,6 +1,9 @@
 import type { LLMProvider }
 from "../../../llm/src/interfaces/LLMProvider.js";
 
+import { AIJsonParser }
+from "../utils/AIJsonParser.js";
+
 import type { ActionModel }
 from "./ActionModel.js";
 
@@ -99,6 +102,6 @@ ${step}
         .replace(/```/g, "")
         .trim();
 
-    return JSON.parse(cleaned);
+    return AIJsonParser.parse(response);
   }
 }
