@@ -55,6 +55,10 @@ The platform is built as independent, loosely-coupled layers:
           │  TestDataGenerator      │
           │  PlaywrightActionGen.   │
           │  AssertionGenerator     │
+          │  FlakyTestAnalyzer      │
+          │  SelfHealingLocator     │
+          │  BugRootCauseAnalyzer   │
+          │  RegressionSelector     │
           └────────────┬────────────┘
                        │
           ┌────────────▼────────────┐
@@ -95,17 +99,32 @@ playwright-ai-poc/
 │       │   └── AIActionModelGenerator.ts   # LLM → ActionModel conversion
 │       ├── assertion-generator/
 │       │   └── AssertionGenerator.ts       # LLM → Playwright assertion
+│       ├── flaky-test-analyzer/
+│       │   ├── FlakyTestAnalyzer.ts        # Analyses execution data for flaky patterns
+│       │   ├── FlakyTestAnalysis.ts        # Output interface (probability, causes, fix)
+│       │   └── TestExecutionData.ts        # Input interface (name, retries, duration, error)
 │       ├── models/
 │       │   ├── TestCase.ts                 # TestCase interface
 │       │   └── TestData.ts                 # TestData interface
 │       ├── playwright-generator/
 │       │   └── PlaywrightActionGenerator.ts # LLM → Playwright action statement
+│       ├── regression-selector/
+│       │   ├── RegressionSelector.ts       # Selects impacted test suites from changed files
+│       │   └── RegressionSelection.ts      # Output interface (files, features, suites, reasoning)
+│       ├── root-cause-analyzer/
+│       │   ├── BugRootCauseAnalyzer.ts     # Diagnoses failure type, cause, and fix
+│       │   ├── FailureAnalysisInput.ts     # Input interface (name, message, stack, log)
+│       │   └── RootCauseAnalysisResult.ts  # Output interface (type, cause, component, confidence)
+│       ├── self-healing-locator/
+│       │   ├── SelfHealingLocatorEngine.ts # Heals broken locators using the knowledge base
+│       │   ├── LocatorFailure.ts           # Input interface (failedLocator, pageName)
+│       │   └── LocatorHealingResult.ts     # Output interface (healed selector, confidence, reason)
 │       ├── test-case-generator/
 │       │   └── TestCaseGenerator.ts        # Requirement → TestCase[]
 │       ├── test-data-generator/
 │       │   └── TestDataGenerator.ts        # Requirement → TestData
 │       ├── utils/
-│       │   └── JsonExtractor.ts            # Strips markdown fences from LLM output
+│       │   └── AIJsonParser.ts             # Generic typed JSON parser — strips LLM markdown fences
 │       └── index.ts                        # Main entry point / orchestrator
 │
 ├── automation/
@@ -117,7 +136,9 @@ playwright-ai-poc/
 │
 ├── knowledge-base/
 │   ├── KnowledgeBaseService.ts             # Loads page JSON files by name
-│   └── login-page.json                     # Selectors, URLs, and messages for login page
+│   ├── TestCatalogService.ts               # Loads the available test suite catalog
+│   ├── login-page.json                     # Selectors, URLs, and messages for login page
+│   └── test-catalog.json                   # Registry of available test suite names
 │
 ├── llm/
 │   └── src/
@@ -133,7 +154,9 @@ playwright-ai-poc/
 │       └── login.spec.ts                   # AI-generated Playwright test file
 │
 ├── docs/
-│   └── architecture.md                     # Architecture vision and principles
+│   ├── architecture.md                     # Architecture vision and principles
+│   ├── current-architecture.md             # Current implemented architecture snapshot
+│   └── self-healing-locator-design.md      # Design doc for the self-healing locator module
 │
 ├── playwright.config.ts                    # Playwright config (Chromium, Firefox, WebKit)
 ├── tsconfig.json                           # TypeScript configuration
@@ -309,9 +332,85 @@ Reads a JSON file from the `knowledge-base/` directory by page name and returns 
 const kb = new KnowledgeBaseService().load("login-page");
 ```
 
-### `JsonExtractor`
+### `FlakyTestAnalyzer`
 
-Utility that strips markdown code fences (` ```json `, ` ``` `) from LLM responses before `JSON.parse`.
+Accepts a `TestExecutionData` object and returns a `FlakyTestAnalysis` with a flakiness probability score, possible causes, and a fix recommendation.
+
+```typescript
+interface TestExecutionData {
+  testName: string;
+  retryCount: number;
+  duration: number;
+  failureMessage: string;
+}
+
+interface FlakyTestAnalysis {
+  testName: string;
+  flakyProbability: number;   // 0–100
+  possibleCauses: string[];
+  recommendation: string;
+}
+```
+
+### `SelfHealingLocatorEngine`
+
+Accepts a `LocatorFailure` and the knowledge base for the relevant page. Returns a `LocatorHealingResult` with a healed selector drawn exclusively from the knowledge base.
+
+```typescript
+interface LocatorFailure {
+  failedLocator: string;
+  pageName: string;
+}
+
+interface LocatorHealingResult {
+  originalLocator: string;
+  healedLocator: string;
+  confidence: number;   // 0–100
+  reasoning: string;
+}
+```
+
+### `BugRootCauseAnalyzer`
+
+Accepts a `FailureAnalysisInput` (test name, error message, stack trace, execution log) and returns a `RootCauseAnalysisResult` with failure classification, root cause, impacted component, and a confidence score. Validates that the confidence score is within 0–100 and that all required fields are present.
+
+```typescript
+interface FailureAnalysisInput {
+  testName: string;
+  failureMessage: string;
+  stackTrace: string;
+  executionLog: string;
+}
+
+interface RootCauseAnalysisResult {
+  failureType: string;
+  probableCause: string;
+  impactedComponent: string;
+  recommendation: string;
+  confidence: number;   // 0–100
+}
+```
+
+### `RegressionSelector`
+
+Accepts a list of changed file paths and returns a `RegressionSelection` identifying impacted features and which test suites from `test-catalog.json` should be run. Filters LLM output against the known catalog so invented suite names are never returned.
+
+```typescript
+interface RegressionSelection {
+  changedFiles: string[];
+  impactedFeatures: string[];
+  recommendedTests: string[];   // only values present in test-catalog.json
+  reasoning: string;
+}
+```
+
+### `AIJsonParser`
+
+Generic typed utility that strips markdown code fences from LLM responses and parses the result as JSON. Used by all AI modules.
+
+```typescript
+const result = AIJsonParser.parse<MyType>(llmResponse);
+```
 
 ---
 
@@ -345,6 +444,31 @@ To add a new page, create a new JSON file following the same structure and load 
 
 ```typescript
 const kb = new KnowledgeBaseService().load("dashboard-page");
+```
+
+### `TestCatalogService`
+
+Reads `knowledge-base/test-catalog.json` and returns the flat list of available test suite names. Used by `RegressionSelector` to constrain LLM output to known suites only.
+
+```typescript
+const suites = new TestCatalogService().load();
+// ["Login Tests", "Registration Tests", "Checkout Tests", ...]
+```
+
+**`knowledge-base/test-catalog.json`** — add a suite name here to make it eligible for AI-driven regression selection:
+
+```json
+{
+  "testSuites": [
+    "Login Tests",
+    "Registration Tests",
+    "Password Reset Tests",
+    "User Profile Tests",
+    "Search Tests",
+    "Checkout Tests",
+    "Order Tests"
+  ]
+}
 ```
 
 ---
@@ -388,9 +512,9 @@ Planned AI modules based on the platform vision:
 | AI Test Data Generation | Done |
 | AI Playwright Action Generation | Done |
 | AI Assertion Generation | Done |
-| AI Locator Healing | Planned |
-| AI Flaky Test Analysis | Planned |
-| AI Bug Root Cause Analysis | Planned |
-| AI Regression Optimization | Planned |
+| AI Locator Healing | Done |
+| AI Flaky Test Analysis | Done |
+| AI Bug Root Cause Analysis | Done |
+| AI Regression Optimization | Done |
 | AI Coverage Analysis | Planned |
 | Natural Language to Automation | Planned |
