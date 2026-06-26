@@ -1,0 +1,45 @@
+{
+  "pageName": "homePage",
+  "url": "https://automationexercise.com/",
+  "selectors": {
+    "homeNav": "a[href='https://automationexercise.com/']",
+    "productsNav": "a[href='https://automationexercise.com/products']",
+    "cartNav": "a[href='https://automationexercise.com/view_cart']",
+    "signupLoginNav": "a[href='https://automationexercise.com/login']",
+    "testCasesNav": "a[href='https://automationexercise.com/test_cases']",
+    "apiTestingNav": "a[href='https://automationexercise.com/api_list']",
+    "videoTutorialsNav": "a[href='https://www.youtube.com/c/AutomationExercise']",
+    "contactUsNav": "a[href='https://automationexercise.com/contact_us']",
+    "categoryWomen": "a[href='https://automationexercise.com/#Women']",
+    "categoryMen": "a[href='https://automationexercise.com/#Men']",
+    "categoryKids": "a[href='https://automationexercise.com/#Kids']",
+    "categoryDressWomen": "a[href='https://automationexercise.com/category_products/1']",
+    "categoryTopsWomen": "a[href='https://automationexercise.com/category_products/2']",
+    "categorySareeWomen": "a[href='https://automationexercise.com/category_products/7']",
+    "categoryTshirtsMen": "a[href='https://automationexercise.com/category_products/3']",
+    "categoryJeansMen": "a[href='https://automationexercise.com/category_products/6']",
+    "categoryDressKids": "a[href='https://automationexercise.com/category_products/4']",
+    "categoryTopsShirtsKids": "a[href='https://automationexercise.com/category_products/5']",
+    "brandPolo": "a[href='https://automationexercise.com/brand_products/Polo']",
+    "brandHM": "a[href='https://automationexercise.com/brand_products/H&M']",
+    "brandMadame": "a[href='https://automationexercise.com/brand_products/Madame']",
+    "brandMastHarbour": "a[href='https://automationexercise.com/brand_products/Mast%20&%20Harbour']",
+    "brandBabyhug": "a[href='https://automationexercise.com/brand_products/Babyhug']",
+    "brandAllenSollyJunior": "a[href='https://automationexercise.com/brand_products/Allen%20Solly%20Junior']",
+    "brandKookieKids": "a[href='https://automationexercise.com/brand_products/Kookie%20Kids']",
+    "brandBiba": "a[href='https://automationexercise.com/brand_products/Biba']",
+    "addToCartButton": "a.btn.btn-default.add-to-cart",
+    "viewCartButton": "a[href='https://automationexercise.com/view_cart']",
+    "continueShoppingButton": "button.btn.btn-success.close-modal.btn-block",
+    "viewProductButton": "a[href^='https://automationexercise.com/product_details/']"
+  },
+  "messages": {
+    "addToCartSuccess": "Your product has been added to cart.",
+    "addedConfirmation": "Added!",
+    "viewCartModal": "View Cart"
+  },
+  "success": {
+    "redirectUrl": "",
+    "landmarkText": "Your product has been added to cart."
+  }
+}

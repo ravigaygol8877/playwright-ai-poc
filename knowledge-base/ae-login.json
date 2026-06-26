@@ -1,0 +1,21 @@
+{
+  "pageName": "Login and Signup Page",
+  "url": "https://automationexercise.com/login",
+  "selectors": {
+    "loginEmailInput": "input[type='email'][name='email']",
+    "loginPasswordInput": "input[type='password'][name='password']",
+    "loginSubmitButton": "button[type='submit']:contains('Login')",
+    "signupNameInput": "input[type='text'][name='name']",
+    "signupEmailInput": "input[type='email'][name='email']",
+    "signupSubmitButton": "button[type='submit']:contains('Signup')",
+    "subscribeEmailInput": "#susbscribe_email",
+    "subscribeSubmitButton": "#subscribe"
+  },
+  "messages": {
+    "subscriptionSuccessMessage": "You have been successfully subscribed!"
+  },
+  "success": {
+    "redirectUrl": "",
+    "landmarkText": ""
+  }
+}
