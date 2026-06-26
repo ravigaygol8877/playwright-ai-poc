@@ -1,7 +1,7 @@
 import "dotenv/config";
 import fs from "fs";
 
-import { OpenRouterProvider } from "../../llm/src/providers/OpenRouterProvider.js";
+import { ProviderFactory } from "../../llm/src/ProviderFactory.js";
 
 import { TestCaseGenerator }
     from "./test-case-generator/TestCaseGenerator.js";
@@ -25,14 +25,7 @@ import { KnowledgeBaseService }
     from "../../knowledge-base/KnowledgeBaseService.js";
 
 async function main() {
-    const apiKey = process.env.OPENROUTER_API_KEY;
-
-    if (!apiKey) {
-        throw new Error("OPENROUTER_API_KEY not found");
-    }
-
-    const llmProvider =
-        new OpenRouterProvider(apiKey);
+    const llmProvider = ProviderFactory.create();
 
     const requirement =
         "User should be able to login using valid username and password";
@@ -87,7 +80,7 @@ async function main() {
         );
 
     fs.writeFileSync(
-        "tests/generated/login.spec.ts",
+        "tests/e2e/login.spec.ts",
         script
     );
 
