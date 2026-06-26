@@ -15,11 +15,25 @@ import type { Requirement }   from "./ExcelReader.js";
 import type { TestCase }      from "../../ai/src/models/TestCase.js";
 import { pMap }               from "../../ai/src/utils/concurrency.js";
 import { ArtifactManifest }   from "../../ai/src/utils/ArtifactManifest.js";
+import type { KnowledgeBase } from "../../ai/src/models/KnowledgeBase.js";
 
 export interface ExpandedRequirement extends Requirement {
   generatedTestCases: TestCase[];
 }
 
+/**
+ * Expands requirements into test cases via AI, with manifest-aware caching.
+ *
+ * Without a manifest, calls `TestCaseGenerator` for every `aiGenerate=true` requirement
+ * using a concurrency-capped worker pool. With a manifest, classifies requirements as
+ * new/modified/unchanged/removed first — unchanged requirements return their cached test
+ * cases instantly (zero LLM calls); only new or modified requirements trigger generation.
+ * Removed requirements are cleaned from the manifest automatically.
+ *
+ * @example
+ *   const expander = new RequirementExpander(llmProvider);
+ *   const expanded = await expander.expandAll(requirements, knowledgeBases, 8, manifest);
+ */
 export class RequirementExpander {
   private generator: TestCaseGenerator;
 
@@ -29,7 +43,7 @@ export class RequirementExpander {
 
   async expand(
     requirement: Requirement,
-    knowledgeBase?: Record<string, unknown>,
+    knowledgeBase?: KnowledgeBase,
   ): Promise<ExpandedRequirement> {
     if (!requirement.aiGenerate) {
       return { ...requirement, generatedTestCases: [] };
@@ -45,7 +59,7 @@ export class RequirementExpander {
 
   async expandAll(
     requirements:  Requirement[],
-    knowledgeBases: Map<string, Record<string, unknown>>,
+    knowledgeBases: Map<string, KnowledgeBase>,
     concurrency = 8,
     manifest?: ArtifactManifest,
   ): Promise<ExpandedRequirement[]> {
@@ -88,8 +102,7 @@ export class RequirementExpander {
 
     // Warn about removed requirements
     for (const id of removedIds) {
-      const existing = (manifest as any).data?.requirements?.[id] as
-        { feature?: string; scenario?: string; page?: string } | undefined;
+      const existing = manifest.getRequirementEntry(id);
       const label = existing
         ? `${existing.page} > ${existing.feature} > ${existing.scenario}`
         : id;

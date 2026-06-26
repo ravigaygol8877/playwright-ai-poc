@@ -85,10 +85,55 @@ function tryRun(cmd: string, label: string): boolean {
   return true;
 }
 
+// ─── Env var validation ───────────────────────────────────────────────────────
+
+const VALID_PROVIDERS = ["gemini", "github-models", "openrouter", "lm-studio", "fallback"];
+
+function validateEnv(): void {
+  const provider = (process.env["LLM_PROVIDER"] ?? "gemini").toLowerCase().trim();
+
+  if (!VALID_PROVIDERS.includes(provider)) {
+    console.error(`\n  ERROR: Unknown LLM_PROVIDER="${provider}"`);
+    console.error(`  Valid values: ${VALID_PROVIDERS.join(", ")}`);
+    console.error(`  Set it in .env or export LLM_PROVIDER=<value>\n`);
+    process.exit(1);
+  }
+
+  const required: Record<string, string> = {
+    gemini:          "GOOGLE_API_KEY",
+    "github-models": "GITHUB_TOKEN",
+    openrouter:      "OPENROUTER_API_KEY",
+  };
+
+  const requiredKey = required[provider];
+  if (requiredKey && !process.env[requiredKey]?.trim()) {
+    console.error(`\n  ERROR: ${requiredKey} is required for LLM_PROVIDER="${provider}"`);
+    console.error(`  Add it to your .env file — see .env.example for reference\n`);
+    process.exit(1);
+  }
+
+  if (provider === "fallback") {
+    const chain = (process.env["FALLBACK_CHAIN"] ?? "gemini,github-models,openrouter,lm-studio")
+      .split(",").map(s => s.trim());
+    const hasAnyKey =
+      (chain.includes("gemini")          && !!process.env["GOOGLE_API_KEY"]?.trim()) ||
+      (chain.includes("github-models")   && !!process.env["GITHUB_TOKEN"]?.trim())  ||
+      (chain.includes("openrouter")      && !!process.env["OPENROUTER_API_KEY"]?.trim()) ||
+      (chain.includes("lm-studio"));
+    if (!hasAnyKey) {
+      console.error("\n  ERROR: LLM_PROVIDER=fallback but no provider credentials are set.");
+      console.error("  Set at least one of: GOOGLE_API_KEY, GITHUB_TOKEN, OPENROUTER_API_KEY\n");
+      process.exit(1);
+    }
+  }
+}
+
 // ─── Pre-flight checks ────────────────────────────────────────────────────────
 
 function preflight(): void {
   section("Pre-flight Checks");
+
+  validateEnv();
 
   if (!fs.existsSync(EXCEL_FILE)) {
     console.error(`\n  ERROR: Requirements file not found: ${EXCEL_FILE}`);

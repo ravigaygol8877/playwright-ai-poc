@@ -237,7 +237,7 @@ async function generateSuite(
   try {
     // Load knowledge base first — needed for both requirement generation and test case generation
     process.stdout.write("  ▸ Loading knowledge base... ");
-    const kb = kbService.load(suite.page) as Record<string, unknown>;
+    const kb = kbService.load(suite.page);
     console.log(`done  (${suite.page})`);
 
     // Auto-generate POM + data file if not yet present for this page

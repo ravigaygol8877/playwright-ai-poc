@@ -31,6 +31,20 @@ function isFatalForProvider(message: string): boolean {
   );
 }
 
+/**
+ * Auto-switching fallback chain over multiple LLMProviders.
+ *
+ * Tries each provider in order; when one fails fatally (quota, bad key, offline) it
+ * permanently advances the cursor so all subsequent calls skip dead providers without
+ * retrying them. Transient failures (rate-limit, 503) are handled by the inner provider
+ * before the cursor moves. Wraps any set of LLMProvider implementations transparently.
+ *
+ * @example
+ *   const provider = new FallbackProvider([
+ *     { name: "gemini", provider: geminiInstance },
+ *     { name: "github-models", provider: githubModelsInstance },
+ *   ]);
+ */
 export class FallbackProvider implements LLMProvider {
   /**
    * Persists across calls — once we advance to a working provider we stay there,

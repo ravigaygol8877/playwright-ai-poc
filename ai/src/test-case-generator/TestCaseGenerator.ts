@@ -1,13 +1,17 @@
-import type { LLMProvider } from "../../../llm/src/interfaces/LLMProvider.js";
-import type { TestCase } from "../models/TestCase.js";
-import { AIJsonParser } from "../utils/AIJsonParser.js";
+import type { LLMProvider }    from "../../../llm/src/interfaces/LLMProvider.js";
+import type { TestCase }       from "../models/TestCase.js";
+import { AIJsonParser }        from "../utils/AIJsonParser.js";
+import type { KnowledgeBase }  from "../models/KnowledgeBase.js";
+
+const MIN_TEST_CASES = 4;
+const MAX_TEST_CASES = 10;
 
 export class TestCaseGenerator {
   constructor(private llmProvider: LLMProvider) {}
 
   async generate(
     requirement: string,
-    knowledgeBase?: Record<string, unknown>
+    knowledgeBase?: KnowledgeBase,
   ): Promise<TestCase[]> {
 
     const kbContext = this.buildKbContext(knowledgeBase);
@@ -54,40 +58,43 @@ Requirement:
 ${requirement}
 `;
 
-    const response = await this.llmProvider.generateResponse(prompt);
-    return AIJsonParser.parse<TestCase[]>(response);
+    const response  = await this.llmProvider.generateResponse(prompt);
+    const testCases = AIJsonParser.parse<TestCase[]>(response);
+
+    if (!Array.isArray(testCases) || testCases.length < MIN_TEST_CASES) {
+      throw new Error(
+        `TestCaseGenerator: expected at least ${MIN_TEST_CASES} test cases, got ${Array.isArray(testCases) ? testCases.length : 0}. ` +
+        `The LLM response may be truncated or malformed.`
+      );
+    }
+
+    return testCases.slice(0, MAX_TEST_CASES);
   }
 
-  private buildKbContext(kb: Record<string, unknown> | undefined): string {
+  private buildKbContext(kb: KnowledgeBase | undefined): string {
     if (!kb) return "";
-
-    const pageName  = kb.pageName  as string | undefined;
-    const url       = kb.url       as string | undefined;
-    const selectors = kb.selectors as Record<string, string> | undefined;
-    const messages  = kb.messages  as Record<string, string> | undefined;
-    const notes     = kb.notes     as string | undefined;
 
     const lines: string[] = [];
 
-    if (pageName) lines.push(`PAGE: ${pageName}`);
-    if (url)      lines.push(`URL : ${url}`);
+    lines.push(`PAGE: ${kb.pageName}`);
+    lines.push(`URL : ${kb.url}`);
 
-    if (selectors && Object.keys(selectors).length > 0) {
+    if (Object.keys(kb.selectors).length > 0) {
       lines.push("\nAVAILABLE ELEMENTS (use these exact names in test steps):");
-      for (const [key] of Object.entries(selectors)) {
+      for (const key of Object.keys(kb.selectors)) {
         lines.push(`  - ${key}`);
       }
     }
 
-    if (messages && Object.keys(messages).length > 0) {
+    if (kb.messages && Object.keys(kb.messages).length > 0) {
       lines.push("\nKNOWN VALIDATION MESSAGES (use these exact strings in expectedResult):");
-      for (const [, value] of Object.entries(messages)) {
+      for (const value of Object.values(kb.messages)) {
         lines.push(`  - "${value}"`);
       }
     }
 
-    if (notes) {
-      lines.push(`\nPAGE NOTES:\n  ${notes}`);
+    if (kb.notes) {
+      lines.push(`\nPAGE NOTES:\n  ${kb.notes}`);
     }
 
     return lines.length > 0 ? lines.join("\n") + "\n" : "";

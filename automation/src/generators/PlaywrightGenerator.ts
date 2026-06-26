@@ -4,6 +4,9 @@ import type { TestCase }
 import type { TestData }
   from "../../../ai/src/models/TestData.js";
 
+import type { KnowledgeBase }
+  from "../../../ai/src/models/KnowledgeBase.js";
+
 import { AIActionModelGenerator }
   from "../../../ai/src/action-model/AIActionModelGenerator.js";
 
@@ -36,22 +39,15 @@ export class PlaywrightGenerator {
   async generate(
     testCases: TestCase[],
     testData: TestData,
-    knowledgeBase: any,
+    knowledgeBase: KnowledgeBase,
   ): Promise<string> {
 
-    const pageUrl     = new URL(knowledgeBase.url as string);
-    const pagePath    = pageUrl.pathname;
-    const describeName =
-      (knowledgeBase.describeName as string | undefined) ??
-      (knowledgeBase.pageName as string);
-    const prefixLines =
-      (knowledgeBase.beforeEachPrefix as string[] | undefined) ?? [];
-    const skipGoto =
-      (knowledgeBase.skipGoto as boolean | undefined) ?? false;
-
-    const availableTargets = Object.keys(
-      knowledgeBase.selectors as Record<string, unknown>,
-    );
+    const pageUrl          = new URL(knowledgeBase.url);
+    const pagePath         = pageUrl.pathname;
+    const describeName     = knowledgeBase.describeName ?? knowledgeBase.pageName;
+    const prefixLines      = knowledgeBase.beforeEachPrefix ?? [];
+    const skipGoto         = knowledgeBase.skipGoto ?? false;
+    const availableTargets = Object.keys(knowledgeBase.selectors);
 
     // Generate all test blocks concurrently
     const testBlocks = await pMap(
@@ -83,7 +79,7 @@ ${testBlocks.join("\n\n")}
   private async generateTestBlock(
     testCase: TestCase,
     availableTargets: string[],
-    knowledgeBase: any,
+    knowledgeBase: KnowledgeBase,
   ): Promise<string> {
     // Process all steps concurrently within the test case too
     const renderResults = await pMap(

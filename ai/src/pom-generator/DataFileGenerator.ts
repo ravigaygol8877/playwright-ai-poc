@@ -30,15 +30,15 @@ export class DataFileGenerator {
   constructor(private llmProvider: LLMProvider) {}
 
   async generate(
-    kb: Record<string, unknown>,
+    kb: import("../models/KnowledgeBase.js").KnowledgeBase,
     kbKey: string,
   ): Promise<DataFileResult> {
 
-    const pageName  = (kb.pageName  as string | undefined) ?? kbKey;
-    const url       = (kb.url       as string | undefined) ?? '/';
-    const messages  = (kb.messages  as Record<string, string> | undefined) ?? {};
-    const success   = (kb.success   as Record<string, string> | undefined) ?? {};
-    const selectors = (kb.selectors as Record<string, string> | undefined) ?? {};
+    const pageName  = kb.pageName ?? kbKey;
+    const url       = kb.url      ?? '/';
+    const messages  = kb.messages  ?? {};
+    const success   = kb.success   ?? {};
+    const selectors = kb.selectors ?? {};
 
     const className    = kbKeyToClassName(kbKey);
     const interfaceName = `${className}Data`;

@@ -1,21 +1,18 @@
-import type { LLMProvider } from "../../../llm/src/interfaces/LLMProvider.js";
+import type { LLMProvider }    from "../../../llm/src/interfaces/LLMProvider.js";
+import type { KnowledgeBase } from "../models/KnowledgeBase.js";
 
 export class RequirementGenerator {
   constructor(private llmProvider: LLMProvider) {}
 
-  async generate(knowledgeBase: Record<string, unknown>): Promise<string> {
-    const pageName  = knowledgeBase.pageName  as string ?? "Unknown Page";
-    const url       = knowledgeBase.url        as string ?? "";
-    const selectors = knowledgeBase.selectors  as Record<string, string> | undefined;
-    const messages  = knowledgeBase.messages   as Record<string, string> | undefined;
-    const notes     = knowledgeBase.notes      as string | undefined;
+  async generate(knowledgeBase: KnowledgeBase): Promise<string> {
+    const pageName = knowledgeBase.pageName ?? "Unknown Page";
+    const url      = knowledgeBase.url      ?? "";
 
-    const selectorList = selectors
-      ? Object.entries(selectors).map(([k, v]) => `  ${k}: ${v}`).join("\n")
-      : "  (none)";
+    const selectorList = Object.entries(knowledgeBase.selectors)
+      .map(([k, v]) => `  ${k}: ${v}`).join("\n") || "  (none)";
 
-    const messageList = messages
-      ? Object.entries(messages).map(([k, v]) => `  ${k}: "${v}"`).join("\n")
+    const messageList = knowledgeBase.messages
+      ? Object.entries(knowledgeBase.messages).map(([k, v]) => `  ${k}: "${v}"`).join("\n")
       : "  (none)";
 
     const prompt = `
@@ -30,7 +27,7 @@ ${selectorList}
 KNOWN MESSAGES / VALIDATIONS:
 ${messageList}
 
-${notes ? `NOTES:\n${notes}\n` : ""}
+${knowledgeBase.notes ? `NOTES:\n${knowledgeBase.notes}\n` : ""}
 
 Based ONLY on what is actually present on this page, write a single comprehensive test requirement paragraph.
 

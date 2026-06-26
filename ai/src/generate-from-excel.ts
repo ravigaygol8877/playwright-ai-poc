@@ -42,6 +42,7 @@ import { PageAnalyzer }           from "./discovery/PageAnalyzer.js";
 import { ScenarioInferenceEngine } from "./discovery/ScenarioInferenceEngine.js";
 import type { Requirement }       from "../../src/requirements/ExcelReader.js";
 import { ArtifactManifest }       from "./utils/ArtifactManifest.js";
+import type { KnowledgeBase }     from "./models/KnowledgeBase.js";
 
 // ─── CLI args ─────────────────────────────────────────────────────────────────
 
@@ -59,6 +60,11 @@ const OUTPUT_PATH      = "tests/e2e/";
 // Override with env var: SPEC_BATCH_SIZE=50 npm run ai:run
 const SPEC_BATCH_SIZE  = parseInt(process.env["SPEC_BATCH_SIZE"] ?? "20", 10);
 const SPEC_MANIFEST    = path.join(".llm-cache", "spec-manifest.json");
+// GitHub Models allows max 5 concurrent requests; other providers handle 8 fine.
+// Override with env var: CONCURRENCY=4 npm run ai:run
+const CONCURRENCY = parseInt(process.env["CONCURRENCY"] ?? (
+  (process.env["LLM_PROVIDER"] ?? "").toLowerCase() === "github-models" ? "4" : "8"
+), 10);
 
 // ─── Spec manifest helpers ─────────────────────────────────────────────────────
 
@@ -142,7 +148,7 @@ async function main() {
   }
 
   let pageGroups       = reader.groupByPage(parseResult.requirements);
-  const knowledgeBases = new Map<string, Record<string, unknown>>();
+  const knowledgeBases = new Map<string, KnowledgeBase>();
 
   // ── Step 2: Auto-generate missing Knowledge Base files ─────────────────────
   section("Step 2 — Auto-generating Missing Knowledge Base Files");
@@ -264,9 +270,9 @@ async function main() {
     const pomFile   = `src/pages/${className}.ts`;
     const dataFile  = `src/data/${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
 
-    let kb: Record<string, unknown>;
+    let kb: KnowledgeBase;
     try {
-      kb = kbService.load(pageKey) as Record<string, unknown>;
+      kb = kbService.load(pageKey);
       knowledgeBases.set(pageKey, kb);
     } catch {
       warn(`No KB file for "${pageKey}" — skipping POM generation`);
@@ -323,7 +329,7 @@ async function main() {
   const expanded = await expander.expandAll(
     parseResult.requirements,
     knowledgeBases,
-    8,
+    CONCURRENCY,
     manifest,
   );
 
@@ -488,6 +494,11 @@ async function main() {
   if (passed.length > 0) {
     console.log(`  Run tests:      npm test`);
     console.log(`  Reports folder: open ${runs.root}\n`);
+  }
+
+  // Log LLM cache stats if available (CachingLLMProvider wraps every provider)
+  if ("logStats" in llm && typeof (llm as { logStats(): void }).logStats === "function") {
+    (llm as { logStats(): void }).logStats();
   }
 
   if (failed.length > 0) process.exit(1);

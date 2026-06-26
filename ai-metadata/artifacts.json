@@ -1,5 +1,18 @@
 {
   "version": "1",
   "requirements": {},
-  "pages": {}
+  "pages": {
+    "ae-home": {
+      "url": "https://automationexercise.com/",
+      "kbHash": "871bbcb6e426ace37503c2955a5d7920334e58356d249c4690085dfdbfa2c9aa",
+      "specFiles": [],
+      "updatedAt": "2026-06-26T09:32:29.830Z"
+    },
+    "ae-login": {
+      "url": "https://automationexercise.com/login",
+      "kbHash": "b78eba27a78d9da56efea8a921e8f248614d9d9b57c8dfa98237fffd990e8b8b",
+      "specFiles": [],
+      "updatedAt": "2026-06-26T09:33:01.817Z"
+    }
+  }
 }

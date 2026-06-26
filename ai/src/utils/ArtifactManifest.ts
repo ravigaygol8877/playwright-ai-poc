@@ -70,6 +70,19 @@ export interface ClassificationSummary {
 
 const MANIFEST_VERSION = "1";
 
+/**
+ * Central state store for all AI-generated artifacts, persisted in `ai-metadata/artifacts.json`.
+ *
+ * Tracks per-requirement content hashes so unchanged requirements return cached test cases
+ * without any LLM call. Tracks per-page KB and POM hashes to drive cascade invalidation:
+ * a URL change forces KB regeneration; a KB file change forces POM regeneration. Committed
+ * to git (unlike `.llm-cache/`) so the team shares the same baseline across machines.
+ *
+ * @example
+ *   const manifest = new ArtifactManifest();
+ *   const { classified, newCount } = manifest.classifyRequirements(requirements);
+ *   // only newCount requirements will trigger LLM calls
+ */
 export class ArtifactManifest {
   private data:  ManifestData;
   private dirty  = false;
@@ -243,6 +256,11 @@ export class ArtifactManifest {
   removeRequirement(reqId: string): void {
     delete this.data.requirements[reqId];
     this.dirty = true;
+  }
+
+  /** Return the stored entry for a requirement, or undefined if not present. */
+  getRequirementEntry(reqId: string): RequirementEntry | undefined {
+    return this.data.requirements[reqId];
   }
 
   // ── Persist ────────────────────────────────────────────────────────────────

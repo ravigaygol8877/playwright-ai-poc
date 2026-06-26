@@ -577,3 +577,43 @@ Planned AI modules based on the platform vision:
 | AI Regression Optimization | Done |
 | AI Coverage Analysis | Planned |
 | Natural Language to Automation | Planned |
+
+---
+
+## CI
+
+![CI](https://github.com/ravigaygol8877/playwright-ai-poc/actions/workflows/ci.yml/badge.svg)
+
+The CI workflow (`.github/workflows/ci.yml`) runs automatically on every push and pull request to `main`.
+
+### What runs automatically
+
+| Check | When |
+|-------|------|
+| TypeScript type check (`npx tsc --noEmit`) | Every push / PR |
+| ESLint (`npm run lint`) | Every push / PR — `continue-on-error` until ESLint is configured |
+| Unit tests (`npm run test:unit`) | Every push / PR — `continue-on-error` until tests/unit/ exists |
+| Playwright smoke tests (`@smoke` tag, Chromium only) | Every push / PR — skipped if no spec files exist in `tests/e2e/` |
+
+### What requires manual execution
+
+The full AI generation pipeline (`npm run ai:run`) is **not** run in CI because it:
+- Requires live LLM API keys (Gemini, GitHub Models, OpenRouter)
+- Makes real network calls to the target application for DOM snapshots
+- Can take 10+ minutes depending on the number of requirements
+
+Run it locally before committing generated specs:
+
+```bash
+LLM_PROVIDER=github-models MODEL=gpt-4.1-mini npm run ai:run
+```
+
+### Required GitHub Secrets
+
+Add these in **Settings → Secrets and variables → Actions**:
+
+| Secret | Used for |
+|--------|----------|
+| `GOOGLE_API_KEY` | Gemini provider |
+| `GITHUB_TOKEN_MODELS` | GitHub Models provider (separate from the built-in `GITHUB_TOKEN`) |
+| `OPENROUTER_API_KEY` | OpenRouter provider |

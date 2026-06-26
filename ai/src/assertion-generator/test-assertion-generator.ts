@@ -14,9 +14,12 @@ async function main() {
     new AssertionGenerator(provider);
 
   const knowledgeBase = {
+    url:      "https://example.com/login",
+    pageName: "Login Page",
+    selectors: {},
     success: {
-      redirectUrl: "/dashboard"
-    }
+      redirectUrl: "/dashboard",
+    },
   };
 
   const result =

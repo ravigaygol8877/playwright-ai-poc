@@ -73,7 +73,7 @@ async function main() {
     }
 
     try {
-      const kb = kbService.load(kbKey) as Record<string, unknown>;
+      const kb = kbService.load(kbKey);
 
       // Generate POM
       process.stdout.write("  ▸ Generating POM... ");

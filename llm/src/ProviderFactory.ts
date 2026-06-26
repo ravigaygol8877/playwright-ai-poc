@@ -40,8 +40,10 @@ export class ProviderFactory {
     const providerName = (process.env["LLM_PROVIDER"] ?? "gemini").toLowerCase().trim();
     const model = modelOverride?.trim() || process.env["MODEL"]?.trim() || undefined;
 
+    const lmUrl = process.env["LM_STUDIO_URL"] ?? "http://127.0.0.1:1234";
     console.log(`  Provider    : ${providerName}`);
     if (model) console.log(`  Model       : ${model}`);
+    if (providerName === "lm-studio") console.log(`  LM Studio   : ${lmUrl}`);
 
     if (providerName === "fallback") {
       return ProviderFactory.wrapWithCache(ProviderFactory.createFallback(model));

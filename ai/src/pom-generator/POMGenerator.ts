@@ -127,11 +127,11 @@ function buildAssertionImpl(
 export class POMGenerator {
   constructor(private llmProvider: LLMProvider) {}
 
-  async generate(kb: Record<string, unknown>, kbKey: string): Promise<POMResult> {
-    const pageName  = (kb.pageName  as string | undefined) ?? kbKey;
-    const url       = (kb.url       as string | undefined) ?? '/';
-    const selectors = (kb.selectors as Record<string, string> | undefined) ?? {};
-    const messages  = (kb.messages  as Record<string, string> | undefined) ?? {};
+  async generate(kb: import("../models/KnowledgeBase.js").KnowledgeBase, kbKey: string): Promise<POMResult> {
+    const pageName  = kb.pageName ?? kbKey;
+    const url       = kb.url      ?? '/';
+    const selectors = kb.selectors ?? {};
+    const messages  = kb.messages  ?? {};
 
     const className    = kbKeyToClassName(kbKey);
     const fileName     = kbKeyToFileName(className);

@@ -25,6 +25,19 @@ interface CacheEntry {
   cachedAt:  string;
 }
 
+/**
+ * Transparent write-through prompt cache wrapping any LLMProvider.
+ *
+ * Every prompt is keyed by SHA-256(cacheVersion + prompt) and stored as a JSON file
+ * under `.llm-cache/`. On a cache hit the response is returned instantly with zero API
+ * calls; on a miss the inner provider is called and the result is persisted before
+ * returning. Bump `CACHE_VERSION` when prompts change significantly so stale entries
+ * are automatically ignored. Disable with `LLM_CACHE=false` in env.
+ *
+ * @example
+ *   const cached = new CachingLLMProvider(geminiProvider);
+ *   const response = await cached.generateResponse(prompt); // free on second call
+ */
 export class CachingLLMProvider implements LLMProvider {
   private readonly cacheDir: string;
   private hits   = 0;

@@ -5,13 +5,13 @@ const renderer =
   new PlaywrightRenderer();
 
 const knowledgeBase = {
-  url: "https://example.com/login",
-
+  url:      "https://example.com/login",
+  pageName: "Login Page",
   selectors: {
-    username: "#username",
-    password: "#password",
-    loginButton: "#login"
-  }
+    username:    "#username",
+    password:    "#password",
+    loginButton: "#login",
+  },
 };
 
 const result =

@@ -40,7 +40,11 @@
     "demo:regression": "tsx ai/src/regression-selector/test-regression-selector.ts",
     "test:github-models": "LLM_PROVIDER=github-models MODEL=gpt-4.1 tsx llm/src/test-github-models.ts",
     "test:provider-switching": "tsx llm/src/test-provider-switching.ts",
-    "cache:clear": "node -e \"const fs=require('fs'); if(fs.existsSync('.llm-cache')){fs.rmSync('.llm-cache',{recursive:true,force:true});console.log('LLM cache cleared.');}else{console.log('No cache to clear.');}\" "
+    "cache:clear": "node -e \"const fs=require('fs'); if(fs.existsSync('.llm-cache')){fs.rmSync('.llm-cache',{recursive:true,force:true});console.log('LLM cache cleared.');}else{console.log('No cache to clear.');}\" ",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "tsx --test ai/src/**/*.test.ts"
   },
   "repository": {
     "type": "git",
@@ -59,8 +63,10 @@
     "@types/node": "^25.9.3",
     "allure-commandline": "^2.43.0",
     "allure-playwright": "^3.10.1",
+    "eslint": "^9.0.0",
     "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.0.0"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

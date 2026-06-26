@@ -83,6 +83,20 @@ const CLICK_PATTERNS = [
 
 // ── Main classifier ─────────────────────────────────────────────────────────
 
+/**
+ * Zero-LLM action classifier using keyword regex rules.
+ *
+ * Classifies natural-language step descriptions into `goto`, `fill`, `click`, or `noop`
+ * ActionModels without any API call — covering roughly 90% of generated steps. For steps
+ * that match no rule, it delegates to `AIActionModelGenerator` as a fallback. Target
+ * inference uses camelCase decomposition to match step text against available KB selector
+ * names; data key inference maps field descriptions to test data keys.
+ *
+ * @example
+ *   const gen = new RuleBasedActionModelGenerator(aiFallback);
+ *   const action = await gen.generate("Enter username in email field", ["emailInput", "passwordInput"]);
+ *   // => { action: "fill", target: "emailInput", dataKey: "validUsername" }
+ */
 export class RuleBasedActionModelGenerator {
   constructor(
     private readonly fallback: AIActionModelGenerator,

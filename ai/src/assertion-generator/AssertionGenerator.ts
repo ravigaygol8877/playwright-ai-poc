@@ -1,4 +1,5 @@
-import type { LLMProvider } from "../../../llm/src/interfaces/LLMProvider.js";
+import type { LLMProvider }    from "../../../llm/src/interfaces/LLMProvider.js";
+import type { KnowledgeBase } from "../models/KnowledgeBase.js";
 
 export class AssertionGenerator {
   constructor(
@@ -7,24 +8,21 @@ export class AssertionGenerator {
 
   async generateAssertion(
     expectedResult: string,
-    knowledgeBase: any
+    knowledgeBase: KnowledgeBase,
   ): Promise<string> {
 
     const messageLines = knowledgeBase.messages
-      ? Object.entries(knowledgeBase.messages as Record<string, string>)
+      ? Object.entries(knowledgeBase.messages)
           .map(([, v]) => `  "${v}"`)
           .join("\n")
       : "  (none)";
 
-    const selectorLines = knowledgeBase.selectors
-      ? Object.entries(knowledgeBase.selectors as Record<string, string>)
-          .map(([k, v]) => `  ${k} → ${v}`)
-          .join("\n")
-      : "  (none)";
+    const selectorLines = Object.entries(knowledgeBase.selectors)
+      .map(([k, v]) => `  ${k} → ${v}`)
+      .join("\n") || "  (none)";
 
-    const successInfo = knowledgeBase.success as Record<string, string> | undefined;
-    const redirectUrl = successInfo?.redirectUrl ?? "";
-    const landmarkText = successInfo?.landmarkText ?? successInfo?.completionText ?? "";
+    const redirectUrl  = knowledgeBase.success?.redirectUrl ?? "";
+    const landmarkText = knowledgeBase.success?.landmarkText ?? knowledgeBase.success?.completionText ?? "";
 
     const prompt = `
 You are a Senior Playwright Automation Engineer writing ONLY the assertion part of a test.

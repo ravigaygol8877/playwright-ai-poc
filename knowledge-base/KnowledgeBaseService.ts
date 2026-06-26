@@ -1,9 +1,10 @@
 import fs from "fs";
+import type { KnowledgeBase } from "../ai/src/models/KnowledgeBase.js";
 
 const REQUIRED_FIELDS = ["pageName", "url", "selectors"] as const;
 
 export class KnowledgeBaseService {
-  load(pageName: string) {
+  load(pageName: string): KnowledgeBase {
     const filePath = `knowledge-base/${pageName}.json`;
 
     if (!fs.existsSync(filePath)) {
@@ -14,7 +15,7 @@ export class KnowledgeBaseService {
     }
 
     const content = fs.readFileSync(filePath, "utf-8");
-    const kb = JSON.parse(content) as Record<string, unknown>;
+    const kb = JSON.parse(content) as KnowledgeBase;
 
     for (const field of REQUIRED_FIELDS) {
       if (!(field in kb)) {

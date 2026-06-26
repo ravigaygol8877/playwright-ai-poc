@@ -1,11 +1,14 @@
 import type { ActionModel }
     from "../../../ai/src/action-model/ActionModel.js";
 
+import type { KnowledgeBase }
+    from "../../../ai/src/models/KnowledgeBase.js";
+
 export class PlaywrightRenderer {
 
     renderAction(
         action: ActionModel,
-        knowledgeBase: any
+        knowledgeBase: KnowledgeBase,
     ): string {
 
         switch (action.action) {
@@ -15,7 +18,7 @@ export class PlaywrightRenderer {
 
             case "fill": {
                 if (!action.target) return "";
-                const selector = knowledgeBase.selectors[action.target] as string | undefined;
+                const selector = knowledgeBase.selectors[action.target];
                 if (!selector) return "";
                 const value = action.dataKey === "empty"
                     ? "''"
@@ -25,7 +28,7 @@ export class PlaywrightRenderer {
 
             case "click": {
                 if (!action.target) return "";
-                const selector = knowledgeBase.selectors[action.target] as string | undefined;
+                const selector = knowledgeBase.selectors[action.target];
                 if (!selector) return "";
                 return `await page.locator("${selector}").click();`;
             }
