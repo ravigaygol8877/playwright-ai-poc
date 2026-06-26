@@ -1,17 +1,14 @@
 import "dotenv/config";
 
-import { OpenRouterProvider }
-from "../../../llm/src/providers/OpenRouterProvider.js";
+import { ProviderFactory }
+from "../../../llm/src/ProviderFactory.js";
 
 import { AIActionModelGenerator }
 from "./AIActionModelGenerator.js";
 
 async function main() {
 
-  const provider =
-    new OpenRouterProvider(
-      process.env.OPENROUTER_API_KEY!
-    );
+  const provider = ProviderFactory.create();
 
   const generator =
     new AIActionModelGenerator(

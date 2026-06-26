@@ -1,65 +1,94 @@
 import "dotenv/config";
-import { PlaywrightGenerator } from "../../automation/src/generators/PlaywrightGenerator.js";
-import { OpenRouterProvider } from "../../llm/src/providers/OpenRouterProvider.js";
-import { TestCaseGenerator } from "./test-case-generator/TestCaseGenerator.js";
-import { PlaywrightActionGenerator } from "./playwright-generator/PlaywrightActionGenerator.js";
-import { TestDataGenerator } from "./test-data-generator/TestDataGenerator.js";
+import fs from "fs";
+
+import { ProviderFactory } from "../../llm/src/ProviderFactory.js";
+
+import { TestCaseGenerator }
+    from "./test-case-generator/TestCaseGenerator.js";
+
+import { TestDataGenerator }
+    from "./test-data-generator/TestDataGenerator.js";
+
 import { AssertionGenerator }
     from "./assertion-generator/AssertionGenerator.js";
-import fs from "fs";
+
+import { AIActionModelGenerator }
+    from "./action-model/AIActionModelGenerator.js";
+
+import { PlaywrightGenerator }
+    from "../../automation/src/generators/PlaywrightGenerator.js";
+
+import { PlaywrightRenderer }
+    from "../../automation/src/renderers/PlaywrightRenderer.js";
+
+import { KnowledgeBaseService }
+    from "../../knowledge-base/KnowledgeBaseService.js";
+
 async function main() {
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const llmProvider = ProviderFactory.create();
 
-    if (!apiKey) {
-        throw new Error("OPENROUTER_API_KEY not found");
-    }
+    const requirement =
+        "User should be able to login using valid username and password";
 
-    const llmProvider = new OpenRouterProvider(apiKey);
+    const testCaseGenerator =
+        new TestCaseGenerator(llmProvider);
 
-    const generator = new TestCaseGenerator(llmProvider);
-
-    const result = await generator.generate(
-        "User should be able to login using valid username and password"
-    );
+    const testCases =
+        await testCaseGenerator.generate(
+            requirement
+        );
 
     const testDataGenerator =
         new TestDataGenerator(llmProvider);
 
     const testData =
         await testDataGenerator.generate(
-            "User should be able to login using valid username and password"
+            requirement
         );
 
-    const assertionGenerator =
-        new AssertionGenerator(llmProvider);
+    const kbService =
+        new KnowledgeBaseService();
 
-    const actionGenerator =
-        new PlaywrightActionGenerator(llmProvider);
+    const knowledgeBase =
+        kbService.load("login-page");
+
+    const actionModelGenerator =
+        new AIActionModelGenerator(
+            llmProvider
+        );
+
+    const renderer =
+        new PlaywrightRenderer();
+
+    const assertionGenerator =
+        new AssertionGenerator(
+            llmProvider
+        );
 
     const playwrightGenerator =
         new PlaywrightGenerator(
-            actionGenerator,
+            actionModelGenerator,
+            renderer,
             assertionGenerator
         );
 
     const script =
         await playwrightGenerator.generate(
-            result,
-            testData
+            testCases,
+            testData,
+            knowledgeBase
         );
 
     fs.writeFileSync(
-        "tests/generated/login.spec.ts",
+        "tests/e2e/login.spec.ts",
         script
     );
 
     console.log(
         "Generated: tests/generated/login.spec.ts"
     );
+
     console.log(script);
-
-    //console.log(JSON.stringify(result, null, 2));
-
 }
 
 main();

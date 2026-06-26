@@ -1,0 +1,2893 @@
+{
+  "version": "1",
+  "requirements": {
+    "0f59b83781b52a8f": {
+      "contentHash": "6627c58abb1ca4ee7722725a630125ceebbf5f40b6dcfe1cc4cb81148b86ee21",
+      "page": "ae-home",
+      "feature": "Newsletter",
+      "scenario": "Valid email subscribes successfully",
+      "descPreview": "Entering a valid email address in the subscription box and clicking Subscribe should display a succe",
+      "testCaseCount": 7,
+      "testCasesHash": "6936693ba729bf5efced452d4bd8892094846adeff5d4469e509f32082f7d630",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Subscribe with a valid standard email address",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address 'user@example.com' in the subscription box",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription success confirmation message is displayed"
+        },
+        {
+          "id": "TC_002",
+          "title": "Subscribe with an email address containing subdomain",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address 'user@mail.example.com' in the subscription box",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription success confirmation message is displayed"
+        },
+        {
+          "id": "TC_003",
+          "title": "Subscribe with an empty email address",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave the subscription box empty",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "An error message indicating email is required is displayed"
+        },
+        {
+          "id": "TC_004",
+          "title": "Subscribe with an invalid email format missing '@'",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an invalid email address 'userexample.com' in the subscription box",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "An error message indicating invalid email format is displayed"
+        },
+        {
+          "id": "TC_005",
+          "title": "Subscribe with a very long but valid email address",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address with 254 characters in the subscription box (maximum length allowed by RFC)",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription success confirmation message is displayed"
+        },
+        {
+          "id": "TC_006",
+          "title": "Subscribe with an email containing SQL injection attempt",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter an email address \"test@example.com'; DROP TABLE users;--\" in the subscription box",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Input is sanitized and an error or success message is displayed without any security breach"
+        },
+        {
+          "id": "TC_007",
+          "title": "Subscribe with an email containing script injection attempt",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter an email address \"<script>alert('xss')</script>@example.com\" in the subscription box",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Input is sanitized and an error or success message is displayed without executing script"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:46:41.690Z"
+    },
+    "29a1ab5c4f94c0f2": {
+      "contentHash": "5839268fa5fa9e844c6b14d45df33ae75a1521457f3d8ac0d2939f3595b1a7d5",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Category sidebar filters products",
+      "descPreview": "Clicking a category in the left sidebar (Women > Dress, Men > Tshirts, etc.) should navigate to the ",
+      "testCaseCount": 8,
+      "testCasesHash": "d567e3bc91df2e633d024f50576553fe199715fbabdf0e224d6ed622ef3c74c2",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Navigate to Women > Dress category and verify filtered product list",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click categoryWomenLink",
+            "Click categoryDressWomenLink"
+          ],
+          "expectedResult": "Page displays products filtered by Women > Dress category"
+        },
+        {
+          "id": "TC_002",
+          "title": "Navigate to Men > Tshirts category and verify filtered product list",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click categoryMenLink",
+            "Click categoryTshirtsMenLink"
+          ],
+          "expectedResult": "Page displays products filtered by Men > Tshirts category"
+        },
+        {
+          "id": "TC_003",
+          "title": "Navigate to Kids > Tops & Shirts category and verify filtered product list",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click categoryKidsLink",
+            "Click categoryTopsShirtsKidsLink"
+          ],
+          "expectedResult": "Page displays products filtered by Kids > Tops & Shirts category"
+        },
+        {
+          "id": "TC_004",
+          "title": "Click categoryWomenLink only and verify product list shows all Women category products",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Click categoryWomenLink"
+          ],
+          "expectedResult": "Page displays all products under Women category without further subcategory filtering"
+        },
+        {
+          "id": "TC_005",
+          "title": "Attempt to click an invalid category element and verify no navigation occurs",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Attempt to click a non-existent category element (not in available elements)"
+          ],
+          "expectedResult": "No navigation or filtering occurs; page remains on current product list"
+        },
+        {
+          "id": "TC_006",
+          "title": "Verify that clicking categoryMenLink followed by categoryJeansMenLink filters products correctly",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click categoryMenLink",
+            "Click categoryJeansMenLink"
+          ],
+          "expectedResult": "Page displays products filtered by Men > Jeans category"
+        },
+        {
+          "id": "TC_007",
+          "title": "Verify that clicking categoryKidsLink followed by categoryDressKidsLink filters products correctly",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click categoryKidsLink",
+            "Click categoryDressKidsLink"
+          ],
+          "expectedResult": "Page displays products filtered by Kids > Dress category"
+        },
+        {
+          "id": "TC_008",
+          "title": "Verify security: ensure no unauthorized category filtering by URL manipulation",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Manually modify URL to access a non-existent or unauthorized category filter"
+          ],
+          "expectedResult": "Application prevents access and shows an error or redirects to a valid product list page"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:46:44.361Z"
+    },
+    "7015097cd9ed9823": {
+      "contentHash": "0edd59a4ef44c563740b8874aeca8f13e77b76772a686168ec990eae64fab67f",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Scroll to bottom shows subscription widget",
+      "descPreview": "Scrolling to the bottom of the homepage should reveal the newsletter subscription form with an email",
+      "testCaseCount": 7,
+      "testCasesHash": "b689d772e6565a6d9ef438394ea89276ed5dcb810222b52265c9abe5ad192665",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Verify newsletter subscription form is visible after scrolling to bottom",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Open https://automationexercise.com/",
+            "Scroll to the bottom of the homepage"
+          ],
+          "expectedResult": "Newsletter subscription form with an email field and Subscribe button is visible"
+        },
+        {
+          "id": "TC_002",
+          "title": "Subscribe to newsletter with a valid email",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "Scroll to the bottom of the homepage"
+          ],
+          "steps": [
+            "Enter a valid email address (e.g. testuser@example.com) in the newsletter email field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription is successful and confirmation message is displayed"
+        },
+        {
+          "id": "TC_003",
+          "title": "Attempt newsletter subscription with empty email field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [
+            "Scroll to the bottom of the homepage"
+          ],
+          "steps": [
+            "Leave the newsletter email field empty",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Validation error message indicating email field cannot be empty is displayed"
+        },
+        {
+          "id": "TC_004",
+          "title": "Attempt newsletter subscription with invalid email format",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [
+            "Scroll to the bottom of the homepage"
+          ],
+          "steps": [
+            "Enter an invalid email address (e.g. invalid-email) in the newsletter email field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Validation error message indicating invalid email format is displayed"
+        },
+        {
+          "id": "TC_005",
+          "title": "Subscribe to newsletter with maximum length email address",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [
+            "Scroll to the bottom of the homepage"
+          ],
+          "steps": [
+            "Enter an email address with maximum allowed length (e.g. 64 characters before @ and 255 characters total) in the newsletter email field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription is successful and confirmation message is displayed"
+        },
+        {
+          "id": "TC_006",
+          "title": "Attempt newsletter subscription with email containing SQL injection attempt",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [
+            "Scroll to the bottom of the homepage"
+          ],
+          "steps": [
+            "Enter an email address with SQL injection payload (e.g. test@example.com' OR '1'='1) in the newsletter email field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription is rejected and no database error or security breach occurs"
+        },
+        {
+          "id": "TC_007",
+          "title": "Attempt newsletter subscription with email containing script injection attempt",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [
+            "Scroll to the bottom of the homepage"
+          ],
+          "steps": [
+            "Enter an email address with script injection payload (e.g. <script>alert('xss')</script>@example.com) in the newsletter email field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription is rejected and no script is executed or XSS vulnerability occurs"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:46:46.095Z"
+    },
+    "ab679ff04d9bbf7e": {
+      "contentHash": "f5b4051ef5a215c6145548166f3e91748531bc4ebe271a2cfcc261ea399ff4f4",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Homepage loads with all navigation links",
+      "descPreview": "The homepage should load successfully displaying the header navigation (Home, Products, Cart, Signup",
+      "testCaseCount": 8,
+      "testCasesHash": "0bae4382c693df3d3895fb486e9d6f7d4f3b324188d0370aa90b18b4a687915a",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Verify homepage loads with all main header navigation links visible",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Navigate to homepage URL",
+            "Verify navHomeLink is visible",
+            "Verify navProductsLink is visible",
+            "Verify navCartLink is visible",
+            "Verify navSignupLoginLink is visible"
+          ],
+          "expectedResult": "Homepage loads successfully with navHomeLink, navProductsLink, navCartLink, and navSignupLoginLink visible in header navigation"
+        },
+        {
+          "id": "TC_002",
+          "title": "Verify clicking navProductsLink navigates to products page",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Navigate to homepage URL",
+            "Click navProductsLink"
+          ],
+          "expectedResult": "User is navigated to the products page successfully"
+        },
+        {
+          "id": "TC_003",
+          "title": "Verify add to cart functionality shows correct validation message",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Navigate to homepage URL",
+            "Click an addToCartButtons element",
+            "Click continueShoppingButton"
+          ],
+          "expectedResult": "\"Your product has been added to cart.\" message is displayed"
+        },
+        {
+          "id": "TC_004",
+          "title": "Verify homepage does not load if URL is incorrect",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Navigate to an invalid homepage URL (e.g. https://automationexercise.com/invalidpage)"
+          ],
+          "expectedResult": "Homepage does not load and an error or 404 page is displayed"
+        },
+        {
+          "id": "TC_005",
+          "title": "Verify all category links under Women category are visible",
+          "type": "positive",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Navigate to homepage URL",
+            "Verify categoryWomenLink is visible",
+            "Verify categoryDressWomenLink is visible",
+            "Verify categoryTopsWomenLink is visible",
+            "Verify categorySareeWomenLink is visible"
+          ],
+          "expectedResult": "All Women category links (categoryWomenLink, categoryDressWomenLink, categoryTopsWomenLink, categorySareeWomenLink) are visible on homepage"
+        },
+        {
+          "id": "TC_006",
+          "title": "Verify homepage resists script injection via URL parameters",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Navigate to homepage URL with malicious script in URL parameters (e.g. https://automationexercise.com/?param=<script>alert(1)</script>)"
+          ],
+          "expectedResult": "Homepage loads without executing any injected scripts or showing alert popups"
+        },
+        {
+          "id": "TC_007",
+          "title": "Verify clicking navSignupLoginLink navigates to signup/login page",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Navigate to homepage URL",
+            "Click navSignupLoginLink"
+          ],
+          "expectedResult": "User is navigated to the signup/login page successfully"
+        },
+        {
+          "id": "TC_008",
+          "title": "Verify viewProductLinks are clickable and navigate to product details",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Navigate to homepage URL",
+            "Click a viewProductLinks element"
+          ],
+          "expectedResult": "User is navigated to the product details page for the selected product"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:46:48.371Z"
+    },
+    "f4a59a9605850066": {
+      "contentHash": "b874b7b048e8957ee1c46ce22b9f60ddfc0b869e924524600d00515987b05adf",
+      "page": "ae-home",
+      "feature": "Newsletter",
+      "scenario": "Invalid email shows error on subscribe",
+      "descPreview": "Entering a malformed email (e.g. 'abc@') and clicking Subscribe should display a validation error.",
+      "testCaseCount": 7,
+      "testCasesHash": "e092366fd981ab2bc195089a6525fab2fb22860da6a5bfe2d2808282c662636c",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Subscribe with a valid email address",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address 'user@example.com' in the subscription input field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription is successful and no validation error is displayed"
+        },
+        {
+          "id": "TC_002",
+          "title": "Subscribe with malformed email missing domain part",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter malformed email 'abc@' in the subscription input field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "A validation error message is displayed indicating invalid email format"
+        },
+        {
+          "id": "TC_003",
+          "title": "Subscribe with email missing '@' symbol",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter malformed email 'abc.com' in the subscription input field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "A validation error message is displayed indicating invalid email format"
+        },
+        {
+          "id": "TC_004",
+          "title": "Subscribe with empty email input",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave the subscription input field empty",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "A validation error message is displayed indicating email is required"
+        },
+        {
+          "id": "TC_005",
+          "title": "Subscribe with email containing invalid characters",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter malformed email 'abc@exa!mple.com' in the subscription input field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "A validation error message is displayed indicating invalid email format"
+        },
+        {
+          "id": "TC_006",
+          "title": "Subscribe with email at maximum allowed length",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address with maximum allowed length (e.g. 64 characters before @ and 255 total) in the subscription input field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "Subscription is successful and no validation error is displayed"
+        },
+        {
+          "id": "TC_007",
+          "title": "Subscribe with email containing script injection attempt",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter email '<script>alert(1)</script>@example.com' in the subscription input field",
+            "Click the Subscribe button"
+          ],
+          "expectedResult": "A validation error message is displayed and no script execution occurs"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:47:17.950Z"
+    },
+    "4e9b2560dc3f8ddf": {
+      "contentHash": "b90ab789c00777ac4107447347adadc75d5c77051446748a8ef6448a347a5c88",
+      "page": "ae-home",
+      "feature": "Newsletter",
+      "scenario": "Empty email shows error on subscribe",
+      "descPreview": "Clicking Subscribe with the email field empty should not submit and should show a required field err",
+      "testCaseCount": 7,
+      "testCasesHash": "c839f86bb95e3df55d3c001589191861f1be036771d07e9b68d06c5639ea9b4b",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Subscribe button click with empty email field shows required field error",
+          "type": "validation",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Navigate to home page https://automationexercise.com/",
+            "Leave email field empty",
+            "Click Subscribe button"
+          ],
+          "expectedResult": "Required field error message is displayed and subscription is not submitted"
+        },
+        {
+          "id": "TC_002",
+          "title": "Subscribe with valid email submits successfully",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Navigate to home page https://automationexercise.com/",
+            "Enter a valid email address in email field",
+            "Click Subscribe button"
+          ],
+          "expectedResult": "Subscription is submitted successfully without any error"
+        },
+        {
+          "id": "TC_003",
+          "title": "Subscribe with invalid email format shows validation error",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Navigate to home page https://automationexercise.com/",
+            "Enter invalid email format (e.g. 'user@domain') in email field",
+            "Click Subscribe button"
+          ],
+          "expectedResult": "Email format validation error message is displayed and subscription is not submitted"
+        },
+        {
+          "id": "TC_004",
+          "title": "Subscribe with email field containing only spaces shows required field error",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Navigate to home page https://automationexercise.com/",
+            "Enter spaces only in email field",
+            "Click Subscribe button"
+          ],
+          "expectedResult": "Required field error message is displayed and subscription is not submitted"
+        },
+        {
+          "id": "TC_005",
+          "title": "Subscribe with maximum length valid email submits successfully",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Navigate to home page https://automationexercise.com/",
+            "Enter a valid email address with maximum allowed length in email field",
+            "Click Subscribe button"
+          ],
+          "expectedResult": "Subscription is submitted successfully without any error"
+        },
+        {
+          "id": "TC_006",
+          "title": "Subscribe button click with email field containing script injection attempt shows validation error",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Navigate to home page https://automationexercise.com/",
+            "Enter script injection string '<script>alert(1)</script>' in email field",
+            "Click Subscribe button"
+          ],
+          "expectedResult": "Input is sanitized or rejected and validation error message is displayed; subscription is not submitted"
+        },
+        {
+          "id": "TC_007",
+          "title": "Subscribe button click with email field containing SQL injection attempt shows validation error",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Navigate to home page https://automationexercise.com/",
+            "Enter SQL injection string \"' OR '1'='1\" in email field",
+            "Click Subscribe button"
+          ],
+          "expectedResult": "Input is sanitized or rejected and validation error message is displayed; subscription is not submitted"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:47:23.367Z"
+    },
+    "70b1c35a0d4d3135": {
+      "contentHash": "d4354aa08c22b439af51ca2134ec34c1a6f8af99cc3c26447dfe98f72c950818",
+      "page": "ae-home",
+      "feature": "Security",
+      "scenario": "XSS payload in subscription email is rejected",
+      "descPreview": "Entering <script>alert(1)</script> in the email field should not execute JavaScript and should retur",
+      "testCaseCount": 7,
+      "testCasesHash": "38451a999c7cb5a992a46306a00139f327cbb9f4fd8d81faa752ec21f6833b89",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Verify validation error when entering <script>alert(1)</script> in email field on Signup/Login page",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink",
+            "Enter <script>alert(1)</script> in the email field",
+            "Submit the form"
+          ],
+          "expectedResult": "A validation error is displayed preventing form submission and no JavaScript alert is executed"
+        },
+        {
+          "id": "TC_002",
+          "title": "Verify valid email input allows successful navigation on Signup/Login page",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink",
+            "Enter valid email user@example.com in the email field",
+            "Submit the form"
+          ],
+          "expectedResult": "Form is submitted successfully and user proceeds to the next step without errors"
+        },
+        {
+          "id": "TC_003",
+          "title": "Verify validation error when entering empty email field on Signup/Login page",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink",
+            "Leave the email field empty",
+            "Submit the form"
+          ],
+          "expectedResult": "A validation error is displayed indicating that the email field cannot be empty"
+        },
+        {
+          "id": "TC_004",
+          "title": "Verify validation error when entering invalid email format in email field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink",
+            "Enter invalid email format user@@example..com in the email field",
+            "Submit the form"
+          ],
+          "expectedResult": "A validation error is displayed indicating the email format is invalid"
+        },
+        {
+          "id": "TC_005",
+          "title": "Verify that entering long email input with script tags does not execute JavaScript and shows validation error",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink",
+            "Enter a very long email string with embedded <script>alert(1)</script> tags in the email field",
+            "Submit the form"
+          ],
+          "expectedResult": "A validation error is displayed preventing form submission and no JavaScript alert is executed"
+        },
+        {
+          "id": "TC_006",
+          "title": "Verify that clicking navSignupLoginLink navigates to Signup/Login page",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink"
+          ],
+          "expectedResult": "User is navigated to the Signup/Login page"
+        },
+        {
+          "id": "TC_007",
+          "title": "Verify that entering email with special characters but no script tags is accepted",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink",
+            "Enter email with special characters like user+test@example.com in the email field",
+            "Submit the form"
+          ],
+          "expectedResult": "Form is submitted successfully and user proceeds to the next step without errors"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:47:29.516Z"
+    },
+    "48ea060eeea4e102": {
+      "contentHash": "0a39af46e4baf47fb02736f9d97014154641f704b1e0fccdda9aabcc27b06ec0",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Valid credentials redirect to account page",
+      "descPreview": "Entering a registered email and correct password then clicking Login should redirect to the logged-i",
+      "testCaseCount": 7,
+      "testCasesHash": "5bae0362c3a248f99a765e2a881705aeda2fda3e705bbbf3a6d595e1df5472ae",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Successful login with valid registered email and correct password",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User has a registered email and password"
+          ],
+          "steps": [
+            "Enter registered email into loginEmailInput",
+            "Enter correct password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is redirected to the logged-in account overview page"
+        },
+        {
+          "id": "TC_002",
+          "title": "Login attempt with registered email and incorrect password",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [
+            "User has a registered email"
+          ],
+          "steps": [
+            "Enter registered email into loginEmailInput",
+            "Enter incorrect password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails and user remains on login page with an error message displayed"
+        },
+        {
+          "id": "TC_003",
+          "title": "Login attempt with unregistered email and any password",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter unregistered email into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails and user remains on login page with an error message displayed"
+        },
+        {
+          "id": "TC_004",
+          "title": "Login attempt with empty email and valid password",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave loginEmailInput empty",
+            "Enter valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Validation error message displayed indicating email is required"
+        },
+        {
+          "id": "TC_005",
+          "title": "Login attempt with valid email and empty password",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [
+            "User has a registered email"
+          ],
+          "steps": [
+            "Enter registered email into loginEmailInput",
+            "Leave loginPasswordInput empty",
+            "Click loginButton"
+          ],
+          "expectedResult": "Validation error message displayed indicating password is required"
+        },
+        {
+          "id": "TC_006",
+          "title": "Login attempt with SQL injection string in email input",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter \"' OR '1'='1\" into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails and no authentication bypass occurs; error message displayed"
+        },
+        {
+          "id": "TC_007",
+          "title": "Login attempt with maximum length email input",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter an email with maximum allowed length into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails with appropriate validation or error message if email is unregistered or invalid"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:47:49.481Z"
+    },
+    "0d44dbbbadee7430": {
+      "contentHash": "28cd9d6b899707d725cafd94e2b4bc7ca6cdcac30ba20ce76b047a84c8870590",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Invalid password shows error message",
+      "descPreview": "Entering a valid email with an incorrect password should display 'Your email or password is incorrec",
+      "testCaseCount": 8,
+      "testCasesHash": "d54e96aab8ec87cd34e7b5b12b8826ed17296147f3f01769ab5ef47df7cb6a33",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Login with valid email and correct password",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter the correct password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is successfully logged in and redirected to the home page"
+        },
+        {
+          "id": "TC_002",
+          "title": "Login with valid email and incorrect password",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter an incorrect password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Display error message 'Your email or password is incorrect!'"
+        },
+        {
+          "id": "TC_003",
+          "title": "Login with empty email and valid password",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave loginEmailInput empty",
+            "Enter a valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Display validation error indicating email is required"
+        },
+        {
+          "id": "TC_004",
+          "title": "Login with valid email and empty password",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Leave loginPasswordInput empty",
+            "Click loginButton"
+          ],
+          "expectedResult": "Display validation error indicating password is required"
+        },
+        {
+          "id": "TC_005",
+          "title": "Login with invalid email format and any password",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an invalid email format into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Display validation error indicating invalid email format"
+        },
+        {
+          "id": "TC_006",
+          "title": "Login with SQL injection attempt in email field",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter \"' OR '1'='1\" into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Display error message 'Your email or password is incorrect!' and no authentication bypass occurs"
+        },
+        {
+          "id": "TC_007",
+          "title": "Login with maximum length email and incorrect password",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter an email with maximum allowed length into loginEmailInput",
+            "Enter an incorrect password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Display error message 'Your email or password is incorrect!'"
+        },
+        {
+          "id": "TC_008",
+          "title": "Login with valid email and password containing special characters",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter a valid password containing special characters into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is successfully logged in and redirected to the home page"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:47:59.835Z"
+    },
+    "6bb449912e352657": {
+      "contentHash": "157df2ae30ed19e3d240b0dc4fd8cdab502095a7adbbea4cc2a6bd8134ee6a68",
+      "page": "ae-home",
+      "feature": "Accessibility",
+      "scenario": "Homepage keyboard navigation is functional",
+      "descPreview": "All interactive elements (nav links, buttons, subscription form) should be reachable and operable vi",
+      "testCaseCount": 7,
+      "testCasesHash": "a3bb6c1fa6d5af7d7c826b5bb0df2351e4a41155ad4ca0fa7e3f9c153a855223",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Navigate through all nav links using keyboard and activate each with Enter",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User is on home page"
+          ],
+          "steps": [
+            "Press Tab repeatedly to focus on navHomeLink",
+            "Press Enter to activate navHomeLink and verify URL is https://automationexercise.com/",
+            "Press Tab to focus on navProductsLink",
+            "Press Enter to activate navProductsLink and verify products page is displayed",
+            "Press Tab to focus on navCartLink",
+            "Press Enter to activate navCartLink and verify cart page is displayed",
+            "Press Tab to focus on navSignupLoginLink",
+            "Press Enter to activate navSignupLoginLink and verify signup/login page is displayed",
+            "Press Tab to focus on navTestCasesLink",
+            "Press Enter to activate navTestCasesLink and verify test cases page is displayed",
+            "Press Tab to focus on navApiTestingLink",
+            "Press Enter to activate navApiTestingLink and verify API testing page is displayed",
+            "Press Tab to focus on navVideoTutorialsLink",
+            "Press Enter to activate navVideoTutorialsLink and verify video tutorials page is displayed",
+            "Press Tab to focus on navContactUsLink",
+            "Press Enter to activate navContactUsLink and verify contact us page is displayed"
+          ],
+          "expectedResult": "Each nav link is focused sequentially by Tab and activates the correct page upon Enter key press"
+        },
+        {
+          "id": "TC_002",
+          "title": "Add product to cart using keyboard navigation and verify confirmation message",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User is on home page"
+          ],
+          "steps": [
+            "Press Tab repeatedly until addToCartButtons is focused on the first product",
+            "Press Enter to add the product to cart",
+            "Observe the confirmation message displayed"
+          ],
+          "expectedResult": "\"Your product has been added to cart.\" message is displayed after pressing Enter on addToCartButtons"
+        },
+        {
+          "id": "TC_003",
+          "title": "Navigate through category links using keyboard and verify correct category page loads",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User is on home page"
+          ],
+          "steps": [
+            "Press Tab repeatedly to focus on categoryWomenLink",
+            "Press Enter to activate categoryWomenLink and verify women's category page is displayed",
+            "Press Tab to focus on categoryMenLink",
+            "Press Enter to activate categoryMenLink and verify men's category page is displayed",
+            "Press Tab to focus on categoryKidsLink",
+            "Press Enter to activate categoryKidsLink and verify kids category page is displayed"
+          ],
+          "expectedResult": "Each category link is focused by Tab and loads the correct category page upon Enter key press"
+        },
+        {
+          "id": "TC_004",
+          "title": "Attempt to activate continueShoppingButton via keyboard when no modal is present",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [
+            "User is on home page",
+            "No add to cart modal is displayed"
+          ],
+          "steps": [
+            "Press Tab repeatedly to try to focus continueShoppingButton",
+            "Press Enter if focused"
+          ],
+          "expectedResult": "continueShoppingButton is not reachable or focusable via keyboard when no modal is present"
+        },
+        {
+          "id": "TC_005",
+          "title": "Navigate through brand links using keyboard and verify each brand page loads",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User is on home page"
+          ],
+          "steps": [
+            "Press Tab repeatedly to focus on brandPoloLink",
+            "Press Enter to activate brandPoloLink and verify Polo brand page is displayed",
+            "Press Tab to focus on brandHM",
+            "Press Enter to activate brandHM and verify H&M brand page is displayed",
+            "Press Tab to focus on brandMadame",
+            "Press Enter to activate brandMadame and verify Madame brand page is displayed",
+            "Press Tab to focus on brandMastHarbour",
+            "Press Enter to activate brandMastHarbour and verify Mast Harbour brand page is displayed",
+            "Press Tab to focus on brandBabyhug",
+            "Press Enter to activate brandBabyhug and verify Babyhug brand page is displayed",
+            "Press Tab to focus on brandAllenSollyJunior",
+            "Press Enter to activate brandAllenSollyJunior and verify Allen Solly Junior brand page is displayed",
+            "Press Tab to focus on brandKookieKids",
+            "Press Enter to activate brandKookieKids and verify Kookie Kids brand page is displayed",
+            "Press Tab to focus on brandBiba",
+            "Press Enter to activate brandBiba and verify Biba brand page is displayed"
+          ],
+          "expectedResult": "Each brand link is focused by Tab and loads the correct brand page upon Enter key press"
+        },
+        {
+          "id": "TC_006",
+          "title": "Verify viewProductLinks are accessible and open product details via keyboard",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User is on home page"
+          ],
+          "steps": [
+            "Press Tab repeatedly to focus on the first viewProductLinks",
+            "Press Enter to open the product details page",
+            "Verify product details page is displayed"
+          ],
+          "expectedResult": "viewProductLinks is reachable by keyboard and opens product details page upon Enter key press"
+        },
+        {
+          "id": "TC_007",
+          "title": "Verify testCasesButton and apisListButton are operable via keyboard and load correct pages",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User is on home page"
+          ],
+          "steps": [
+            "Press Tab repeatedly to focus on testCasesButton",
+            "Press Enter to activate testCasesButton and verify test cases page is displayed",
+            "Press Tab to focus on apisListButton",
+            "Press Enter to activate apisListButton and verify API list page is displayed"
+          ],
+          "expectedResult": "testCasesButton and apisListButton are reachable by keyboard and load correct pages upon Enter key press"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:48:02.734Z"
+    },
+    "0a703172a385cc08": {
+      "contentHash": "3deea18b62acfd3ab06690ef53fea365ba9ff9977b41eddc10c7dcef480400da",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Unregistered email shows error message",
+      "descPreview": "Entering an email address not registered in the system should display an appropriate error message.",
+      "testCaseCount": 8,
+      "testCasesHash": "73d882d9db6aa09d33f002f6efc0a99bb6f0d71dbb4d3a9cea07a6c6468c575c",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Login with valid registered email and correct password",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a registered email address into loginEmailInput",
+            "Enter the correct password for the registered email into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is successfully logged in and redirected to the home page"
+        },
+        {
+          "id": "TC_002",
+          "title": "Login with unregistered email and any password",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an unregistered email address into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the email is not registered"
+        },
+        {
+          "id": "TC_003",
+          "title": "Login with registered email and incorrect password",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a registered email address into loginEmailInput",
+            "Enter an incorrect password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "An error message is displayed indicating incorrect password"
+        },
+        {
+          "id": "TC_004",
+          "title": "Login with empty email field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave loginEmailInput empty",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "An error message is displayed indicating email field is required"
+        },
+        {
+          "id": "TC_005",
+          "title": "Login with invalid email format",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an invalid email format (e.g., 'user@domain') into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "An error message is displayed indicating invalid email format"
+        },
+        {
+          "id": "TC_006",
+          "title": "Login with SQL injection attempt in email field",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a SQL injection string (e.g., \"' OR '1'='1\") into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login is rejected with an error message; no authentication bypass occurs"
+        },
+        {
+          "id": "TC_007",
+          "title": "Login with maximum length email input not registered",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter an unregistered email address with maximum allowed length into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the email is not registered"
+        },
+        {
+          "id": "TC_008",
+          "title": "Login with email containing leading and trailing spaces (unregistered)",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter an unregistered email address with leading and trailing spaces into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the email is not registered"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:48:09.589Z"
+    },
+    "c0d2d0b8cb2d48a4": {
+      "contentHash": "8a13daa41f0aa0f3c1941a95c88c728b588fca6305def81f84d5dc403f3b8c74",
+      "page": "ae-login",
+      "feature": "Validation",
+      "scenario": "Empty email field shows validation error",
+      "descPreview": "Submitting the login form with the email field empty should display a required field validation erro",
+      "testCaseCount": 7,
+      "testCasesHash": "ed9f8d17651471fe538641a6a7f454e0842540a85bb1617e71f0644e25c6230b",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Login with valid email and password",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter a valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is successfully logged in and redirected to the home page"
+        },
+        {
+          "id": "TC_002",
+          "title": "Login with empty email field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Clear loginEmailInput to ensure it is empty",
+            "Enter a valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "A required field validation error is displayed for the email input"
+        },
+        {
+          "id": "TC_003",
+          "title": "Login with invalid email format",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an invalid email format (e.g. 'user@com') into loginEmailInput",
+            "Enter a valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "A validation error indicating invalid email format is displayed"
+        },
+        {
+          "id": "TC_004",
+          "title": "Login with empty password field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Clear loginPasswordInput to ensure it is empty",
+            "Click loginButton"
+          ],
+          "expectedResult": "A required field validation error is displayed for the password input"
+        },
+        {
+          "id": "TC_005",
+          "title": "Login with SQL injection attempt in email field",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a SQL injection string (e.g. \"' OR '1'='1\") into loginEmailInput",
+            "Enter a valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login is rejected with an error message; no authentication bypass occurs"
+        },
+        {
+          "id": "TC_006",
+          "title": "Login with maximum length email input",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter an email with maximum allowed length (e.g. 254 characters) into loginEmailInput",
+            "Enter a valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Email input is accepted and login proceeds or appropriate validation message is shown if length exceeded"
+        },
+        {
+          "id": "TC_007",
+          "title": "Login with email containing leading and trailing spaces",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email with leading and trailing spaces into loginEmailInput",
+            "Enter a valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Spaces are trimmed and login proceeds successfully or validation error is shown if trimming is not supported"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:48:21.930Z"
+    },
+    "ead3db6f9328606d": {
+      "contentHash": "7b9de1661ecfa25683aa7622a3d991a31429ceff28549b015c33f1efb158cfba",
+      "page": "ae-login",
+      "feature": "Validation",
+      "scenario": "Malformed email shows validation error",
+      "descPreview": "Entering 'notanemail' (without @) in the email field should show browser/client-side format validati",
+      "testCaseCount": 8,
+      "testCasesHash": "851c94dd0fc202548f6c25be88ea487960d458ad0af15a9ea44db41d33b8c30d",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Signup with valid name and valid email",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid name in signupNameInput",
+            "Enter a valid email (e.g. user@example.com) in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "User proceeds to next signup step without client-side validation error"
+        },
+        {
+          "id": "TC_002",
+          "title": "Signup with invalid email missing '@' symbol",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid name in signupNameInput",
+            "Enter 'notanemail' in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Browser/client-side email format validation error is shown preventing form submission"
+        },
+        {
+          "id": "TC_003",
+          "title": "Login with valid email and valid password",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email (e.g. user@example.com) in loginEmailInput",
+            "Enter a valid password in loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is successfully logged in and redirected to home or dashboard"
+        },
+        {
+          "id": "TC_004",
+          "title": "Login with invalid email missing '@' symbol",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter 'notanemail' in loginEmailInput",
+            "Enter any password in loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Browser/client-side email format validation error is shown preventing form submission"
+        },
+        {
+          "id": "TC_005",
+          "title": "Subscribe with valid email",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email (e.g. subscriber@example.com) in subscriptionEmailInput",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "\"You have been successfully subscribed!\" message is displayed"
+        },
+        {
+          "id": "TC_006",
+          "title": "Subscribe with invalid email missing '@' symbol",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter 'notanemail' in subscriptionEmailInput",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "Browser/client-side email format validation error is shown preventing form submission"
+        },
+        {
+          "id": "TC_007",
+          "title": "Signup with empty email field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid name in signupNameInput",
+            "Leave signupEmailInput empty",
+            "Click signupButton"
+          ],
+          "expectedResult": "Browser/client-side required field validation error is shown preventing form submission"
+        },
+        {
+          "id": "TC_008",
+          "title": "Login with email containing special characters but valid format",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter 'user+test.email@example-domain.com' in loginEmailInput",
+            "Enter a valid password in loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is successfully logged in and redirected to home or dashboard"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:48:40.393Z"
+    },
+    "496c45b0df43244e": {
+      "contentHash": "6faae4e376460c4eb6228614c96f3e767dd415f235cee018de3e74ee59e0e255",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Navigate to Products Page",
+      "descPreview": "Clicking the ' Products' navigation link should successfully load the main product listing page, di",
+      "testCaseCount": 7,
+      "testCasesHash": "3723dc1fd35924794dc7575d24d55ddedc707e37c312eea5c9d9c8e371559d02",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Verify clicking navProductsLink loads product listing page with available items",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navProductsLink"
+          ],
+          "expectedResult": "Main product listing page is displayed showing available items"
+        },
+        {
+          "id": "TC_002",
+          "title": "Verify navProductsLink is clickable and visible on home page",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Check navProductsLink is visible",
+            "Click navProductsLink"
+          ],
+          "expectedResult": "navProductsLink is visible and clickable, product listing page loads"
+        },
+        {
+          "id": "TC_003",
+          "title": "Verify navProductsLink does not load product listing page when user is not logged in",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [
+            "User is logged out"
+          ],
+          "steps": [
+            "Click navProductsLink"
+          ],
+          "expectedResult": "Main product listing page is displayed showing available items regardless of login state"
+        },
+        {
+          "id": "TC_004",
+          "title": "Verify navProductsLink does not allow injection attacks via URL manipulation",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Attempt to access navProductsLink URL with script injection parameters",
+            "Click navProductsLink"
+          ],
+          "expectedResult": "Page loads product listing normally without executing injected scripts or showing errors"
+        },
+        {
+          "id": "TC_005",
+          "title": "Verify navProductsLink loads product listing page correctly when clicked multiple times rapidly",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Click navProductsLink rapidly 5 times"
+          ],
+          "expectedResult": "Product listing page loads once without errors or duplicate content"
+        },
+        {
+          "id": "TC_006",
+          "title": "Verify navProductsLink loads product listing page correctly after navigating away and back",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navContactUsLink",
+            "Click navProductsLink"
+          ],
+          "expectedResult": "Product listing page is displayed with available items after navigation"
+        },
+        {
+          "id": "TC_007",
+          "title": "Verify navProductsLink is disabled or not clickable when page is loading",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Trigger page load",
+            "Attempt to click navProductsLink during loading"
+          ],
+          "expectedResult": "navProductsLink is disabled or unresponsive during loading to prevent multiple requests"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:48:40.533Z"
+    },
+    "46a7a1906eab3da3": {
+      "contentHash": "1ea477830cca13d188e9648eee4f377d24fdd0c4e87f6b5c6e7bded722c0c508",
+      "page": "ae-login",
+      "feature": "Validation",
+      "scenario": "Empty password field shows validation error",
+      "descPreview": "Submitting the login form with the password field empty should display a required field validation e",
+      "testCaseCount": 7,
+      "testCasesHash": "0166f57b26be009b00ec3a384938c9315865c2c70a790434ff57c551ad07b6f0",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Login with valid email and non-empty password",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter a valid password into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is successfully logged in and navigated away from the login page"
+        },
+        {
+          "id": "TC_002",
+          "title": "Login with valid email and empty password field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Leave loginPasswordInput empty",
+            "Click loginButton"
+          ],
+          "expectedResult": "A required field validation error is displayed for loginPasswordInput"
+        },
+        {
+          "id": "TC_003",
+          "title": "Login with empty email and empty password fields",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave loginEmailInput empty",
+            "Leave loginPasswordInput empty",
+            "Click loginButton"
+          ],
+          "expectedResult": "Required field validation errors are displayed for both loginEmailInput and loginPasswordInput"
+        },
+        {
+          "id": "TC_004",
+          "title": "Login with invalid email format and empty password",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an invalid email format into loginEmailInput",
+            "Leave loginPasswordInput empty",
+            "Click loginButton"
+          ],
+          "expectedResult": "A required field validation error is displayed for loginPasswordInput and an invalid email format error is displayed for loginEmailInput"
+        },
+        {
+          "id": "TC_005",
+          "title": "Login with valid email and password containing only spaces",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter spaces only into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "A required field validation error is displayed for loginPasswordInput"
+        },
+        {
+          "id": "TC_006",
+          "title": "Attempt login with valid email and extremely long password",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter a password with 1000 characters into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails with an invalid credentials error or password length validation error"
+        },
+        {
+          "id": "TC_007",
+          "title": "Attempt login with valid email and password containing SQL injection attempt",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter \"' OR '1'='1\" into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails with invalid credentials error and no authentication bypass occurs"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:48:46.109Z"
+    },
+    "e5487fea91b5dfc4": {
+      "contentHash": "3d34c7417e0c358755b23504939b6d9fc4034b0cd6564726fc1173e8be5a48a2",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Access Account Management",
+      "descPreview": "Clicking the 'Signup / Login' navigation link should direct the user to the appropriate authenticati",
+      "testCaseCount": 7,
+      "testCasesHash": "d4cde1b88657898c7cb457a8a388a6708a0e64b177460b74bcdf33856c715e37",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Verify navigation to Signup/Login page from navSignupLoginLink",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink"
+          ],
+          "expectedResult": "User is directed to the authentication page displaying both signup and login options"
+        },
+        {
+          "id": "TC_002",
+          "title": "Verify URL correctness after clicking navSignupLoginLink",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink"
+          ],
+          "expectedResult": "Browser URL changes to the authentication page URL containing 'login' or 'signup'"
+        },
+        {
+          "id": "TC_003",
+          "title": "Verify that clicking navSignupLoginLink multiple times does not cause errors",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Click navSignupLoginLink",
+            "Click navSignupLoginLink again multiple times"
+          ],
+          "expectedResult": "Page remains on the authentication page without any errors or crashes"
+        },
+        {
+          "id": "TC_004",
+          "title": "Verify that unauthenticated user cannot bypass login by directly accessing navSignupLoginLink",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [
+            "User is logged out"
+          ],
+          "steps": [
+            "Click navSignupLoginLink"
+          ],
+          "expectedResult": "User is presented with login and signup options and is not granted access to restricted areas"
+        },
+        {
+          "id": "TC_005",
+          "title": "Verify that the authentication page shows validation error when submitting empty login form",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [
+            "User is on authentication page after clicking navSignupLoginLink"
+          ],
+          "steps": [
+            "Attempt to submit login form with empty username and password fields"
+          ],
+          "expectedResult": "Validation error messages are displayed indicating that username and password are required"
+        },
+        {
+          "id": "TC_006",
+          "title": "Verify that signup form accepts valid email and password inputs",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User is on authentication page after clicking navSignupLoginLink"
+          ],
+          "steps": [
+            "Enter valid email and password in signup form",
+            "Submit signup form"
+          ],
+          "expectedResult": "User is successfully registered or prompted for next signup steps"
+        },
+        {
+          "id": "TC_007",
+          "title": "Verify that the navSignupLoginLink is accessible via keyboard navigation",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Navigate to navSignupLoginLink using keyboard tab key",
+            "Press Enter key on navSignupLoginLink"
+          ],
+          "expectedResult": "User is directed to the authentication page displaying both signup and login options"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:49:06.109Z"
+    },
+    "49121d1da7b4081d": {
+      "contentHash": "ca340b699b8283d59b85ce028aaf29eabd79040104ca72e26929baa5b06be31d",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Subscription Boundary Test (Max Length)",
+      "descPreview": "Enter an email address string at the maximum allowed character length into the subscription field an",
+      "testCaseCount": 7,
+      "testCasesHash": "e6dd5df52cbaa1bae916cd3d7008fc3966a8a9de05dfbf535d8bc09e5c108e0f",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Subscribe with maximum length valid email address",
+          "type": "boundary",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Navigate to https://automationexercise.com/",
+            "Enter a valid email address with the maximum allowed character length into the subscription field",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "Subscription form accepts the email and shows a success message or confirmation without error"
+        },
+        {
+          "id": "TC_002",
+          "title": "Subscribe with maximum length email missing '@' symbol",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Navigate to https://automationexercise.com/",
+            "Enter an email address string at maximum allowed length but missing '@' symbol into the subscription field",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "Subscription form displays a clear validation error indicating invalid email format"
+        },
+        {
+          "id": "TC_003",
+          "title": "Subscribe with maximum length email containing SQL injection payload",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Navigate to https://automationexercise.com/",
+            "Enter an email address string at maximum allowed length containing a SQL injection payload into the subscription field",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "Subscription form rejects the input or sanitizes it without executing any SQL commands and shows an appropriate error or success message"
+        },
+        {
+          "id": "TC_004",
+          "title": "Subscribe with maximum length email containing special characters",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Navigate to https://automationexercise.com/",
+            "Enter a valid email address at maximum length including allowed special characters (e.g., +, ., -, _) into the subscription field",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "Subscription form accepts the email and shows a success message or confirmation without error"
+        },
+        {
+          "id": "TC_005",
+          "title": "Subscribe with maximum length email exceeding allowed domain length",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Navigate to https://automationexercise.com/",
+            "Enter an email address string at maximum allowed length but with domain part exceeding allowed length into the subscription field",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "Subscription form displays a clear validation error indicating domain length exceeded"
+        },
+        {
+          "id": "TC_006",
+          "title": "Subscribe with maximum length email containing Unicode characters",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Navigate to https://automationexercise.com/",
+            "Enter a valid email address at maximum length containing Unicode characters in the local part into the subscription field",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "Subscription form either accepts the email and shows success or provides a clear validation error about unsupported characters"
+        },
+        {
+          "id": "TC_007",
+          "title": "Subscribe with maximum length email consisting only of whitespace characters",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Navigate to https://automationexercise.com/",
+            "Enter an email address string at maximum allowed length consisting only of whitespace characters into the subscription field",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "Subscription form displays a clear validation error indicating invalid email format"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:49:22.875Z"
+    },
+    "df904a57b74f24b8": {
+      "contentHash": "0e6b7f7d074246d8361c4d25e6aec1e3c6c3f27d61f56f967c2201dea33d11cf",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Test Cart Page Load",
+      "descPreview": "Clicking the 'Cart' navigation link should load the cart page, displaying either an empty state or p",
+      "testCaseCount": 7,
+      "testCasesHash": "5d885642fe4ff7b914e1ff847cb368eed84e1ba5c33d1b06b96a999d0c8262b5",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Navigate to Cart page with empty cart",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navCartLink"
+          ],
+          "expectedResult": "Cart page loads displaying an empty cart state prompting user to proceed with checkout/login"
+        },
+        {
+          "id": "TC_002",
+          "title": "Navigate to Cart page after adding a product",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navProductsLink",
+            "Click addToCartButtons for any product",
+            "Click continueShoppingButton",
+            "Click navCartLink"
+          ],
+          "expectedResult": "Cart page loads displaying the added product with option to proceed with checkout/login"
+        },
+        {
+          "id": "TC_003",
+          "title": "Verify cart page prompt when user is not logged in",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [
+            "User is not logged in"
+          ],
+          "steps": [
+            "Click navCartLink"
+          ],
+          "expectedResult": "Cart page displays prompt to login or proceed with checkout"
+        },
+        {
+          "id": "TC_004",
+          "title": "Verify cart page prompt when user is logged in",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [
+            "User is logged in"
+          ],
+          "steps": [
+            "Click navCartLink"
+          ],
+          "expectedResult": "Cart page loads displaying cart contents and option to proceed with checkout"
+        },
+        {
+          "id": "TC_005",
+          "title": "Attempt to access cart page via navCartLink with session expired",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [
+            "User session is expired"
+          ],
+          "steps": [
+            "Click navCartLink"
+          ],
+          "expectedResult": "Cart page prompts user to login before proceeding with checkout"
+        },
+        {
+          "id": "TC_006",
+          "title": "Verify cart page behavior after removing all items and clicking navCartLink",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [
+            "Cart contains items"
+          ],
+          "steps": [
+            "Click navCartLink",
+            "Remove all items from cart",
+            "Click navCartLink again"
+          ],
+          "expectedResult": "Cart page displays empty cart state prompting user to proceed with checkout/login"
+        },
+        {
+          "id": "TC_007",
+          "title": "Verify cart page loads correctly after multiple addToCartButtons clicks",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Click navProductsLink",
+            "Click addToCartButtons multiple times for different products",
+            "Click navCartLink"
+          ],
+          "expectedResult": "Cart page loads displaying all added products with option to proceed with checkout/login"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:49:25.981Z"
+    },
+    "99d994419dc9f7bd": {
+      "contentHash": "513fb94bc823cd7b606b8943bc72d631d4fda5cfa2d1760473e4f51e46696521",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Subscription Duplicate Submission",
+      "descPreview": "Enter a valid email address and submit the subscription form multiple times in rapid succession. The",
+      "testCaseCount": 8,
+      "testCasesHash": "56703faa5873cdaaa15ecd4ea2189f694491a78ded7e42172c9d8989e08f10fb",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Submit valid email once and verify successful subscription",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address in the subscription form",
+            "Submit the subscription form once"
+          ],
+          "expectedResult": "The system displays the message 'Your product has been added to cart.' indicating successful subscription"
+        },
+        {
+          "id": "TC_002",
+          "title": "Submit valid email multiple times in rapid succession and verify single successful subscription",
+          "type": "positive",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address in the subscription form",
+            "Submit the subscription form 5 times rapidly without waiting for response"
+          ],
+          "expectedResult": "The system processes only one submission and displays 'Your product has been added to cart.' once, ignoring duplicates"
+        },
+        {
+          "id": "TC_003",
+          "title": "Submit invalid email format multiple times rapidly and verify validation error",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an invalid email address (e.g., 'invalid-email') in the subscription form",
+            "Submit the subscription form 3 times rapidly"
+          ],
+          "expectedResult": "The system prevents submission and displays an appropriate email validation error message each time"
+        },
+        {
+          "id": "TC_004",
+          "title": "Submit empty email field multiple times rapidly and verify validation error",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave the email field empty in the subscription form",
+            "Submit the subscription form 4 times rapidly"
+          ],
+          "expectedResult": "The system prevents submission and displays an appropriate 'email required' validation error message each time"
+        },
+        {
+          "id": "TC_005",
+          "title": "Submit valid email with SQL injection attempt multiple times rapidly and verify security",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address containing SQL injection payload (e.g., 'test@example.com; DROP TABLE users;') in the subscription form",
+            "Submit the subscription form 3 times rapidly"
+          ],
+          "expectedResult": "The system sanitizes input, prevents injection, and processes only one valid subscription displaying 'Your product has been added to cart.'"
+        },
+        {
+          "id": "TC_006",
+          "title": "Submit valid email with maximum allowed length multiple times rapidly and verify single subscription",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address with maximum allowed length (e.g., 64 characters before @ and valid domain) in the subscription form",
+            "Submit the subscription form 6 times rapidly"
+          ],
+          "expectedResult": "The system processes only one submission and displays 'Your product has been added to cart.' without errors"
+        },
+        {
+          "id": "TC_007",
+          "title": "Submit valid email with leading and trailing spaces multiple times rapidly and verify single subscription",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address with leading and trailing spaces (e.g., '  user@example.com  ') in the subscription form",
+            "Submit the subscription form 7 times rapidly"
+          ],
+          "expectedResult": "The system trims spaces, processes only one submission, and displays 'Your product has been added to cart.'"
+        },
+        {
+          "id": "TC_008",
+          "title": "Submit valid email multiple times rapidly using different case variations and verify single subscription",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address in uppercase (e.g., 'USER@EXAMPLE.COM') in the subscription form",
+            "Submit the subscription form 4 times rapidly",
+            "Enter the same email address in lowercase (e.g., 'user@example.com')",
+            "Submit the subscription form 4 times rapidly"
+          ],
+          "expectedResult": "The system treats email case-insensitively and processes only one subscription displaying 'Your product has been added to cart.'"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:49:37.743Z"
+    },
+    "3c1231377d3a086c": {
+      "contentHash": "940ee9b7594d40ba61c671a972e232de72a2635492573ce2e2f715f450ae24d3",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Contact Page Accessibility",
+      "descPreview": "Clicking the 'Contact us' navigation link should successfully load the contact page without any clie",
+      "testCaseCount": 7,
+      "testCasesHash": "d608559fb8ebe4afa7314dc47ac054767402e7995442523d6f0e0b4076c3bd37",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Verify Contact Us page loads successfully on clicking navContactUsLink",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navContactUsLink"
+          ],
+          "expectedResult": "Contact Us page loads with no client-side errors and URL changes accordingly"
+        },
+        {
+          "id": "TC_002",
+          "title": "Verify no client-side errors occur when clicking navContactUsLink multiple times rapidly",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Click navContactUsLink rapidly 5 times in succession"
+          ],
+          "expectedResult": "Contact Us page loads without client-side errors and no UI glitches occur"
+        },
+        {
+          "id": "TC_003",
+          "title": "Verify Contact Us page does not load if navContactUsLink is clicked after network failure",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [
+            "Simulate network failure or offline mode"
+          ],
+          "steps": [
+            "Click navContactUsLink"
+          ],
+          "expectedResult": "Contact Us page does not load and a client-side network error message is displayed"
+        },
+        {
+          "id": "TC_004",
+          "title": "Verify Contact Us page resists XSS attacks via navContactUsLink",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [
+            "Ensure no malicious scripts are injected into navContactUsLink"
+          ],
+          "steps": [
+            "Click navContactUsLink"
+          ],
+          "expectedResult": "Contact Us page loads without executing any injected scripts or showing unexpected popups"
+        },
+        {
+          "id": "TC_005",
+          "title": "Verify Contact Us page loads correctly on slow network after clicking navContactUsLink",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [
+            "Simulate slow network conditions"
+          ],
+          "steps": [
+            "Click navContactUsLink"
+          ],
+          "expectedResult": "Contact Us page loads completely without client-side errors despite slow network"
+        },
+        {
+          "id": "TC_006",
+          "title": "Verify Contact Us page loads correctly after navigating from navHomeLink then clicking navContactUsLink",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navHomeLink",
+            "Click navContactUsLink"
+          ],
+          "expectedResult": "Contact Us page loads without client-side errors after navigating from Home page"
+        },
+        {
+          "id": "TC_007",
+          "title": "Verify Contact Us page loads correctly after clicking navProductsLink then navContactUsLink",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Click navProductsLink",
+            "Click navContactUsLink"
+          ],
+          "expectedResult": "Contact Us page loads without client-side errors after navigating from Products page"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:49:42.933Z"
+    },
+    "94b8b2ef7f315b1c": {
+      "contentHash": "2dafd6a199a1c5fb3af5d337de5aed6214d37d451fe64ad6f66c76fd784df6fa",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Signup with Existing Email",
+      "descPreview": "Attempt to register using a valid email address that is already linked to an account. Expected outco",
+      "testCaseCount": 7,
+      "testCasesHash": "8678efe7d07b1d62ca6644c9e42583bc9ff733ca7d72a3e78e607e8663f4edce",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Register with an already registered valid email",
+          "type": "negative",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid name in signupNameInput",
+            "Enter an email address already linked to an existing account in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the email address is already in use"
+        },
+        {
+          "id": "TC_002",
+          "title": "Register with a new valid email address",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid name in signupNameInput",
+            "Enter a new valid email address not linked to any account in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "User proceeds to the next step of registration without error"
+        },
+        {
+          "id": "TC_003",
+          "title": "Register with empty signupNameInput and valid email",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave signupNameInput empty",
+            "Enter a valid email address not linked to any account in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the name field is required"
+        },
+        {
+          "id": "TC_004",
+          "title": "Register with invalid email format in signupEmailInput",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid name in signupNameInput",
+            "Enter an invalid email format (e.g., 'user@domain') in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the email format is invalid"
+        },
+        {
+          "id": "TC_005",
+          "title": "Register with SQL injection attempt in signupEmailInput",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid name in signupNameInput",
+            "Enter a SQL injection string (e.g., \"test@example.com' OR '1'='1\") in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "The system rejects the input and displays a validation error without processing injection"
+        },
+        {
+          "id": "TC_006",
+          "title": "Register with maximum length name and valid email",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a name with maximum allowed length (e.g., 255 characters) in signupNameInput",
+            "Enter a valid email address not linked to any account in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "User proceeds to the next step of registration without error"
+        },
+        {
+          "id": "TC_007",
+          "title": "Register with whitespace-only name and valid email",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter whitespace characters only in signupNameInput",
+            "Enter a valid email address not linked to any account in signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the name field is required"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:50:02.909Z"
+    },
+    "b4a61a6f27e4f77c": {
+      "contentHash": "9a2defc3a299848fd2ea5f0ff8796a1ee9341ca56ffedf9565572f3b9d087e8c",
+      "page": "ae-home",
+      "feature": "Navigation",
+      "scenario": "Post-Subscription Persistence Check",
+      "descPreview": "Successfully submit the subscription form, navigate to another page (e.g., Products), and then retur",
+      "testCaseCount": 7,
+      "testCasesHash": "3a951c6e6ac53cb85b7467ba56b42ead0949bf1e3629bd31fc7ef3d12d5fe8c2",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Subscribe with valid email and verify confirmation persists after navigation",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address in the subscription form",
+            "Submit the subscription form",
+            "Verify the subscription confirmation message is visible",
+            "Click navProductsLink to navigate to the Products page",
+            "Click navHomeLink to return to the homepage"
+          ],
+          "expectedResult": "Subscription confirmation message remains visible on the homepage after navigation"
+        },
+        {
+          "id": "TC_002",
+          "title": "Attempt subscription with empty email field and verify error handling",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave the subscription email field empty",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "An appropriate validation error message is displayed indicating email is required"
+        },
+        {
+          "id": "TC_003",
+          "title": "Subscribe with invalid email format and verify error message",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an invalid email format (e.g., 'invalid-email') in the subscription form",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "An appropriate validation error message is displayed indicating invalid email format"
+        },
+        {
+          "id": "TC_004",
+          "title": "Subscribe with maximum length email and verify confirmation persists after navigation",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a maximum length valid email address (e.g., 64 characters before @) in the subscription form",
+            "Submit the subscription form",
+            "Verify the subscription confirmation message is visible",
+            "Click navProductsLink to navigate to the Products page",
+            "Click navHomeLink to return to the homepage"
+          ],
+          "expectedResult": "Subscription confirmation message remains visible on the homepage after navigation"
+        },
+        {
+          "id": "TC_005",
+          "title": "Subscribe with email containing script tags to test XSS vulnerability",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter an email containing script tags (e.g., '<script>alert(1)</script>@test.com') in the subscription form",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "Subscription form rejects the input or sanitizes it without executing scripts, no alert is triggered"
+        },
+        {
+          "id": "TC_006",
+          "title": "Subscribe with email containing leading and trailing spaces",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address with leading and trailing spaces in the subscription form",
+            "Submit the subscription form",
+            "Verify the subscription confirmation message is visible",
+            "Click navProductsLink to navigate to the Products page",
+            "Click navHomeLink to return to the homepage"
+          ],
+          "expectedResult": "Subscription confirmation message remains visible on the homepage after navigation, spaces are trimmed and email accepted"
+        },
+        {
+          "id": "TC_007",
+          "title": "Subscribe with already subscribed email and verify system behavior",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [
+            "Email address has been previously subscribed successfully"
+          ],
+          "steps": [
+            "Enter the previously subscribed email address in the subscription form",
+            "Submit the subscription form"
+          ],
+          "expectedResult": "System displays a message indicating the email is already subscribed or prevents duplicate subscription"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:50:17.196Z"
+    },
+    "d492ea2d975722fd": {
+      "contentHash": "1230be7e0fbe3f523574fbaddf027dafa41d114f06295aff790c852ff060203c",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Successful New User Signup",
+      "descPreview": "Fill out the Signup form with valid, unique Name and Email Address. Expected outcome: Successful acc",
+      "testCaseCount": 8,
+      "testCasesHash": "d8e4dfd41b9d8e7fc482e5f80e6a452556f0b456b63322bc537abe7daeb4529b",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Signup with valid unique Name and Email",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid unique name into signupNameInput",
+            "Enter a valid unique email address into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Successful account creation confirmation message appears or user is redirected to a welcome/account page"
+        },
+        {
+          "id": "TC_002",
+          "title": "Signup with empty Name field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave signupNameInput empty",
+            "Enter a valid unique email address into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Validation error message indicating Name is required is displayed"
+        },
+        {
+          "id": "TC_003",
+          "title": "Signup with invalid email format",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid unique name into signupNameInput",
+            "Enter an invalid email format (e.g., 'user@invalid') into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Validation error message indicating invalid email format is displayed"
+        },
+        {
+          "id": "TC_004",
+          "title": "Signup with already registered email",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [
+            "An account exists with email 'registered@example.com'"
+          ],
+          "steps": [
+            "Enter a valid unique name into signupNameInput",
+            "Enter 'registered@example.com' into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Error message indicating email is already registered is displayed"
+        },
+        {
+          "id": "TC_005",
+          "title": "Signup with Name field at maximum length boundary",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid unique name with maximum allowed characters (e.g., 255 chars) into signupNameInput",
+            "Enter a valid unique email address into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Successful account creation confirmation message appears or user is redirected to a welcome/account page"
+        },
+        {
+          "id": "TC_006",
+          "title": "Signup with script injection attempt in Name field",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a script injection string (e.g., '<script>alert(1)</script>') into signupNameInput",
+            "Enter a valid unique email address into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Input is sanitized and no script execution occurs; either validation error or successful signup without script execution"
+        },
+        {
+          "id": "TC_007",
+          "title": "Signup with email containing leading and trailing spaces",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid unique name into signupNameInput",
+            "Enter a valid unique email address with leading and trailing spaces into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Spaces are trimmed and successful account creation confirmation message appears or user is redirected to a welcome/account page"
+        },
+        {
+          "id": "TC_008",
+          "title": "Signup with Name containing special characters",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid unique name containing special characters (e.g., hyphens, apostrophes) into signupNameInput",
+            "Enter a valid unique email address into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Successful account creation confirmation message appears or user is redirected to a welcome/account page"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:50:26.017Z"
+    },
+    "f429c99460be3fb1": {
+      "contentHash": "463dfb927c2ec75a5f3282d26631b68feb6f86f56fb5413b7f0ffb0de3babd49",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Login Duplicate Submission Attempt",
+      "descPreview": "Enter valid login credentials and click the Login button multiple times rapidly without waiting for ",
+      "testCaseCount": 7,
+      "testCasesHash": "03f319bd2e016829014e22096821beb90bafbbe15bf72df4f7a5bb1af059223d",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Rapid multiple login attempts with valid credentials",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter valid email into loginEmailInput",
+            "Enter valid password into loginPasswordInput",
+            "Click loginButton rapidly 5 times without waiting for server response"
+          ],
+          "expectedResult": "System displays only one success or failure message and does not create multiple sessions or duplicate responses"
+        },
+        {
+          "id": "TC_002",
+          "title": "Rapid multiple login attempts with invalid password",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter valid email into loginEmailInput",
+            "Enter invalid password into loginPasswordInput",
+            "Click loginButton rapidly 6 times without waiting for server response"
+          ],
+          "expectedResult": "System displays only one failure message indicating invalid credentials and prevents multiple error popups"
+        },
+        {
+          "id": "TC_003",
+          "title": "Rapid multiple login attempts with empty email and password fields",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave loginEmailInput empty",
+            "Leave loginPasswordInput empty",
+            "Click loginButton rapidly 7 times without waiting for server response"
+          ],
+          "expectedResult": "System displays validation messages for required fields only once and does not flood the user with repeated errors"
+        },
+        {
+          "id": "TC_004",
+          "title": "Rapid multiple login attempts with SQL injection payload in email field",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter \"' OR '1'='1\" into loginEmailInput",
+            "Enter any password into loginPasswordInput",
+            "Click loginButton rapidly 6 times without waiting for server response"
+          ],
+          "expectedResult": "System rejects login attempts without exposing database errors and displays a single generic authentication failure message"
+        },
+        {
+          "id": "TC_005",
+          "title": "Rapid multiple login attempts with maximum length email and password",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email of maximum allowed length into loginEmailInput",
+            "Enter a password of maximum allowed length into loginPasswordInput",
+            "Click loginButton rapidly 6 times without waiting for server response"
+          ],
+          "expectedResult": "System processes login attempts normally and displays only one success or failure message without errors or crashes"
+        },
+        {
+          "id": "TC_006",
+          "title": "Rapid multiple login attempts with valid credentials and network delay simulation",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [
+            "Simulate slow network response"
+          ],
+          "steps": [
+            "Enter valid email into loginEmailInput",
+            "Enter valid password into loginPasswordInput",
+            "Click loginButton rapidly 7 times without waiting for server response"
+          ],
+          "expectedResult": "System queues or rate limits requests and shows only one success or failure message after network response"
+        },
+        {
+          "id": "TC_007",
+          "title": "Rapid multiple login attempts with valid email and empty password",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter valid email into loginEmailInput",
+            "Leave loginPasswordInput empty",
+            "Click loginButton rapidly 6 times without waiting for server response"
+          ],
+          "expectedResult": "System displays password required validation message only once and prevents multiple error messages"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:50:26.675Z"
+    },
+    "ebdf15ad46acaebd": {
+      "contentHash": "1e83a1bddfeffb6cd22240db7f780d3a1f648c6d959dd0e1bdeaa5a9ecab29dc",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Subscription Form Submission",
+      "descPreview": "Enter a valid email address into the unnamed subscription field and click submit. Expected outcome: ",
+      "testCaseCount": 7,
+      "testCasesHash": "09b93e89c8692509db2c190dde9e64ceab70850b3403d731d1b8954f3806a407",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Subscribe with a valid email address",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address into subscriptionEmailInput",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "You have been successfully subscribed!"
+        },
+        {
+          "id": "TC_002",
+          "title": "Subscribe with an empty email field",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave subscriptionEmailInput empty",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the email field cannot be empty"
+        },
+        {
+          "id": "TC_003",
+          "title": "Subscribe with an invalid email format",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter an invalid email format (e.g., 'invalid-email') into subscriptionEmailInput",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the email format is invalid"
+        },
+        {
+          "id": "TC_004",
+          "title": "Subscribe with an email address at maximum allowed length",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address with maximum allowed length into subscriptionEmailInput",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "You have been successfully subscribed!"
+        },
+        {
+          "id": "TC_005",
+          "title": "Subscribe with an email address containing leading and trailing spaces",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address with leading and trailing spaces into subscriptionEmailInput",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "You have been successfully subscribed!"
+        },
+        {
+          "id": "TC_006",
+          "title": "Subscribe with a previously subscribed email address",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [
+            "Email address is already subscribed"
+          ],
+          "steps": [
+            "Enter the previously subscribed valid email address into subscriptionEmailInput",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "An error message is displayed indicating the email is already subscribed"
+        },
+        {
+          "id": "TC_007",
+          "title": "Subscribe with an email containing SQL injection attempt",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter an email containing SQL injection payload (e.g., \"test@example.com'; DROP TABLE users;--\") into subscriptionEmailInput",
+            "Click subscriptionButton"
+          ],
+          "expectedResult": "The input is sanitized and an error message is displayed or subscription is rejected without affecting system integrity"
+        }
+      ],
+      "generatedAt": "2026-06-26T09:50:32.400Z"
+    },
+    "2d6aa13846e7e630": {
+      "contentHash": "b0b799de80f285e40903466ee607cd9ea6991582c486acb8f3fc1e2ca155d3ec",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Boundary Test - Max Length Input",
+      "descPreview": "Enter a name or password string that matches the maximum allowed character limit (e.g., 256 characte",
+      "testCaseCount": 7,
+      "testCasesHash": "daedd3d40562773d9cde7b4fb3352e318c576bd4dfbb93f0ec26d3ab17e53f64",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Signup with maximum length name and valid email",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a 256-character string into signupNameInput",
+            "Enter a valid email into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Form accepts the 256-character name and valid email, proceeds with signup validation without error"
+        },
+        {
+          "id": "TC_002",
+          "title": "Login with maximum length password and valid email",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter a 256-character string into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Form accepts the 256-character password and valid email, proceeds with login validation without error"
+        },
+        {
+          "id": "TC_003",
+          "title": "Signup with name exceeding maximum length (257 characters)",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a 257-character string into signupNameInput",
+            "Enter a valid email into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Form rejects input with validation error indicating name exceeds maximum allowed length"
+        },
+        {
+          "id": "TC_004",
+          "title": "Login with password exceeding maximum length (257 characters)",
+          "type": "validation",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter a 257-character string into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Form rejects input with validation error indicating password exceeds maximum allowed length"
+        },
+        {
+          "id": "TC_005",
+          "title": "Signup with maximum length name containing special characters",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a 256-character string with special characters into signupNameInput",
+            "Enter a valid email into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Form accepts the 256-character special character name and valid email, proceeds without error"
+        },
+        {
+          "id": "TC_006",
+          "title": "Login with maximum length password containing SQL injection attempt",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email into loginEmailInput",
+            "Enter a 256-character string containing SQL injection pattern into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Form accepts input but does not execute injection; login fails or succeeds only with valid credentials, no security breach"
+        },
+        {
+          "id": "TC_007",
+          "title": "Signup with empty name and maximum length email",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Leave signupNameInput empty",
+            "Enter a 256-character valid email into signupEmailInput",
+            "Click signupButton"
+          ],
+          "expectedResult": "Form rejects submission with validation error indicating name is required"
+        }
+      ],
+      "generatedAt": "2026-06-26T14:39:32.206Z"
+    },
+    "de4e2d2ba95bc803": {
+      "contentHash": "82eea6d5170402721be65153496e89659fadeb12dc6df263bad7d05611f3cba6",
+      "page": "ae-login",
+      "feature": "Authentication",
+      "scenario": "Login with Special Characters in Password",
+      "descPreview": "Enter a valid email address and attempt to log in using a password containing special characters (e.",
+      "testCaseCount": 7,
+      "testCasesHash": "c081886fc999da0a96226d1f8b005fa581fb9be176473236c2d493ff461bc3e9",
+      "testCases": [
+        {
+          "id": "TC_001",
+          "title": "Login with valid email and correct password containing special characters",
+          "type": "positive",
+          "priority": "High",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address into loginEmailInput",
+            "Enter the correct password containing special characters (e.g., P@ssw0rd!) into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "User is successfully logged in and redirected to the home page"
+        },
+        {
+          "id": "TC_002",
+          "title": "Login with valid email and incorrect password containing special characters",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address into loginEmailInput",
+            "Enter an incorrect password containing special characters (e.g., Wrong!@#) into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails and an error message indicating invalid credentials is displayed"
+        },
+        {
+          "id": "TC_003",
+          "title": "Login with valid email and password containing only special characters",
+          "type": "negative",
+          "priority": "Medium",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address into loginEmailInput",
+            "Enter a password with only special characters (e.g., !@#$%^&) into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails and an error message indicating invalid credentials is displayed"
+        },
+        {
+          "id": "TC_004",
+          "title": "Login with valid email and password containing special characters at boundary length (minimum length)",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address into loginEmailInput",
+            "Enter a password containing special characters with minimum allowed length (e.g., P@1!) into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "If password matches stored hash, user is logged in; otherwise, login fails with invalid credentials message"
+        },
+        {
+          "id": "TC_005",
+          "title": "Login with valid email and password containing special characters at boundary length (maximum length)",
+          "type": "boundary",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address into loginEmailInput",
+            "Enter a password containing special characters with maximum allowed length (e.g., P@ssw0rd!LongMaxLength) into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "If password matches stored hash, user is logged in; otherwise, login fails with invalid credentials message"
+        },
+        {
+          "id": "TC_006",
+          "title": "Login attempt with valid email and password containing SQL injection special characters",
+          "type": "security",
+          "priority": "Critical",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address into loginEmailInput",
+            "Enter a password containing SQL injection special characters (e.g., ' OR '1'='1!@#) into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails and no authentication bypass occurs; error message indicating invalid credentials is displayed"
+        },
+        {
+          "id": "TC_007",
+          "title": "Login attempt with valid email and password containing special characters and leading/trailing spaces",
+          "type": "edge-case",
+          "priority": "Low",
+          "preconditions": [],
+          "steps": [
+            "Enter a valid email address into loginEmailInput",
+            "Enter a password containing special characters with leading and trailing spaces (e.g., ' P@ssw0rd! ') into loginPasswordInput",
+            "Click loginButton"
+          ],
+          "expectedResult": "Login fails due to incorrect password including spaces or succeeds if spaces are trimmed and password matches stored hash"
+        }
+      ],
+      "generatedAt": "2026-06-26T14:39:38.661Z"
+    }
+  },
+  "pages": {
+    "ae-home": {
+      "url": "https://automationexercise.com/",
+      "kbHash": "871bbcb6e426ace37503c2955a5d7920334e58356d249c4690085dfdbfa2c9aa",
+      "specFiles": [],
+      "updatedAt": "2026-06-26T09:32:29.830Z"
+    },
+    "ae-login": {
+      "url": "https://automationexercise.com/login",
+      "kbHash": "b78eba27a78d9da56efea8a921e8f248614d9d9b57c8dfa98237fffd990e8b8b",
+      "specFiles": [],
+      "updatedAt": "2026-06-26T09:33:01.817Z"
+    }
+  }
+}

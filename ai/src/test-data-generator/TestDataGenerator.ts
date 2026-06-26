@@ -1,6 +1,7 @@
 import type { LLMProvider } from "../../../llm/src/interfaces/LLMProvider.js";
-import { JsonExtractor } from "../utils/JsonExtractor.js";
 import type { TestData } from "../models/TestData.js";
+import { AIJsonParser }
+    from "../utils/AIJsonParser.js";
 export class TestDataGenerator {
     constructor(private llmProvider: LLMProvider) { }
 
@@ -21,24 +22,24 @@ DO NOT generate descriptions.
 Return ONLY valid JSON in this exact format:
 
 {
-  "validUsername": "string",
-  "validPassword": "string",
-  "invalidUsername": "string",
-  "invalidPassword": "string"
+  "validUsername": "a realistic valid username",
+  "validPassword": "a realistic valid password with mixed characters",
+  "invalidUsername": "a username containing special characters that fail validation",
+  "invalidPassword": "a password too short to pass validation",
+  "overMaxLengthUsername": "a username string longer than 50 characters",
+  "uppercaseUsername": "the validUsername value converted to all uppercase",
+  "firstName": "a realistic first name for a test user",
+  "lastName": "a realistic last name for a test user",
+  "postalCode": "a realistic valid 5-digit US postal code",
+  "invalidPostalCode": "a non-numeric string that fails postal code validation",
+  "lockedOutUsername": "locked_out_user"
 }
 
 Requirement:
 ${requirement}
 `;
 
-        const response =
-            await this.llmProvider.generateResponse(prompt);
-
-        console.log("Raw AI Response:");
-        console.log(response);
-        const cleaned =
-            JsonExtractor.extract(response);
-
-        return JSON.parse(cleaned) as TestData;
+        const response = await this.llmProvider.generateResponse(prompt);
+        return AIJsonParser.parse<TestData>(response);
     }
 }
