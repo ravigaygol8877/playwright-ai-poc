@@ -3,16 +3,17 @@ import type { LLMProvider } from "../interfaces/LLMProvider.js";
 
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
-const DEFAULT_MODEL = "openai/gpt-4.1-mini";
+const DEFAULT_MODEL = "gpt-4.1";
 
-export class OpenRouterProvider implements LLMProvider {
+export class GitHubModelsProvider implements LLMProvider {
     private client: OpenAI;
     private model: string;
 
-    constructor(apiKey: string, model?: string) {
+    constructor(token: string, model?: string) {
         this.client = new OpenAI({
-            apiKey,
-            baseURL: "https://openrouter.ai/api/v1",
+            apiKey: token,
+            baseURL: "https://models.inference.ai.azure.com",
+            timeout: 120_000,
         });
         this.model = model ?? DEFAULT_MODEL;
     }
@@ -25,7 +26,6 @@ export class OpenRouterProvider implements LLMProvider {
                 const response = await this.client.chat.completions.create({
                     model: this.model,
                     messages: [{ role: "user", content: prompt }],
-                    max_tokens: 2500,
                     temperature: 0.3,
                 });
 
