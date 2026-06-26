@@ -483,22 +483,81 @@ export interface LLMProvider {
 }
 ```
 
-Two implementations are included:
+`ProviderFactory.create()` is the single entry point. It reads `LLM_PROVIDER` and `MODEL` from
+the environment and returns the correct implementation — no code changes required to switch providers.
 
-| Provider | Description |
-|----------|-------------|
-| `OpenRouterProvider` | Production — routes to `openai/gpt-4.1-mini` via OpenRouter |
-| `MockLLMProvider` | Local testing — returns the prompt string without any API call |
+### Supported Providers
 
-To switch providers, replace the constructor argument in `ai/src/index.ts`:
+| `LLM_PROVIDER` | Class | Key Required | Default Model |
+|---|---|---|---|
+| `gemini` (default) | `GeminiProvider` | `GOOGLE_API_KEY` | `gemini-2.0-flash` |
+| `github-models` | `GitHubModelsProvider` | `GITHUB_TOKEN` | `gpt-4.1` |
+| `openrouter` | `OpenRouterProvider` | `OPENROUTER_API_KEY` | `openai/gpt-4.1-mini` |
+| — | `MockLLMProvider` | none | — |
 
-```typescript
-// Production
-const llmProvider = new OpenRouterProvider(apiKey);
+### Configuration
 
-// Local / offline testing
-const llmProvider = new MockLLMProvider();
+Set in `.env` or any `config/environments/*.env` file:
+
+```env
+# Choose provider
+LLM_PROVIDER=gemini          # or github-models / openrouter
+
+# Override model (optional — uses provider default if omitted)
+MODEL=gemini-2.0-flash       # or gpt-5 / gpt-4.1 / openai/gpt-4.1-mini
+
+# Provider credentials (only the one matching LLM_PROVIDER is required)
+GOOGLE_API_KEY=your-key      # for gemini
+GITHUB_TOKEN=your-token      # for github-models
+OPENROUTER_API_KEY=your-key  # for openrouter
 ```
+
+### Startup Logging
+
+Every run prints the active provider and model:
+
+```
+  Provider    : github-models
+  Model       : gpt-5
+```
+
+### Switching Providers
+
+```bash
+# Gemini (default)
+npm run generate:all:qa
+
+# GitHub Models — GPT-5
+LLM_PROVIDER=github-models MODEL=gpt-5 npm run generate:all:qa
+
+# GitHub Models — GPT-4.1
+LLM_PROVIDER=github-models MODEL=gpt-4.1 npm run generate:all:qa
+
+# OpenRouter
+LLM_PROVIDER=openrouter MODEL=openai/gpt-4.1-mini npm run generate:all:qa
+```
+
+### GitHub Models Smoke Test
+
+```bash
+npm run test:github-models           # tests GPT-5
+MODEL=gpt-4.1 npm run test:github-models  # tests GPT-4.1
+```
+
+### Provider Switching Demo
+
+```bash
+npm run test:provider-switching
+# Runs OpenRouter → GPT-4.1-mini, GitHub Models → GPT-5, GitHub Models → GPT-4.1 in sequence
+```
+
+### Adding a New Provider
+
+1. Create `llm/src/providers/YourProvider.ts` implementing `LLMProvider`
+2. Add a branch in `llm/src/ProviderFactory.ts`
+3. Add the required env var to `.env` and all `config/environments/*.env` files
+
+Planned providers: `ClaudeProvider`, `OpenAIProvider`, `AzureOpenAIProvider`.
 
 ---
 

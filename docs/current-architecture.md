@@ -34,17 +34,19 @@ Examples:
 2. Provider Independence
 
 The platform depends on the LLMProvider interface rather than a specific LLM vendor.
+ProviderFactory selects the correct implementation at runtime from env vars.
 
-Current implementation:
+Supported:
 
-* OpenRouterProvider
+* GeminiProvider       (LLM_PROVIDER=gemini)
+* GitHubModelsProvider (LLM_PROVIDER=github-models)
+* OpenRouterProvider   (LLM_PROVIDER=openrouter)
 
-Future support:
+Planned:
 
-* OpenAI
-* Claude
-* Gemini
-* Local LLMs
+* ClaudeProvider
+* OpenAIProvider
+* AzureOpenAIProvider
 
 ⸻
 
@@ -284,17 +286,22 @@ Shared Infrastructure
 
 LLMProvider
 
-Provider abstraction layer.
+Provider abstraction layer. All providers implement the same interface.
 
-Current implementation:
+ProviderFactory.create() is the single entry point — reads LLM_PROVIDER and MODEL
+from the environment and returns the correct provider implementation.
 
-* OpenRouterProvider
+Current providers:
 
-Future:
+* GeminiProvider       — Google Gemini (default)   LLM_PROVIDER=gemini
+* GitHubModelsProvider — GitHub Models inference    LLM_PROVIDER=github-models
+* OpenRouterProvider   — OpenRouter gateway         LLM_PROVIDER=openrouter
+
+Planned providers:
 
 * OpenAIProvider
 * ClaudeProvider
-* GeminiProvider
+* AzureOpenAIProvider
 
 ⸻
 

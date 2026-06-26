@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Test Intelligence Platform — Demo Presentation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── Slide Container ─────────────────────────── */
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 52px 72px 40px;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  /* ── Nav ─────────────────────────────────────── */
+  .nav {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 16px; z-index: 100;
+  }
+  .nav button {
+    background: #21262d; border: 1px solid #30363d; color: #e6edf3;
+    padding: 8px 22px; border-radius: 6px; font-size: 13px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .nav button:hover { background: #30363d; }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+  .nav .counter { font-size: 13px; color: #8b949e; min-width: 60px; text-align: center; }
+
+  .slide-dots {
+    position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px;
+  }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #30363d; cursor: pointer; transition: background 0.2s;
+  }
+  .dot.active { background: #58a6ff; width: 20px; border-radius: 3px; }
+
+  /* ── Progress bar ────────────────────────────── */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, #58a6ff, #3fb950);
+    transition: width 0.4s ease; z-index: 200;
+  }
+
+  /* ── Slide number tag ────────────────────────── */
+  .slide-tag {
+    position: fixed; top: 16px; right: 24px;
+    font-size: 11px; color: #484f58;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Typography ──────────────────────────────── */
+  .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.4px;
+    text-transform: uppercase; color: #58a6ff; margin-bottom: 14px;
+  }
+  h1 { font-size: 46px; font-weight: 700; line-height: 1.1; color: #e6edf3; }
+  h2 { font-size: 32px; font-weight: 700; color: #e6edf3; margin-bottom: 8px; }
+  h3 { font-size: 18px; font-weight: 600; color: #e6edf3; }
+  .subtitle { font-size: 20px; color: #8b949e; margin-top: 12px; line-height: 1.5; }
+  .body { font-size: 15px; color: #8b949e; line-height: 1.7; }
+
+  /* ── Accent colors ───────────────────────────── */
+  .blue  { color: #58a6ff; }
+  .green { color: #3fb950; }
+  .orange{ color: #f0883e; }
+  .purple{ color: #bc8cff; }
+  .red   { color: #f85149; }
+
+  /* ── Code block ──────────────────────────────── */
+  pre, code {
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 13px;
+  }
+  pre {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 16px 20px; overflow-x: auto; line-height: 1.6;
+  }
+  .kw  { color: #ff7b72; }   /* keyword */
+  .fn  { color: #d2a8ff; }   /* function */
+  .str { color: #a5d6ff; }   /* string  */
+  .cmt { color: #484f58; }   /* comment */
+  .num { color: #79c0ff; }   /* number  */
+  .cls { color: #ffa657; }   /* class   */
+
+  /* ── Cards / grids ───────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 16px; }
+
+  .card {
+    background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .card.blue-border  { border-color: #1f6feb; }
+  .card.green-border { border-color: #238636; }
+  .card.orange-border{ border-color: #9e6a03; }
+  .card.purple-border{ border-color: #6e40c9; }
+  .card.red-border   { border-color: #da3633; }
+
+  .card-icon { font-size: 22px; margin-bottom: 8px; }
+  .card h3   { font-size: 15px; margin-bottom: 6px; }
+  .card .body{ font-size: 13px; }
+
+  /* ── Pill / badge ────────────────────────────── */
+  .pill {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: 600; letter-spacing: .4px;
+  }
+  .pill-blue   { background: #1f3c6e; color: #58a6ff; }
+  .pill-green  { background: #0f2d1a; color: #3fb950; }
+  .pill-orange { background: #3d2000; color: #f0883e; }
+  .pill-purple { background: #2d1f6e; color: #bc8cff; }
+  .pill-red    { background: #3d0f0f; color: #f85149; }
+
+  /* ── Arrow flow ──────────────────────────────── */
+  .flow {
+    display: flex; align-items: center; gap: 0; margin-top: 24px;
+    flex-wrap: nowrap; overflow: hidden;
+  }
+  .flow-step {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 12px 16px; font-size: 13px; text-align: center;
+    flex: 1; min-width: 0;
+  }
+  .flow-step .step-num { font-size: 11px; color: #484f58; margin-bottom: 4px; }
+  .flow-step .step-label { font-weight: 600; }
+  .flow-step .step-sub { font-size: 11px; color: #8b949e; margin-top: 3px; }
+  .arrow { color: #484f58; font-size: 18px; flex-shrink: 0; padding: 0 6px; }
+
+  /* ── Table ───────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
+  th { background: #161b22; color: #8b949e; font-weight: 600; text-align: left;
+       padding: 10px 14px; border-bottom: 1px solid #30363d; font-size: 11px;
+       letter-spacing: .6px; text-transform: uppercase; }
+  td { padding: 10px 14px; border-bottom: 1px solid #21262d; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #161b22; }
+
+  /* ── Two-column layout ───────────────────────── */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 20px; }
+  .cols-6040 { display: grid; grid-template-columns: 60% 40%; gap: 28px; margin-top: 20px; }
+
+  /* ── Divider ─────────────────────────────────── */
+  hr { border: none; border-top: 1px solid #21262d; margin: 16px 0; }
+
+  /* ── Layer arch boxes ────────────────────────── */
+  .layer-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+  .layer {
+    display: flex; align-items: center; gap: 16px;
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 14px 20px;
+  }
+  .layer-num {
+    width: 28px; height: 28px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 12px;
+    font-weight: 700; flex-shrink: 0;
+  }
+  .layer-content { flex: 1; }
+  .layer-title { font-weight: 600; font-size: 14px; }
+  .layer-desc  { font-size: 12px; color: #8b949e; margin-top: 2px; }
+  .layer-files { font-size: 11px; font-family: monospace; color: #484f58; margin-top: 4px; }
+
+  /* ── Title slide specific ────────────────────── */
+  .title-slide { justify-content: center; }
+  .title-slide h1 { font-size: 54px; }
+  .title-badge {
+    display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap;
+  }
+
+  /* ── Module badge ────────────────────────────── */
+  .module-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px;
+  }
+  .module-card {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .module-icon {
+    width: 34px; height: 34px; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+  }
+  .module-name  { font-size: 13px; font-weight: 600; }
+  .module-desc  { font-size: 11px; color: #8b949e; margin-top: 3px; }
+
+  /* ── Scenario step list ──────────────────────── */
+  .step-list { list-style: none; margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .step-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 14px; line-height: 1.5;
+  }
+  .step-num-badge {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #1f6feb; color: #e6edf3; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* ── Before/After ─────────────────────────────── */
+  .before-after {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;
+  }
+  .before-box { background: #200d0d; border: 1px solid #da3633; border-radius: 8px; padding: 18px 20px; }
+  .after-box  { background: #0d2118; border: 1px solid #238636; border-radius: 8px; padding: 18px 20px; }
+  .ba-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .ba-item { font-size: 13px; line-height: 1.8; color: #8b949e; }
+
+  /* ── Command line ────────────────────────────── */
+  .cmd {
+    background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+    padding: 10px 16px; font-family: monospace; font-size: 14px;
+    display: flex; align-items: center; gap: 10px; margin-top: 8px;
+  }
+  .cmd-prompt { color: #3fb950; }
+  .cmd-text   { color: #e6edf3; }
+
+  /* ── Slide content scroll ────────────────────── */
+  .slide-content {
+    flex: 1; overflow-y: auto; padding-bottom: 80px;
+    scrollbar-width: thin; scrollbar-color: #30363d transparent;
+  }
+
+  /* ── Keyboard hint ───────────────────────────── */
+  .kbd-hint {
+    position: fixed; bottom: 28px; right: 28px;
+    font-size: 11px; color: #484f58;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="slide-tag" id="slideTag"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 1 — TITLE
+  ═══════════════════════════════════════════ -->
+  <div class="slide title-slide active" id="s1">
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:820px;">
+      <div class="eyebrow">Proof of Concept · 2026</div>
+      <h1>AI Test Intelligence<br><span class="blue">Platform</span></h1>
+      <p class="subtitle">Fill an Excel file. AI writes test cases, page objects,<br>and a full Playwright suite — then archives every report.</p>
+      <div class="title-badge">
+        <span class="pill pill-blue">TypeScript</span>
+        <span class="pill pill-green">Playwright + Allure</span>
+        <span class="pill pill-orange">Multi-Provider LLM</span>
+        <span class="pill pill-purple">10 AI Modules</span>
+        <span class="pill pill-blue" style="background:#0f2d1a;color:#3fb950;">Excel Requirements Input</span>
+        <span class="pill" style="background:#161b22;color:#8b949e;">Auto-POM Generation</span>
+        <span class="pill" style="background:#2d1f6e;color:#bc8cff;">URL-First Discovery</span>
+      </div>
+    </div>
+    <div style="position:absolute;right:72px;bottom:120px;text-align:right;">
+      <div style="font-size:11px;color:#484f58;">Demo Application</div>
+      <div style="font-size:13px;color:#58a6ff;font-weight:600;margin-top:4px;">parabank.parasoft.com</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 2 — THE PROBLEM
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s2">
+    <div class="eyebrow">Why We Built This</div>
+    <h2>The Problem with Traditional Test Automation</h2>
+    <div class="slide-content">
+      <div class="before-after">
+        <div class="before-box">
+          <div class="ba-label" style="color:#f85149;">❌ Before — Manual Process</div>
+          <div class="ba-item">
+            → Think through every scenario manually<br>
+            → Write test cases in a document<br>
+            → Create test data from scratch<br>
+            → Translate steps to Playwright code<br>
+            → Maintain selectors when UI changes<br>
+            → Debug flaky tests reading stack traces<br>
+            → Run full suite on every PR (slow CI)<br><br>
+            <strong style="color:#f85149;">⏱ Hours per feature · Breaks constantly</strong>
+          </div>
+        </div>
+        <div class="after-box">
+          <div class="ba-label" style="color:#3fb950;">✅ After — AI-Powered Platform</div>
+          <div class="ba-item">
+            → One sentence requirement → 8 test cases<br>
+            → AI generates realistic test data<br>
+            → Natural language → Playwright code<br>
+            → Selectors auto-heal after UI changes<br>
+            → AI diagnoses flaky tests automatically<br>
+            → AI explains every test failure<br>
+            → CI runs only impacted tests<br><br>
+            <strong style="color:#3fb950;">⚡ Seconds per feature · Self-maintaining</strong>
+          </div>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card">
+          <div class="card-icon">💸</div>
+          <h3>High Cost</h3>
+          <p class="body">QA engineers spend 60–70% of time writing boilerplate test code, not designing test strategies.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔧</div>
+          <h3>Fragile Tests</h3>
+          <p class="body">One UI rename breaks dozens of tests. Maintenance cost outpaces writing new tests.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🐌</div>
+          <h3>Slow CI</h3>
+          <p class="body">Full regression on every PR even when 1 file changed. 45-minute pipelines block every deploy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE — EXCEL REQUIREMENTS INPUT
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s_excel">
+    <div class="eyebrow">Step 0 — Requirements Input</div>
+    <h2>Excel-Driven Requirements</h2>
+    <div class="slide-content">
+      <p class="body" style="margin-bottom:16px;">Fill one Excel file. Leave the <em>Test Cases</em> column blank — AI generates everything else.</p>
+      <div class="cols">
+        <div>
+          <div class="card blue-border" style="margin-bottom:12px;">
+            <div style="font-size:11px;color:#58a6ff;font-weight:700;margin-bottom:8px;">requirements/requirements.xlsx</div>
+            <table style="font-size:11px;margin-top:0;">
+              <tr>
+                <th>URL</th>
+                <th>Page Name</th>
+                <th>Feature</th>
+                <th>Scenario/Description</th>
+                <th>Priority</th>
+                <th>Test Cases</th>
+              </tr>
+              <tr>
+                <td style="color:#58a6ff;">example.com/home</td>
+                <td>ae-home</td>
+                <td>E-Commerce</td>
+                <td style="color:#484f58;font-style:italic;">(blank — AI discovers)</td>
+                <td style="color:#484f58;">—</td>
+                <td style="color:#3fb950;font-style:italic;">(blank → AI)</td>
+              </tr>
+              <tr>
+                <td style="color:#58a6ff;">example.com/login</td>
+                <td>ae-login</td>
+                <td>Authentication</td>
+                <td>User should be able to login</td>
+                <td><span class="pill pill-green">smoke</span></td>
+                <td style="color:#3fb950;font-style:italic;">(blank → AI)</td>
+              </tr>
+              <tr>
+                <td style="color:#484f58;">↑ same</td>
+                <td>ae-login</td>
+                <td>Authentication</td>
+                <td>User should NOT login with invalid credentials</td>
+                <td><span class="pill pill-orange">regression</span></td>
+                <td style="color:#3fb950;font-style:italic;">(blank → AI)</td>
+              </tr>
+            </table>
+          </div>
+          <div class="card" style="margin-bottom:10px;padding:10px 14px;font-size:12px;color:#8b949e;border-color:#6e40c9;">
+            <strong style="color:#bc8cff;">URL-only rows:</strong> AI crawls the live page and discovers scenarios automatically.
+            <strong style="color:#e6edf3;">Rows with a description:</strong> AI supplements with additional scenarios on top of yours.
+          </div>
+          <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">npm run requirements:template</span><span style="color:#484f58;margin-left:auto;font-size:11px;">← create template</span></div>
+          <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">npm run ai:run</span><span style="color:#484f58;margin-left:auto;font-size:11px;">← full pipeline</span></div>
+        </div>
+        <div>
+          <ul class="step-list">
+            <li><div class="step-num-badge">1</div><div><strong>Read Excel</strong> — parse each row into Requirement objects</div></li>
+            <li><div class="step-num-badge">2</div><div><strong>Blank cell detected</strong> — flag as <code style="color:#3fb950;">aiGenerate: true</code></div></li>
+            <li><div class="step-num-badge">3</div><div><strong>AI expands scenarios</strong> — TestCaseGenerator fills each blank</div></li>
+            <li><div class="step-num-badge">4</div><div><strong>Auto-POM check</strong> — creates missing page objects automatically</div></li>
+            <li><div class="step-num-badge">5</div><div><strong>Scripts generated</strong> — full Playwright .spec.ts written to tests/e2e/</div></li>
+            <li><div class="step-num-badge">6</div><div><strong>Reports archived</strong> — all artefacts saved under reports/{runId}/</div></li>
+          </ul>
+          <div class="card green-border" style="margin-top:12px;padding:12px 16px;">
+            <div style="font-size:12px;color:#8b949e;">
+              <strong style="color:#e6edf3;">QA team writes:</strong> Page, Feature, Description, Priority.<br>
+              Everything else — test cases, selectors, code, assertions — is AI.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE — URL-FIRST DISCOVERY
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s_discovery">
+    <div class="eyebrow">Step 2.5 — Hybrid AI Discovery</div>
+    <h2>URL-First: AI Discovers Scenarios from Live Pages</h2>
+    <div class="slide-content">
+      <div class="cols">
+        <div>
+          <p class="body" style="margin-bottom:16px;">
+            Provide only a URL. The platform crawls the live page, extracts every form field,
+            button, nav link, and heading — then uses AI to infer all testable scenarios.
+            Scenarios you wrote in Excel are preserved and AI adds on top of them.
+          </p>
+          <div class="flow" style="flex-direction:column;gap:8px;margin-top:0;">
+            <div class="card blue-border" style="padding:12px 16px;">
+              <div style="font-size:11px;color:#58a6ff;font-weight:700;margin-bottom:6px;">① PageAnalyzer — Playwright DOM Extraction</div>
+              <div style="font-size:12px;color:#8b949e;line-height:1.8;">
+                Headings: "Welcome", "Login", "Create Account"<br>
+                Forms: username field, password field<br>
+                Buttons: "Sign In", "Forgot Password", "Register"<br>
+                Nav links: Home, Products, Cart, Signup/Login
+              </div>
+            </div>
+            <div style="text-align:center;color:#484f58;font-size:16px;">↓ ScenarioInferenceEngine (LLM) ↓</div>
+            <div class="card green-border" style="padding:12px 16px;">
+              <div style="font-size:11px;color:#3fb950;font-weight:700;margin-bottom:6px;">② AI-Discovered Scenarios</div>
+              <div style="font-size:12px;color:#8b949e;line-height:1.8;">
+                ✦ Verify "Forgot Password" link navigates correctly<br>
+                ✦ Test "Register" button leads to registration form<br>
+                ✦ Verify nav links visible and functional<br>
+                ✦ Test login form with empty fields shows validation<br>
+                ✦ Verify page heading renders on load
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <ul class="step-list">
+            <li><div class="step-num-badge">1</div><div>Playwright launches headless Chromium, navigates to the URL</div></li>
+            <li><div class="step-num-badge">2</div><div>DOM is parsed: forms, buttons, headings, nav links extracted into <code style="color:#58a6ff;">PageContext</code></div></li>
+            <li><div class="step-num-badge">3</div><div>LLM receives PageContext + your existing Excel scenarios → infers what else is testable</div></li>
+            <li><div class="step-num-badge">4</div><div>New scenarios appended as <code style="color:#bc8cff;">AI-Discovered</code> requirements — your Excel rows untouched</div></li>
+            <li><div class="step-num-badge">5</div><div>Results cached in <code style="color:#f0883e;">knowledge-base/{page}-scenarios.json</code> — no re-crawl on next run</div></li>
+          </ul>
+          <div class="card purple-border" style="margin-top:14px;padding:12px 16px;">
+            <div style="font-size:11px;color:#bc8cff;font-weight:700;margin-bottom:6px;">Output — Sheet 2 "Generated Test Cases"</div>
+            <div style="font-size:12px;color:#8b949e;line-height:1.8;">
+              Source column: <span style="color:#58a6ff;">Excel</span> (your rows) vs <span style="color:#bc8cff;font-style:italic;">AI-Discovered</span> (crawled)<br>
+              AI-discovered rows highlighted in light blue<br>
+              Both sources flow into test case generation equally
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 3 — SOLUTION
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s3">
+    <div class="eyebrow">The Solution</div>
+    <h2>One Sentence In. Running Tests Out.</h2>
+    <div class="slide-content">
+      <div class="cols">
+        <div>
+          <p class="body" style="margin-bottom:16px;">Give the platform a plain English requirement. It handles everything else — test cases, data, code, assertions.</p>
+          <div class="card blue-border" style="margin-bottom:12px;">
+            <div style="font-size:11px;color:#484f58;margin-bottom:6px;">INPUT</div>
+            <code style="color:#a5d6ff;font-size:14px;">"User should be able to login<br>&nbsp;using valid username and password"</code>
+          </div>
+          <div style="text-align:center;color:#484f58;margin:8px 0;">↓ AI Pipeline ↓</div>
+          <div class="card green-border">
+            <div style="font-size:11px;color:#484f58;margin-bottom:6px;">OUTPUT — <code style="color:#3fb950;">tests/generated/login.spec.ts</code></div>
+            <div style="font-size:13px;color:#8b949e;">
+              ✓ 8 test cases (positive + negative + edge)<br>
+              ✓ Realistic test data (valid + invalid credentials)<br>
+              ✓ Real Playwright selectors from knowledge base<br>
+              ✓ Correct assertions for every scenario<br>
+              ✓ Ready to run with <code style="color:#3fb950;">npm test</code>
+            </div>
+          </div>
+        </div>
+        <div>
+          <pre><span class="cmt">// Generated automatically</span>
+<span class="kw">import</span> { test, expect } <span class="kw">from</span> <span class="str">'@playwright/test'</span>;
+
+<span class="fn">test</span>(<span class="str">'Login with valid credentials'</span>,
+  <span class="kw">async</span> ({ page }) => {
+
+  <span class="kw">const</span> testData = {
+    validUsername: <span class="str">"john_doe"</span>,
+    validPassword: <span class="str">"Secure@123"</span>,
+    invalidUsername: <span class="str">"user!@#"</span>,
+    invalidPassword: <span class="str">"wrong"</span>
+  };
+
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://parabank.../login'</span>);
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#username'</span>, testData.validUsername);
+  <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#password'</span>, testData.validPassword);
+  <span class="kw">await</span> page.<span class="fn">click</span>(<span class="str">'input[value="Log In"]'</span>);
+
+  <span class="kw">await</span> <span class="fn">expect</span>(page).<span class="fn">toHaveURL</span>(<span class="num">/overview/</span>);
+});</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 4 — PARABANK INTRO
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s4">
+    <div class="eyebrow">Demo Application</div>
+    <h2>ParaBank — Our Real-World Target</h2>
+    <div class="slide-content">
+      <div class="cols-6040">
+        <div>
+          <p class="body">ParaBank is a publicly available demo banking application by Parasoft. It is an ideal showcase target — it has login, accounts, transfers, bill pay, and contact — the same feature set you find in any enterprise web application.</p>
+          <div style="margin-top:16px;">
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">open https://parabank.parasoft.com/parabank/index.htm</span></div>
+          </div>
+          <table style="margin-top:20px;">
+            <tr><th>Feature</th><th>Test Scenarios We Generate</th></tr>
+            <tr>
+              <td><span class="pill pill-blue">Login</span></td>
+              <td>Valid login, invalid credentials, empty fields, locked account</td>
+            </tr>
+            <tr>
+              <td><span class="pill pill-green">Register</span></td>
+              <td>New account, duplicate username, missing required fields</td>
+            </tr>
+            <tr>
+              <td><span class="pill pill-orange">Transfer</span></td>
+              <td>Valid transfer, insufficient funds, invalid amount</td>
+            </tr>
+            <tr>
+              <td><span class="pill pill-purple">Bill Pay</span></td>
+              <td>Valid payment, missing payee, invalid account number</td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          <div class="card" style="height:100%;min-height:280px;">
+            <div style="font-size:11px;color:#484f58;margin-bottom:12px;text-transform:uppercase;letter-spacing:.6px;">ParaBank Knowledge Base</div>
+            <pre style="font-size:11px;padding:12px 14px;">{
+  <span class="str">"pageName"</span>: <span class="str">"Login Page"</span>,
+  <span class="str">"url"</span>: <span class="str">"https://parabank.parasoft
+          .com/parabank/login.htm"</span>,
+  <span class="str">"selectors"</span>: {
+    <span class="str">"username"</span>: <span class="str">"#username"</span>,
+    <span class="str">"password"</span>: <span class="str">"#password"</span>,
+    <span class="str">"loginButton"</span>: <span class="str">"input[value
+          ='Log In']"</span>
+  },
+  <span class="str">"messages"</span>: {
+    <span class="str">"invalidLogin"</span>: <span class="str">"The username
+          and password could not
+          be verified"</span>
+  },
+  <span class="str">"success"</span>: {
+    <span class="str">"redirectUrl"</span>: <span class="str">"/overview"</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 5 — ARCHITECTURE
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s5">
+    <div class="eyebrow">System Design</div>
+    <h2>Four-Layer Architecture</h2>
+    <div class="slide-content">
+      <div class="layer-stack">
+        <div class="layer" style="border-color:#1f6feb;">
+          <div class="layer-num" style="background:#1f3c6e;color:#58a6ff;">3</div>
+          <div class="layer-content">
+            <div class="layer-title blue">AI Modules Layer <span style="color:#484f58;font-weight:400;font-size:12px;">— the intelligence</span></div>
+            <div class="layer-desc">10 independent modules: TestCaseGenerator · TestDataGenerator · ActionModelGenerator · AssertionGenerator · SelfHealingLocator · FlakyAnalyzer · RootCauseAnalyzer · CoverageAnalyzer · RegressionSelector · ScenarioInferenceEngine</div>
+            <div class="layer-files">ai/src/</div>
+          </div>
+          <span class="pill pill-blue">10 Modules</span>
+        </div>
+        <div class="layer" style="border-color:#6e40c9;">
+          <div class="layer-num" style="background:#2d1f6e;color:#bc8cff;">4</div>
+          <div class="layer-content">
+            <div class="layer-title purple">Automation Layer <span style="color:#484f58;font-weight:400;font-size:12px;">— code generation, no AI</span></div>
+            <div class="layer-desc">PlaywrightGenerator orchestrates steps · PlaywrightRenderer converts ActionModel to code strings deterministically</div>
+            <div class="layer-files">automation/src/</div>
+          </div>
+          <span class="pill pill-purple">Pure Code</span>
+        </div>
+        <div class="layer" style="border-color:#9e6a03;">
+          <div class="layer-num" style="background:#3d2000;color:#f0883e;">2</div>
+          <div class="layer-content">
+            <div class="layer-title orange">Knowledge Base Layer <span style="color:#484f58;font-weight:400;font-size:12px;">— ground truth, prevents hallucination</span></div>
+            <div class="layer-desc">JSON files per page: real selectors · real URLs · real error messages · test suite catalog</div>
+            <div class="layer-files">knowledge-base/ · login-page.json · test-catalog.json</div>
+          </div>
+          <span class="pill pill-orange">JSON files</span>
+        </div>
+        <div class="layer" style="border-color:#238636;">
+          <div class="layer-num" style="background:#0f2d1a;color:#3fb950;">1</div>
+          <div class="layer-content">
+            <div class="layer-title green">LLM Provider Layer <span style="color:#484f58;font-weight:400;font-size:12px;">— swap any model in one line</span></div>
+            <div class="layer-desc">Interface: <code>generateResponse(prompt)</code> · Implementations: OpenRouterProvider · GeminiProvider · GitHubModelsProvider · LMStudioProvider (offline) · MockLLMProvider</div>
+            <div class="layer-files">llm/src/ · interfaces/LLMProvider.ts · providers/</div>
+          </div>
+          <span class="pill pill-green">Swappable</span>
+        </div>
+      </div>
+      <div style="margin-top:16px;font-size:13px;color:#484f58;text-align:center;">
+        Every AI module follows the same pattern: <strong style="color:#8b949e;">Input Interface → Engineered Prompt → LLM Call → Parse → Validate → Typed Output</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE — AUTO-GENERATED PAGE OBJECTS
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s_pom">
+    <div class="eyebrow">Phase 4 — Auto-POM Generation</div>
+    <h2>Knowledge Base → Page Object Model</h2>
+    <div class="slide-content">
+      <div class="cols">
+        <div>
+          <div class="card orange-border" style="margin-bottom:10px;">
+            <div style="font-size:11px;color:#f0883e;font-weight:700;margin-bottom:8px;">INPUT — knowledge-base/login-page.json (excerpt)</div>
+            <pre style="font-size:11px;padding:10px 12px;">{
+  <span class="str">"selectors"</span>: {
+    <span class="str">"username"</span>:    <span class="str">"#username"</span>,
+    <span class="str">"password"</span>:    <span class="str">"#password"</span>,
+    <span class="str">"loginButton"</span>: <span class="str">"input[value='Log In']"</span>
+  },
+  <span class="str">"messages"</span>: {
+    <span class="str">"invalidLogin"</span>: <span class="str">"The username and password
+      could not be verified"</span>
+  }
+}</pre>
+          </div>
+          <div style="text-align:center;color:#484f58;font-size:16px;margin:6px 0;">↓ POMGenerator.generate() ↓</div>
+          <div class="card green-border" style="padding:12px 14px;">
+            <div style="font-size:11px;color:#3fb950;font-weight:700;margin-bottom:6px;">OUTPUT — src/pages/LoginPage.ts</div>
+            <pre style="font-size:11px;padding:10px 12px;"><span class="kw">export class</span> <span class="cls">LoginPage</span> <span class="kw">extends</span> <span class="cls">BasePage</span> {
+  <span class="kw">readonly</span> username:    <span class="cls">Locator</span>;
+  <span class="kw">readonly</span> loginButton: <span class="cls">Locator</span>;
+
+  <span class="kw">readonly</span> assertions = {
+    invalidLoginVisible: () =&gt;
+      <span class="fn">expect</span>(this.invalidLogin).<span class="fn">toBeVisible</span>(),
+    redirectedToOverview: () =&gt;
+      <span class="fn">expect</span>(this.page).<span class="fn">toHaveURL</span>(<span class="num">/overview/</span>),
+  };
+
+  <span class="kw">async</span> <span class="fn">loginWith</span>(user, pass) { ... }
+}</pre>
+          </div>
+        </div>
+        <div>
+          <ul class="step-list">
+            <li><div class="step-num-badge">1</div><div>Check if <code style="color:#f0883e;">src/pages/{ClassName}.ts</code> already exists — skip if so</div></li>
+            <li><div class="step-num-badge">2</div><div>Parse KB selectors → typed <code style="color:#58a6ff;">Locator</code> declarations with <code>.or()</code> fallback chains</div></li>
+            <li><div class="step-num-badge">3</div><div>AI generates action methods (<code>loginWith</code>, <code>fillUsername</code>, ...)</div></li>
+            <li><div class="step-num-badge">4</div><div>Typed <code>assertions</code> object built from every selector + message</div></li>
+            <li><div class="step-num-badge">5</div><div>Data file generated — <code>src/data/loginPage.data.ts</code></div></li>
+            <li><div class="step-num-badge">6</div><div><code>src/fixtures/index.ts</code> updated automatically — no manual wiring</div></li>
+          </ul>
+          <div class="card" style="margin-top:12px;padding:12px 16px;">
+            <div style="font-size:11px;color:#484f58;margin-bottom:6px;">COMMANDS</div>
+            <div class="cmd" style="margin-top:0;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run generate:pom</span><span style="color:#484f58;margin-left:auto;font-size:11px;">← all missing pages</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 6 — ALL 9 MODULES
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s6">
+    <div class="eyebrow">Platform Capabilities</div>
+    <h2>10 AI Modules — One Platform</h2>
+    <div class="slide-content">
+      <div class="module-grid">
+        <div class="module-card">
+          <div class="module-icon" style="background:#1f3c6e;">📝</div>
+          <div>
+            <div class="module-name blue">Test Case Generator</div>
+            <div class="module-desc">Requirement → 5–10 structured test cases (positive, negative, edge)</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#0f2d1a;">🗃️</div>
+          <div>
+            <div class="module-name green">Test Data Generator</div>
+            <div class="module-desc">Requirement → realistic valid + invalid credential sets</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#3d2000;">🎯</div>
+          <div>
+            <div class="module-name orange">Action Model Generator</div>
+            <div class="module-desc">Natural language step → structured ActionModel (goto/fill/click)</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#2d1f6e;">✅</div>
+          <div>
+            <div class="module-name purple">Assertion Generator</div>
+            <div class="module-desc">Expected result → Playwright assertion grounded in knowledge base</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#1f3c6e;">🔧</div>
+          <div>
+            <div class="module-name blue">Self-Healing Locator</div>
+            <div class="module-desc">Broken selector + page name → healed selector with confidence score</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#3d0f0f;">⚠️</div>
+          <div>
+            <div class="module-name red">Flaky Test Analyzer</div>
+            <div class="module-desc">Execution metrics → flakiness probability + root cause + fix</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#3d2000;">🔍</div>
+          <div>
+            <div class="module-name orange">Root Cause Analyzer</div>
+            <div class="module-desc">Stack trace + log → failure type + impacted component + recommendation</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#0f2d1a;">📊</div>
+          <div>
+            <div class="module-name green">Coverage Analyzer</div>
+            <div class="module-desc">Requirements + existing tests → gap report + coverage percentage</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#2d1f6e;">🎛️</div>
+          <div>
+            <div class="module-name purple">Regression Selector</div>
+            <div class="module-desc">Changed files → impacted test suites only (no full suite run)</div>
+          </div>
+        </div>
+        <div class="module-card">
+          <div class="module-icon" style="background:#2d1f6e;">🔍</div>
+          <div>
+            <div class="module-name purple">Scenario Inference Engine</div>
+            <div class="module-desc">Live page DOM + existing scenarios → new undiscovered test scenarios</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 7 — PARABANK SCENARIO 1: LOGIN
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s7">
+    <div class="eyebrow">ParaBank Demo — Scenario 1</div>
+    <h2>Login Test Generation</h2>
+    <div class="slide-content">
+      <div class="cols-6040">
+        <div>
+          <div style="font-size:13px;color:#8b949e;margin-bottom:12px;">
+            Single requirement → 8 test cases covering every login scenario
+          </div>
+          <table>
+            <tr><th>#</th><th>Test Case</th><th>Type</th></tr>
+            <tr>
+              <td style="color:#484f58;">TC_001</td>
+              <td>Login with valid username and password</td>
+              <td><span class="pill pill-green">Positive</span></td>
+            </tr>
+            <tr>
+              <td style="color:#484f58;">TC_002</td>
+              <td>Login with invalid username</td>
+              <td><span class="pill pill-red">Negative</span></td>
+            </tr>
+            <tr>
+              <td style="color:#484f58;">TC_003</td>
+              <td>Login with invalid password</td>
+              <td><span class="pill pill-red">Negative</span></td>
+            </tr>
+            <tr>
+              <td style="color:#484f58;">TC_004</td>
+              <td>Login with empty username field</td>
+              <td><span class="pill pill-orange">Validation</span></td>
+            </tr>
+            <tr>
+              <td style="color:#484f58;">TC_005</td>
+              <td>Login with empty password field</td>
+              <td><span class="pill pill-orange">Validation</span></td>
+            </tr>
+            <tr>
+              <td style="color:#484f58;">TC_006</td>
+              <td>Login with both fields empty</td>
+              <td><span class="pill pill-orange">Validation</span></td>
+            </tr>
+            <tr>
+              <td style="color:#484f58;">TC_007</td>
+              <td>Login with SQL injection in username</td>
+              <td><span class="pill pill-purple">Edge Case</span></td>
+            </tr>
+            <tr>
+              <td style="color:#484f58;">TC_008</td>
+              <td>Login with username case sensitivity check</td>
+              <td><span class="pill pill-purple">Edge Case</span></td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          <pre style="font-size:11px;"><span class="cmt">// TC_002 — negative scenario</span>
+<span class="fn">test</span>(<span class="str">'Login with invalid username'</span>,
+  <span class="kw">async</span> ({ page }) => {
+
+  <span class="kw">await</span> page.<span class="fn">goto</span>(
+    <span class="str">'https://parabank.parasoft.com
+     /parabank/login.htm'</span>
+  );
+
+  <span class="kw">await</span> page.<span class="fn">fill</span>(
+    <span class="str">'#username'</span>,
+    testData.invalidUsername
+  );
+
+  <span class="kw">await</span> page.<span class="fn">fill</span>(
+    <span class="str">'#password'</span>,
+    testData.validPassword
+  );
+
+  <span class="kw">await</span> page.<span class="fn">click</span>(
+    <span class="str">'input[value="Log In"]'</span>
+  );
+
+  <span class="kw">await</span> <span class="fn">expect</span>(
+    page.<span class="fn">locator</span>(
+      <span class="str">'text=The username and password
+       could not be verified'</span>
+    )
+  ).<span class="fn">toBeVisible</span>();
+});</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 8 — PARABANK SCENARIO 2: REGISTER
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s8">
+    <div class="eyebrow">ParaBank Demo — Scenario 2</div>
+    <h2>Registration Test Generation</h2>
+    <div class="slide-content">
+      <div class="cols">
+        <div>
+          <div style="font-size:13px;color:#8b949e;margin-bottom:12px;">
+            Requirement → full registration test suite
+          </div>
+          <div class="card blue-border" style="margin-bottom:12px;">
+            <div style="font-size:11px;color:#484f58;margin-bottom:6px;">REQUIREMENT</div>
+            <code style="color:#a5d6ff;font-size:13px;">"User should be able to register a new account on ParaBank with valid personal information"</code>
+          </div>
+          <div class="card" style="margin-top:12px;">
+            <div style="font-size:11px;color:#484f58;margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px;">Knowledge Base — register-page.json</div>
+            <div style="font-size:12px;line-height:1.8;color:#8b949e;">
+              <code style="color:#f0883e;">"url"</code>: /parabank/register.htm<br>
+              <code style="color:#f0883e;">"selectors.firstName"</code>: #customer.firstName<br>
+              <code style="color:#f0883e;">"selectors.lastName"</code>: #customer.lastName<br>
+              <code style="color:#f0883e;">"selectors.username"</code>: #customer.username<br>
+              <code style="color:#f0883e;">"selectors.password"</code>: #customer.password<br>
+              <code style="color:#f0883e;">"selectors.register"</code>: input[value="Register"]<br>
+              <code style="color:#f0883e;">"messages.duplicateUser"</code>: "This username already exists"<br>
+              <code style="color:#f0883e;">"success.text"</code>: "Your account was created"
+            </div>
+          </div>
+        </div>
+        <div>
+          <ul class="step-list">
+            <li><div class="step-num-badge">1</div><div><strong>Valid registration</strong> — all fields filled correctly → account created message</div></li>
+            <li><div class="step-num-badge">2</div><div><strong>Duplicate username</strong> → "This username already exists" error</div></li>
+            <li><div class="step-num-badge">3</div><div><strong>Missing first name</strong> → validation message visible</div></li>
+            <li><div class="step-num-badge">4</div><div><strong>Password mismatch</strong> → "Passwords did not match" error</div></li>
+            <li><div class="step-num-badge">5</div><div><strong>All fields empty</strong> → all required field messages</div></li>
+            <li><div class="step-num-badge">6</div><div><strong>Special characters in name</strong> → edge case validation</div></li>
+          </ul>
+          <div style="margin-top:16px;padding:12px 16px;background:#161b22;border-radius:8px;border:1px solid #30363d;">
+            <div style="font-size:11px;color:#484f58;margin-bottom:4px;">ONE COMMAND</div>
+            <div class="cmd" style="margin-top:0;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run generate</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 9 — PARABANK SCENARIO 3: SELF-HEALING
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s9">
+    <div class="eyebrow">ParaBank Demo — Scenario 3</div>
+    <h2>Self-Healing Locator — Live Demo</h2>
+    <div class="slide-content">
+      <div class="cols">
+        <div>
+          <p class="body" style="margin-bottom:16px;">ParaBank updated its login button. The old selector breaks. The healing engine finds the correct one automatically.</p>
+          <div class="before-box" style="margin-bottom:12px;padding:14px 16px;">
+            <div class="ba-label" style="color:#f85149;font-size:11px;">❌ BROKEN SELECTOR</div>
+            <pre style="background:transparent;border:none;padding:0;margin-top:8px;font-size:13px;"><span class="str">"#loginForm .btn-primary"</span>
+<span class="cmt">// TimeoutError: waiting for selector</span></pre>
+          </div>
+          <div style="text-align:center;color:#484f58;font-size:18px;margin:6px 0;">↓ SelfHealingLocatorEngine.heal() ↓</div>
+          <div class="after-box" style="padding:14px 16px;">
+            <div class="ba-label" style="color:#3fb950;font-size:11px;">✅ HEALED SELECTOR</div>
+            <pre style="background:transparent;border:none;padding:0;margin-top:8px;font-size:13px;">{
+  originalLocator: <span class="str">"#loginForm .btn-primary"</span>,
+  healedLocator:   <span class="str">"input[value='Log In']"</span>,
+  confidence:      <span class="num">94</span>,
+  reasoning: <span class="str">"Login button found in KB
+    under selectors.loginButton"</span>
+}</pre>
+          </div>
+        </div>
+        <div>
+          <pre style="font-size:12px;"><span class="kw">import</span> { <span class="cls">SelfHealingLocatorEngine</span> }
+  <span class="kw">from</span> <span class="str">'./SelfHealingLocatorEngine.js'</span>;
+<span class="kw">import</span> { <span class="cls">KnowledgeBaseService</span> }
+  <span class="kw">from</span> <span class="str">'../../knowledge-base/...'</span>;
+
+<span class="kw">const</span> engine = <span class="kw">new</span> <span class="cls">SelfHealingLocatorEngine</span>(
+  llmProvider
+);
+
+<span class="kw">const</span> kb = <span class="kw">new</span> <span class="cls">KnowledgeBaseService</span>()
+  .<span class="fn">load</span>(<span class="str">'login-page'</span>);
+
+<span class="kw">const</span> result = <span class="kw">await</span> engine.<span class="fn">heal</span>(
+  {
+    failedLocator: <span class="str">'#loginForm .btn-primary'</span>,
+    pageName:      <span class="str">'login-page'</span>
+  },
+  kb
+);
+
+console.<span class="fn">log</span>(result.healedLocator);
+<span class="cmt">// → "input[value='Log In']"</span>
+console.<span class="fn">log</span>(result.confidence);
+<span class="cmt">// → 94</span></pre>
+          <div class="cmd" style="margin-top:12px;">
+            <span class="cmd-prompt">$</span>
+            <span class="cmd-text">npm run demo:healing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 10 — PARABANK SCENARIO 4: ROOT CAUSE
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s10">
+    <div class="eyebrow">ParaBank Demo — Scenario 4</div>
+    <h2>Root Cause Analyzer — CI Failure Diagnosis</h2>
+    <div class="slide-content">
+      <div class="cols">
+        <div>
+          <p class="body" style="margin-bottom:14px;">ParaBank's funds transfer test fails in CI. Instead of reading the stack trace manually, the AI diagnoses it instantly.</p>
+          <div class="card red-border" style="margin-bottom:12px;">
+            <div style="font-size:11px;color:#f85149;margin-bottom:8px;font-weight:700;">CI FAILURE INPUT</div>
+            <div style="font-size:12px;color:#8b949e;line-height:1.8;">
+              <strong style="color:#e6edf3;">testName:</strong> transfer-funds.spec.ts<br>
+              <strong style="color:#e6edf3;">failureMessage:</strong> TimeoutError: waiting for selector '#transferResult'<br>
+              <strong style="color:#e6edf3;">stackTrace:</strong> at waitForSelector (line 38)<br>
+              <strong style="color:#e6edf3;">executionLog:</strong> Navigated to /transfer, selected accounts, entered $500, clicked Transfer, waited 30s
+            </div>
+          </div>
+          <div style="text-align:center;color:#484f58;font-size:18px;margin:6px 0;">↓ BugRootCauseAnalyzer.analyze() ↓</div>
+          <div class="card green-border">
+            <div style="font-size:11px;color:#3fb950;margin-bottom:8px;font-weight:700;">AI DIAGNOSIS OUTPUT</div>
+            <div style="font-size:12px;color:#8b949e;line-height:1.8;">
+              <strong style="color:#e6edf3;">failureType:</strong> Timeout<br>
+              <strong style="color:#e6edf3;">probableCause:</strong> Transfer result loaded after backend account balance API response<br>
+              <strong style="color:#e6edf3;">impactedComponent:</strong> Funds Transfer Page<br>
+              <strong style="color:#e6edf3;">recommendation:</strong> Replace fixed wait with <code style="color:#3fb950;">await expect(page.locator('#transferResult')).toBeVisible()</code><br>
+              <strong style="color:#e6edf3;">confidence:</strong> <span class="green">91</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <pre style="font-size:12px;"><span class="kw">const</span> analyzer = <span class="kw">new</span> <span class="cls">BugRootCauseAnalyzer</span>(
+  llmProvider
+);
+
+<span class="kw">const</span> result = <span class="kw">await</span> analyzer.<span class="fn">analyze</span>({
+  testName: <span class="str">'transfer-funds.spec.ts'</span>,
+  failureMessage: <span class="str">'TimeoutError:
+    waiting for #transferResult'</span>,
+  stackTrace: <span class="str">'at waitForSelector
+    (line 38)...'</span>,
+  executionLog: <span class="str">'Navigated to /transfer,
+    selected accounts,
+    entered $500, clicked Transfer'</span>
+});
+
+<span class="cmt">// Validation — built-in</span>
+<span class="cmt">// confidence must be 0–100</span>
+<span class="cmt">// all fields must be present</span>
+<span class="cmt">// throws if AI returns incomplete data</span></pre>
+          <div class="cmd" style="margin-top:12px;">
+            <span class="cmd-prompt">$</span>
+            <span class="cmd-text">npm run demo:rootcause</span>
+          </div>
+          <div class="card" style="margin-top:12px;padding:12px 14px;">
+            <div style="font-size:12px;color:#8b949e;">
+              Same pattern works for <strong style="color:#e6edf3;">Bill Pay</strong>,
+              <strong style="color:#e6edf3;">Account Creation</strong>,
+              <strong style="color:#e6edf3;">Loan Request</strong> failures.
+              Any page. Any error type.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 11 — PARABANK SCENARIO 5: FLAKY + COVERAGE
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s11">
+    <div class="eyebrow">ParaBank Demo — Scenario 5</div>
+    <h2>Flaky Test Analyzer + Coverage Gap Finder</h2>
+    <div class="slide-content">
+      <div class="grid-2">
+        <div>
+          <div class="card red-border" style="height:100%;">
+            <div style="font-size:12px;font-weight:700;color:#f85149;margin-bottom:10px;">⚠️ FLAKY TEST ANALYZER</div>
+            <p class="body" style="margin-bottom:10px;">ParaBank's bill-pay test fails 3 out of 10 runs. Is it a real bug or timing issue?</p>
+            <pre style="font-size:11px;padding:10px 12px;">Input:
+  testName:       <span class="str">'bill-pay.spec.ts'</span>
+  retryCount:     <span class="num">3</span>
+  duration:       <span class="num">18000</span> ms
+  failureMessage: <span class="str">'Timeout:
+    #paymentResult'</span>
+
+Output:
+  flakyProbability: <span class="num">88</span>
+  possibleCauses: [
+    <span class="str">"Payment API response varies"</span>,
+    <span class="str">"Network dependency"</span>
+  ]
+  recommendation:
+    <span class="str">"Use locator assertion
+     instead of fixed wait"</span></pre>
+            <div class="cmd" style="margin-top:8px;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run demo:flaky</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="card green-border" style="height:100%;">
+            <div style="font-size:12px;font-weight:700;color:#3fb950;margin-bottom:10px;">📊 COVERAGE ANALYZER</div>
+            <p class="body" style="margin-bottom:10px;">Which ParaBank requirements have no test coverage?</p>
+            <pre style="font-size:11px;padding:10px 12px;">Input:
+  requirements: [
+    <span class="str">"User can login"</span>,
+    <span class="str">"User can transfer funds"</span>,
+    <span class="str">"User can pay bills"</span>,
+    <span class="str">"User can open account"</span>,
+    <span class="str">"User can request loan"</span>
+  ]
+  existingTests: [
+    <span class="str">"Login Tests"</span>,
+    <span class="str">"Transfer Tests"</span>
+  ]
+
+Output:
+  coveragePercentage: <span class="num">40</span>
+  missingCoverage: [
+    <span class="str">"Bill Pay Tests"</span>,
+    <span class="str">"Account Opening Tests"</span>,
+    <span class="str">"Loan Request Tests"</span>
+  ]
+  recommendation:
+    <span class="str">"Create 3 new test suites"</span></pre>
+            <div class="cmd" style="margin-top:8px;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run demo:coverage</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 12 — END-TO-END FLOW
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s12">
+    <div class="eyebrow">Pipeline</div>
+    <h2>End-to-End Flow</h2>
+    <div class="slide-content">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+        <div class="flow">
+          <div class="flow-step" style="border-color:#3fb950;">
+            <div class="step-num">01</div>
+            <div class="step-label green">Excel Input</div>
+            <div class="step-sub">requirements.xlsx</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-step" style="border-color:#f0883e;">
+            <div class="step-num">02</div>
+            <div class="step-label orange">Auto-POM</div>
+            <div class="step-sub">KB → page objects</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-step" style="border-color:#1f6feb;">
+            <div class="step-num">03</div>
+            <div class="step-label blue">Requirements</div>
+            <div class="step-sub">AI expands blanks</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-step" style="border-color:#238636;">
+            <div class="step-num">04</div>
+            <div class="step-label green">Test Cases</div>
+            <div class="step-sub">8 per scenario</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-step" style="border-color:#9e6a03;">
+            <div class="step-num">05</div>
+            <div class="step-label orange">Test Data</div>
+            <div class="step-sub">Valid + invalid</div>
+          </div>
+        </div>
+        <div class="card purple-border" style="margin-top:10px;padding:10px 16px;font-size:12px;color:#8b949e;">
+          <strong style="color:#bc8cff;">Step 2.5 (between Excel read and POM generation):</strong> PageAnalyzer crawls each URL → ScenarioInferenceEngine discovers additional test scenarios → appended as AI-Discovered requirements before test case expansion.
+        </div>
+        <div style="text-align:center;color:#484f58;font-size:14px;">↓</div>
+        <div class="flow">
+          <div class="flow-step" style="border-color:#6e40c9;">
+            <div class="step-num">06</div>
+            <div class="step-label purple">Action Models</div>
+            <div class="step-sub">goto/fill/click</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-step" style="border-color:#1f6feb;">
+            <div class="step-num">07</div>
+            <div class="step-label blue">Assertions</div>
+            <div class="step-sub">Typed expect()</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-step" style="border-color:#238636;">
+            <div class="step-num">08</div>
+            <div class="step-label green">.spec.ts</div>
+            <div class="step-sub">Ready to run</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-step" style="border-color:#58a6ff;">
+            <div class="step-num">09</div>
+            <div class="step-label blue">Execute</div>
+            <div class="step-sub">Playwright + Allure</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-step" style="border-color:#bc8cff;">
+            <div class="step-num">10</div>
+            <div class="step-label purple">AI Reports</div>
+            <div class="step-sub">reports/{runId}/</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <div class="grid-2" style="margin-top:0;">
+          <div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">npm run ai:run</span><span style="color:#484f58;margin-left:auto;font-size:12px;">← full pipeline</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">npm test</span><span style="color:#484f58;margin-left:auto;font-size:12px;">← Playwright execution</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">npm run report:latest</span><span style="color:#484f58;margin-left:auto;font-size:12px;">← HTML report</span></div>
+          </div>
+          <div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">npm run allure:serve</span><span style="color:#484f58;margin-left:auto;font-size:12px;">← Allure report</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">npm run demo:healing</span><span style="color:#484f58;margin-left:auto;font-size:12px;">← self-heal locators</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">npm run demo:regression</span><span style="color:#484f58;margin-left:auto;font-size:12px;">← smart test selection</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card" style="padding:12px 14px;text-align:center;">
+          <div style="font-size:22px;font-weight:700;color:#58a6ff;">~30s</div>
+          <div style="font-size:12px;color:#8b949e;margin-top:2px;">Full pipeline runtime</div>
+        </div>
+        <div class="card" style="padding:12px 14px;text-align:center;">
+          <div style="font-size:22px;font-weight:700;color:#3fb950;">8</div>
+          <div style="font-size:12px;color:#8b949e;margin-top:2px;">Test cases from 1 sentence</div>
+        </div>
+        <div class="card" style="padding:12px 14px;text-align:center;">
+          <div style="font-size:22px;font-weight:700;color:#f0883e;">~$0.03</div>
+          <div style="font-size:12px;color:#8b949e;margin-top:2px;">API cost per full run</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE — SMART ARTIFACT CACHE
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s_smartcache">
+    <div class="eyebrow">Enterprise Optimization · Artifact Intelligence</div>
+    <h2>Smart Regeneration — Zero Unnecessary LLM Calls</h2>
+    <div class="slide-content">
+      <div class="cols">
+        <div>
+          <p class="body" style="margin-bottom:14px;">
+            Every requirement is content-hashed and stored in <code style="color:#3fb950;">ai-metadata/artifacts.json</code>.
+            On every run the framework classifies each requirement before touching the LLM.
+          </p>
+          <table style="margin-top:0;">
+            <tr><th>What Changed in Excel</th><th>KB</th><th>POM</th><th>Test Cases</th><th>Specs</th></tr>
+            <tr>
+              <td><strong>Nothing</strong></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+            </tr>
+            <tr>
+              <td><strong>Requirement text edited</strong></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-orange" style="font-size:10px;">⚡ that req only</span></td>
+              <td><span class="pill pill-orange" style="font-size:10px;">⚡ that page only</span></td>
+            </tr>
+            <tr>
+              <td><strong>New requirement added</strong></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-blue" style="font-size:10px;">+ generate new</span></td>
+              <td><span class="pill pill-orange" style="font-size:10px;">⚡ that page only</span></td>
+            </tr>
+            <tr>
+              <td><strong>URL changed in Excel</strong></td>
+              <td><span class="pill pill-orange" style="font-size:10px;">⚡ regen</span></td>
+              <td><span class="pill pill-orange" style="font-size:10px;">⚡ regen</span></td>
+              <td><span class="pill pill-orange" style="font-size:10px;">⚡ regen</span></td>
+              <td><span class="pill pill-orange" style="font-size:10px;">⚡ regen</span></td>
+            </tr>
+            <tr>
+              <td><strong>KB file manually edited</strong></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-orange" style="font-size:10px;">⚡ regen</span></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+              <td><span class="pill pill-green" style="font-size:10px;">⏭ skip</span></td>
+            </tr>
+          </table>
+          <div class="card green-border" style="margin-top:12px;padding:12px 16px;">
+            <div style="font-size:12px;color:#8b949e;line-height:1.9;">
+              <strong style="color:#3fb950;">reqId</strong> = sha256(<code>page:feature:scenario</code>) — stable, survives description edits<br>
+              <strong style="color:#3fb950;">contentHash</strong> = sha256(<code>description+scenario+feature</code>) — detects any content change<br>
+              <strong style="color:#3fb950;">ai-metadata/artifacts.json</strong> — committed to git; survives <code>cache:clear</code>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card blue-border" style="margin-bottom:10px;">
+            <div style="font-size:11px;color:#58a6ff;font-weight:700;margin-bottom:8px;">Console output — first run (14 requirements)</div>
+            <pre style="font-size:11px;padding:10px 12px;background:#0d1117;line-height:1.9;">  📊 Requirements change analysis: <span class="green">14 new</span>
+       ae-login   : 8 new
+       ae-home    : 6 new
+
+  ▸ Expanding (new): Authentication &gt; Login ... done (7 cases)
+  ▸ Expanding (new): Authentication &gt; Invalid login ... done (6 cases)
+  <span class="cmt">  ... 12 more requirements ...</span></pre>
+          </div>
+          <div class="card green-border">
+            <div style="font-size:11px;color:#3fb950;font-weight:700;margin-bottom:8px;">Console output — re-run (nothing changed)</div>
+            <pre style="font-size:11px;padding:10px 12px;background:#0d1117;line-height:1.9;">  📊 Requirements change analysis: <span class="green">14 unchanged</span>
+  ⏭   All requirements unchanged — returning cached test cases
+
+  <span class="cmt">  Step 4 complete in &lt;100ms  (was: 45–120s)</span>
+  ⏭   ae-login — specs unchanged (cache hit, 2 file(s))
+  ⏭   ae-home  — specs unchanged (cache hit, 3 file(s))</pre>
+          </div>
+          <div class="grid-2" style="margin-top:10px;gap:10px;">
+            <div class="card" style="padding:10px 14px;text-align:center;">
+              <div style="font-size:20px;font-weight:700;color:#3fb950;">0</div>
+              <div style="font-size:11px;color:#8b949e;margin-top:2px;">LLM calls on re-run</div>
+            </div>
+            <div class="card" style="padding:10px 14px;text-align:center;">
+              <div style="font-size:20px;font-weight:700;color:#58a6ff;">&lt;5s</div>
+              <div style="font-size:11px;color:#8b949e;margin-top:2px;">Full pipeline, nothing changed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE — PERFORMANCE OPTIMIZATIONS
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s_perf">
+    <div class="eyebrow">Enterprise Optimization · Performance</div>
+    <h2>Four Layers of Performance Engineering</h2>
+    <div class="slide-content">
+      <div class="grid-2">
+        <div class="card blue-border">
+          <div style="font-size:18px;margin-bottom:6px;">⚡</div>
+          <h3 class="blue" style="margin-bottom:4px;">LLM Response Cache</h3>
+          <p class="body" style="margin-bottom:10px;">Every LLM call is SHA-256 hashed. Identical prompts return instantly from disk — zero API calls, zero tokens consumed.</p>
+          <pre style="font-size:11px;padding:10px 12px;line-height:1.8;"><span class="cmt">// CachingLLMProvider wraps any provider</span>
+<span class="cmt">// sha256(version + prompt) → .llm-cache/</span>
+📦 LLM cache: <span class="green">47 hits</span> / <span class="orange">5 misses</span>
+   (<span class="green">90%</span> cached — saved ~38 API calls)</pre>
+          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>llm/src/providers/CachingLLMProvider.ts</code></div>
+        </div>
+        <div class="card green-border">
+          <div style="font-size:18px;margin-bottom:6px;">🔀</div>
+          <h3 class="green" style="margin-bottom:4px;">8× Concurrency Pool</h3>
+          <p class="body" style="margin-bottom:10px;">All requirements expand in parallel (Step 4). All test cases within a page generate in parallel (Step 5). Wall-clock time = slowest single item.</p>
+          <pre style="font-size:11px;padding:10px 12px;line-height:1.8;"><span class="cmt">// pMap — concurrency-capped parallel map</span>
+<span class="kw">const</span> expanded = <span class="kw">await</span> <span class="fn">pMap</span>(
+  requirements,
+  req =&gt; expander.<span class="fn">expand</span>(req, kb),
+  <span class="num">8</span>  <span class="cmt">// 8 parallel LLM calls</span>
+);</pre>
+          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>ai/src/utils/concurrency.ts</code></div>
+        </div>
+        <div class="card orange-border">
+          <div style="font-size:18px;margin-bottom:6px;">🎯</div>
+          <h3 class="orange" style="margin-bottom:4px;">Rule-Based Action Classifier</h3>
+          <p class="body" style="margin-bottom:10px;">~90% of test steps are classified by keyword regex patterns — zero LLM calls. Only novel steps the rules don't recognise fall back to AI.</p>
+          <pre style="font-size:11px;padding:10px 12px;line-height:1.8;"><span class="cmt">// "Click the Login button"  → click (rule)</span>
+<span class="cmt">// "Enter valid username"    → fill  (rule)</span>
+<span class="cmt">// "Navigate to login page"  → goto  (rule)</span>
+<span class="cmt">// "Verify error is visible" → noop  (rule)</span>
+<span class="cmt">// "Do something unusual"    → AI    (fallback)</span></pre>
+          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>ai/src/action-model/RuleBasedActionModelGenerator.ts</code></div>
+        </div>
+        <div class="card purple-border">
+          <div style="font-size:18px;margin-bottom:6px;">📋</div>
+          <h3 class="purple" style="margin-bottom:4px;">Spec File Manifest</h3>
+          <p class="body" style="margin-bottom:10px;">Generated spec files are content-hashed. If test cases for a page didn't change, spec generation is skipped entirely — not even the TypeScript renderer runs.</p>
+          <pre style="font-size:11px;padding:10px 12px;line-height:1.8;"><span class="cmt">// .llm-cache/spec-manifest.json</span>
+<span class="cmt">// hash(allTestCases) matches stored hash</span>
+<span class="cmt">// AND all spec files still exist on disk</span>
+⏭ ae-login — specs unchanged
+   (cache hit, <span class="num">2</span> file(s))</pre>
+          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>ai/src/generate-from-excel.ts</code></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px;padding:12px 20px;">
+        <div style="display:flex;gap:28px;align-items:center;justify-content:center;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#3fb950;">8×</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:2px;">faster via concurrency</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#58a6ff;">90%</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:2px;">LLM cache hit rate (re-runs)</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#f0883e;">90%</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:2px;">steps classified without AI</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#bc8cff;">~$0</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:2px;">API cost on unchanged re-run</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 13 — TECH STACK
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s13">
+    <div class="eyebrow">Technology</div>
+    <h2>Tech Stack — Why Each Was Chosen</h2>
+    <div class="slide-content">
+      <table>
+        <tr><th>Technology</th><th>Purpose</th><th>Why Selected</th><th>Key Benefit</th></tr>
+        <tr>
+          <td><strong>Playwright</strong> <span class="pill pill-green" style="margin-left:6px;">Test Runner</span></td>
+          <td>Browser automation & test execution</td>
+          <td>Industry standard; cross-browser; built-in assertions</td>
+          <td>Auto-wait, trace viewer, HTML reporter</td>
+        </tr>
+        <tr>
+          <td><strong>TypeScript</strong> <span class="pill pill-blue" style="margin-left:6px;">Language</span></td>
+          <td>Type-safe development</td>
+          <td>Strict mode catches AI output errors at compile time</td>
+          <td>Typed contracts between all modules</td>
+        </tr>
+        <tr>
+          <td><strong>OpenRouter</strong> <span class="pill pill-orange" style="margin-left:6px;">LLM Gateway</span></td>
+          <td>Single API for multiple AI models</td>
+          <td>Swap GPT → Claude → Gemini with one config change</td>
+          <td>Cost optimization per task type</td>
+        </tr>
+        <tr>
+          <td><strong>GPT-4.1-mini</strong> <span class="pill pill-orange" style="margin-left:6px;">AI Model</span></td>
+          <td>Intelligence for all 9 modules</td>
+          <td>High quality structured JSON output at low cost</td>
+          <td>temperature=0.3 → consistent results</td>
+        </tr>
+        <tr>
+          <td><strong>tsx</strong> <span class="pill pill-purple" style="margin-left:6px;">Runner</span></td>
+          <td>Run TypeScript without compilation</td>
+          <td>No build step needed; fast dev loop</td>
+          <td><code>npx tsx file.ts</code> just works</td>
+        </tr>
+        <tr>
+          <td><strong>ExcelJS</strong> <span class="pill pill-green" style="margin-left:6px;">Input</span></td>
+          <td>Read/write .xlsx requirements files</td>
+          <td>Rich cell support: dropdowns, formulas, styles</td>
+          <td>Blank cell = AI generate flag</td>
+        </tr>
+        <tr>
+          <td><strong>Allure</strong> <span class="pill pill-orange" style="margin-left:6px;">Reporting</span></td>
+          <td>Rich test execution reports</td>
+          <td>Step-level detail, categories, trends, attachments</td>
+          <td><code>npm run allure:serve</code> — live report</td>
+        </tr>
+        <tr>
+          <td><strong>dotenv</strong> <span class="pill" style="margin-left:6px;background:#161b22;color:#8b949e;">Config</span></td>
+          <td>API key management</td>
+          <td>Standard Node.js secrets pattern</td>
+          <td>Keys out of source code; CI compatible</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 14 — HOW TO EXTEND
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s14">
+    <div class="eyebrow">Extensibility</div>
+    <h2>Add Anything in Minutes</h2>
+    <div class="slide-content">
+      <div class="grid-3">
+        <div class="card blue-border">
+          <div style="font-size:11px;color:#58a6ff;font-weight:700;margin-bottom:8px;">NEW PAGE</div>
+          <p class="body" style="margin-bottom:10px;">Add ParaBank Bill Pay page support</p>
+          <pre style="font-size:11px;padding:10px 12px;"><span class="cmt">// 1. Create JSON file</span>
+knowledge-base/
+  bill-pay-page.json
+
+<span class="cmt">// 2. Change one line</span>
+kb.<span class="fn">load</span>(<span class="str">'bill-pay-page'</span>)
+
+<span class="cmt">// Done. AI uses new page.</span></pre>
+        </div>
+        <div class="card green-border">
+          <div style="font-size:11px;color:#3fb950;font-weight:700;margin-bottom:8px;">NEW LLM</div>
+          <p class="body" style="margin-bottom:10px;">Swap GPT for Claude</p>
+          <pre style="font-size:11px;padding:10px 12px;"><span class="cmt">// 1. Add provider file</span>
+<span class="kw">class</span> <span class="cls">ClaudeProvider</span>
+  <span class="kw">implements</span> <span class="cls">LLMProvider</span> {
+  <span class="kw">async</span> <span class="fn">generateResponse</span>(p) {
+    <span class="cmt">// Anthropic SDK call</span>
+  }
+}
+
+<span class="cmt">// 2. Change one line</span>
+<span class="kw">new</span> <span class="cls">ClaudeProvider</span>()
+
+<span class="cmt">// Nothing else changes.</span></pre>
+        </div>
+        <div class="card purple-border">
+          <div style="font-size:11px;color:#bc8cff;font-weight:700;margin-bottom:8px;">NEW MODULE</div>
+          <p class="body" style="margin-bottom:10px;">Add a Test Priority Scorer</p>
+          <pre style="font-size:11px;padding:10px 12px;"><span class="cmt">// Follow the same pattern:</span>
+
+<span class="cmt">// 1. Input interface</span>
+PriorityScoringInput.ts
+
+<span class="cmt">// 2. Output interface</span>
+PriorityScoredResult.ts
+
+<span class="cmt">// 3. Module class</span>
+<span class="kw">class</span> <span class="cls">TestPriorityScorer</span> {
+  <span class="fn">score</span>(input): Promise&lt;Result&gt;
+}
+
+<span class="cmt">// Done. Same pattern.</span></pre>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px;padding:14px 20px;">
+        <div style="display:flex;gap:32px;align-items:center;justify-content:center;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#58a6ff;">1</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:2px;">JSON file to add a page</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#3fb950;">1</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:2px;">line to swap LLM provider</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#bc8cff;">3</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:2px;">files to add a new AI module</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:22px;font-weight:700;color:#f0883e;">0</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:2px;">existing files modified</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE — ORGANIZED REPORTS
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s_reports">
+    <div class="eyebrow">Phase 1 — Reports Infrastructure</div>
+    <h2>Every Run Fully Archived</h2>
+    <div class="slide-content">
+      <div class="cols">
+        <div>
+          <div class="card blue-border">
+            <div style="font-size:11px;color:#58a6ff;font-weight:700;margin-bottom:10px;">reports/ structure — one folder per run</div>
+            <pre style="font-size:12px;padding:12px 14px;line-height:1.9;">reports/
+  <span class="green">2026-06-25_11-30-00/</span>
+    <span class="blue">playwright/</span>       ← HTML + JSON + JUnit
+    <span class="orange">allure/</span>
+      <span class="orange">results/</span>        ← raw XML for allure-report
+      <span class="orange">report/</span>         ← generated HTML report
+    <span class="purple">ai-reports/</span>       ← AI analyzer JSON files
+    generated/
+      test-cases/     ← per-suite JSON
+      test-scripts/   ← .spec.ts snapshots
+    logs/
+    test-artifacts/   ← screenshots + traces
+  <span class="green">latest</span> → 2026-06-25_11-30-00</pre>
+          </div>
+        </div>
+        <div>
+          <div class="grid-2" style="margin-top:0;gap:10px;">
+            <div class="card green-border" style="padding:12px 14px;">
+              <div style="font-size:11px;color:#3fb950;font-weight:700;margin-bottom:6px;">Playwright Reports</div>
+              <div class="cmd" style="margin-top:0;font-size:12px;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run report:latest</span></div>
+            </div>
+            <div class="card orange-border" style="padding:12px 14px;">
+              <div style="font-size:11px;color:#f0883e;font-weight:700;margin-bottom:6px;">Allure Reports</div>
+              <div class="cmd" style="margin-top:0;font-size:12px;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run allure:serve</span></div>
+            </div>
+          </div>
+          <div class="card purple-border" style="margin-top:10px;padding:12px 16px;">
+            <div style="font-size:11px;color:#bc8cff;font-weight:700;margin-bottom:8px;">AI Reports — JSON per analyzer</div>
+            <div style="font-size:12px;color:#8b949e;line-height:1.8;">
+              generation-summary.json<br>
+              coverage-gap.json<br>
+              flaky-analysis.json<br>
+              root-cause.json<br>
+              regression-recommendations.json<br>
+              self-healing.json
+            </div>
+          </div>
+          <div class="card" style="margin-top:10px;padding:12px 16px;">
+            <div style="font-size:12px;color:#8b949e;">
+              <strong style="color:#e6edf3;">latest/</strong> symlink always points to the most recent run — open once, always current. History stays intact.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 15 — BENEFITS SUMMARY
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s15">
+    <div class="eyebrow">Impact</div>
+    <h2>What the Team Gains</h2>
+    <div class="slide-content">
+      <div class="grid-3">
+        <div class="card blue-border">
+          <div style="font-size:20px;margin-bottom:6px;">⚡</div>
+          <h3 class="blue">Speed</h3>
+          <hr>
+          <p class="body">Test authoring: hours → seconds<br>Locator fixes: manual → automatic<br>Failure diagnosis: 30 min → instant<br>CI pipeline: faster with smart selection</p>
+        </div>
+        <div class="card green-border">
+          <div style="font-size:20px;margin-bottom:6px;">🎯</div>
+          <h3 class="green">Quality</h3>
+          <hr>
+          <p class="body">AI catches edge cases humans miss<br>Consistent test structure always<br>Coverage gaps identified proactively<br>Flaky tests detected before they hide bugs</p>
+        </div>
+        <div class="card purple-border">
+          <div style="font-size:20px;margin-bottom:6px;">🔁</div>
+          <h3 class="purple">Maintainability</h3>
+          <hr>
+          <p class="body">Selectors in JSON → one update point<br>Provider abstraction → no lock-in<br>Modular design → independent ownership<br>No AI logic in code generation layer</p>
+        </div>
+      </div>
+      <table style="margin-top:16px;">
+        <tr><th>Team</th><th>Immediate Win</th></tr>
+        <tr><td><strong>QA Engineers</strong></td><td>Generate full regression suites in seconds; stop writing boilerplate</td></tr>
+        <tr><td><strong>Developers</strong></td><td>Get test coverage for new features immediately after implementation</td></tr>
+        <tr><td><strong>CI/CD</strong></td><td>Run only impacted tests per PR — faster pipelines, same confidence</td></tr>
+        <tr><td><strong>Engineering Managers</strong></td><td>Faster releases, quantified coverage, reduced QA bottleneck</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE 16 — CLOSING
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s16">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;max-width:760px;">
+      <div class="eyebrow">Summary</div>
+      <h1 style="font-size:42px;">Built. Running. <span class="blue">Ready.</span></h1>
+      <p class="subtitle" style="margin-top:16px;">
+        Excel in. Running tests out.<br>
+        Nine AI modules. Four clean layers.<br>
+        Running on this machine today.
+      </p>
+      <hr style="margin:28px 0;max-width:400px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 32px;max-width:700px;">
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Excel requirements input — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Auto-POM generation — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Test generation pipeline — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Allure + Playwright reports — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Self-healing locator engine — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Timestamped run archive — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Root cause &amp; flaky analysis — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Coverage gap analyzer — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Regression selector — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; ParaBank demo scenarios — ready</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; URL-first AI scenario discovery — working</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Local LLM (LM Studio) — offline, no API cost</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Smart artifact cache — zero LLM calls on re-run</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Auto-fallback provider chain — never blocks on quota</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; 8× concurrency pool — parallel LLM calls</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Cascade invalidation — URL/KB change auto-detected</div>
+      </div>
+      <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="cmd" style="margin-top:0;flex:0 0 auto;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run ai:run</span></div>
+        <div class="cmd" style="margin-top:0;flex:0 0 auto;"><span class="cmd-prompt">$</span><span class="cmd-text">npm test</span></div>
+        <div class="cmd" style="margin-top:0;flex:0 0 auto;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run allure:serve</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- ── Dots ─────────────────────────────── -->
+<div class="slide-dots" id="dots"></div>
+
+<!-- ── Nav ──────────────────────────────── -->
+<div class="nav">
+  <button id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
+  <span class="counter" id="counter"></span>
+  <button id="nextBtn" onclick="navigate(1)">Next →</button>
+</div>
+
+<div class="kbd-hint">← → arrow keys to navigate</div>
+
+<script>
+  const SLIDES = [
+    's1','s2','s_excel','s_discovery','s3','s4','s5','s_pom','s6',
+    's7','s8','s9','s10','s11','s12',
+    's_smartcache','s_perf',
+    's13','s14','s_reports','s15','s16'
+  ];
+  const TOTAL = SLIDES.length;
+  let current = 0;
+
+  function updateUI() {
+    document.querySelectorAll('.slide').forEach(s => { s.style.display = 'none'; s.style.opacity = '0'; });
+    const el = document.getElementById(SLIDES[current]);
+    el.style.display = 'flex';
+    setTimeout(() => el.style.opacity = '1', 10);
+    const n = current + 1;
+    document.getElementById('progressBar').style.width = (n / TOTAL * 100) + '%';
+    document.getElementById('slideTag').textContent = n + ' / ' + TOTAL;
+    document.getElementById('counter').textContent   = n + ' / ' + TOTAL;
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= TOTAL) return;
+    const old = document.getElementById(SLIDES[current]);
+    old.style.opacity = '0';
+    setTimeout(() => { old.style.display = 'none'; }, 200);
+    current = next;
+    const el = document.getElementById(SLIDES[current]);
+    el.style.opacity = '0';
+    el.style.display = 'flex';
+    setTimeout(() => el.style.opacity = '1', 50);
+    const n = current + 1;
+    document.getElementById('progressBar').style.width = (n / TOTAL * 100) + '%';
+    document.getElementById('slideTag').textContent = n + ' / ' + TOTAL;
+    document.getElementById('counter').textContent   = n + ' / ' + TOTAL;
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  // Build dots
+  const dotsEl = document.getElementById('dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = (function(idx) { return function() { navigate(idx - current); }; })(i);
+    dotsEl.appendChild(d);
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+  });
+
+  updateUI();
+</script>
+</body>
+</html>
