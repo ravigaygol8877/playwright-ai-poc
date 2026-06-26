@@ -1,7 +1,7 @@
 import "dotenv/config";
 
-import { OpenRouterProvider }
-from "../../../llm/src/providers/OpenRouterProvider.js";
+import { ProviderFactory }
+from "../../../llm/src/ProviderFactory.js";
 
 import { KnowledgeBaseService }
 from "../../../knowledge-base/KnowledgeBaseService.js";
@@ -11,17 +11,7 @@ from "./SelfHealingLocatorEngine.js";
 
 async function main() {
 
-  const apiKey =
-    process.env.OPENROUTER_API_KEY;
-
-  if (!apiKey) {
-    throw new Error(
-      "OPENROUTER_API_KEY not found"
-    );
-  }
-
-  const provider =
-    new OpenRouterProvider(apiKey);
+  const provider = ProviderFactory.create();
 
   const kbService =
     new KnowledgeBaseService();
