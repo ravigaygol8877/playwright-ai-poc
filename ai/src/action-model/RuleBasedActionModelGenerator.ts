@@ -49,9 +49,11 @@ function inferTarget(step: string, availableTargets: string[]): string {
     // Exact substring match gets highest score
     if (s.includes(tl)) return { t, score: 100 };
 
-    // Split camelCase target name into words and match each
-    const words = tl
+    // Split camelCase target name into words and match each.
+    // Must split before lowercasing — the regex requires mixed case to detect boundaries.
+    const words = t
       .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .toLowerCase()
       .split(/\s+/)
       .filter(w => w.length > 2);
     const matched = words.filter(w => s.includes(w)).length;

@@ -44,7 +44,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test:unit": "tsx --test ai/src/**/*.test.ts"
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest"
   },
   "repository": {
     "type": "git",
@@ -66,7 +67,8 @@
     "eslint": "^9.0.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.0.0"
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
