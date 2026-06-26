@@ -40,6 +40,10 @@ Thumbs.db
 playwright-report/
 test-results/
 
+# Excel temporary/lock files
+~$*.xlsx
+~$*.xls
+
 # Reports
 reports/**
 !reports/.gitkeep
@@ -49,3 +53,6 @@ reports/**
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# LLM response cache (auto-rebuilt — never commit)
+.llm-cache/

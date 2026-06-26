@@ -6,13 +6,48 @@
   "directories": {
     "doc": "docs"
   },
-  "scripts": {},
+  "scripts": {
+    "ai:run": "tsx scripts/run-pipeline.ts",
+    "ai:run:qa": "ENVIRONMENT=qa tsx scripts/run-pipeline.ts",
+    "ai:run:uat": "ENVIRONMENT=uat tsx scripts/run-pipeline.ts",
+    "project:reset": "tsx scripts/project-reset.ts",
+    "demo": "tsx demo.ts",
+    "kb:generate": "tsx knowledge-base/test-kb-generator.ts",
+    "generate": "tsx ai/src/index.ts",
+    "generate:pom": "tsx ai/src/pom-generator/generate-pom.ts",
+    "generate:from-excel": "tsx ai/src/generate-from-excel.ts",
+    "requirements:template": "tsx ai/src/create-requirements-template.ts",
+    "generate:all": "tsx ai/src/generate-all.ts",
+    "generate:all:qa": "ENVIRONMENT=qa tsx ai/src/generate-all.ts",
+    "generate:all:uat": "ENVIRONMENT=uat tsx ai/src/generate-all.ts",
+    "test": "playwright test",
+    "test:qa": "ENVIRONMENT=qa dotenv -e config/environments/qa.env -- playwright test --project=chromium",
+    "test:uat": "ENVIRONMENT=uat dotenv -e config/environments/uat.env -- playwright test --project=chromium",
+    "test:prod": "ENVIRONMENT=production dotenv -e config/environments/production.env -- playwright test --project=chromium",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "report": "playwright show-report reports/latest/playwright",
+    "report:latest": "playwright show-report reports/latest/playwright",
+    "allure:generate": "allure generate reports/latest/allure/results --output reports/latest/allure/report --clean",
+    "allure:open": "allure open reports/latest/allure/report",
+    "allure:serve": "allure serve reports/latest/allure/results",
+    "allure:full": "npm test && npm run allure:generate && npm run allure:open",
+    "demo:flaky": "tsx ai/src/flaky-test-analyzer/test-flaky-test-analyzer.ts",
+    "demo:rootcause": "tsx ai/src/root-cause-analyzer/test-bug-root-cause-analyzer.ts",
+    "demo:healing": "tsx ai/src/self-healing-locator/test-self-healing-locator.ts",
+    "demo:coverage": "tsx ai/src/coverage-analyzer/test-coverage-analyzer.ts",
+    "demo:regression": "tsx ai/src/regression-selector/test-regression-selector.ts",
+    "test:github-models": "LLM_PROVIDER=github-models MODEL=gpt-4.1 tsx llm/src/test-github-models.ts",
+    "test:provider-switching": "tsx llm/src/test-provider-switching.ts",
+    "cache:clear": "node -e \"const fs=require('fs'); if(fs.existsSync('.llm-cache')){fs.rmSync('.llm-cache',{recursive:true,force:true});console.log('LLM cache cleared.');}else{console.log('No cache to clear.');}\" "
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ravigaygol8877/playwright-ai-poc.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ravi Gaygol",
   "license": "ISC",
   "type": "module",
   "bugs": {
@@ -22,11 +57,16 @@
   "devDependencies": {
     "@playwright/test": "^1.61.0",
     "@types/node": "^25.9.3",
+    "allure-commandline": "^2.43.0",
+    "allure-playwright": "^3.10.1",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
+    "jsonrepair": "^3.14.1",
     "openai": "^6.44.0"
   }
 }
