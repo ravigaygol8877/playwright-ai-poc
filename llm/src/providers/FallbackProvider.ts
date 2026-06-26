@@ -45,12 +45,17 @@ function isFatalForProvider(message: string): boolean {
  *     { name: "github-models", provider: githubModelsInstance },
  *   ]);
  */
+/** Open the circuit after this many consecutive failures on one provider. */
+const CIRCUIT_BREAKER_THRESHOLD = 5;
+
 export class FallbackProvider implements LLMProvider {
   /**
    * Persists across calls — once we advance to a working provider we stay there,
    * so the pipeline doesn't re-try dead providers on every LLM call.
    */
-  private activeIndex = 0;
+  private activeIndex        = 0;
+  /** Consecutive failures on the current active provider; resets on success or switch. */
+  private consecutiveFailures = 0;
 
   constructor(private readonly chain: ProviderEntry[]) {
     if (chain.length === 0) {
@@ -61,6 +66,15 @@ export class FallbackProvider implements LLMProvider {
 
   async generateResponse(prompt: string): Promise<string> {
     const errors: string[] = [];
+
+    // Circuit breaker: if the active provider has failed too many times in a row,
+    // advance immediately rather than hammering a degraded endpoint.
+    if (this.consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD && this.activeIndex < this.chain.length - 1) {
+      const currentName = this.chain[this.activeIndex]?.name ?? "unknown";
+      console.warn(`  ⚡  [${currentName}] circuit open after ${this.consecutiveFailures} consecutive failures — switching`);
+      this.activeIndex++;
+      this.consecutiveFailures = 0;
+    }
 
     for (let i = this.activeIndex; i < this.chain.length; i++) {
       const { name, provider } = this.chain[i]!;
@@ -73,6 +87,7 @@ export class FallbackProvider implements LLMProvider {
           console.log(`\n  ✅  Switched to provider: ${name} (all further calls will use this)\n`);
           this.activeIndex = i;
         }
+        this.consecutiveFailures = 0;
         return result;
 
       } catch (error) {
@@ -84,7 +99,8 @@ export class FallbackProvider implements LLMProvider {
         errors.push(`[${name}] ${msg.slice(0, 150)}`);
 
         // Move the permanent cursor so future calls skip this dead provider.
-        this.activeIndex = i + 1;
+        this.activeIndex        = i + 1;
+        this.consecutiveFailures = 0;  // new provider, reset counter
       }
     }
 
