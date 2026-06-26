@@ -30,12 +30,13 @@ import { ExcelReader }            from "../../src/requirements/ExcelReader.js";
 import { RequirementExpander }    from "../../src/requirements/RequirementExpander.js";
 import { POMGenerator, kbKeyToClassName } from "./pom-generator/POMGenerator.js";
 import { DataFileGenerator }      from "./pom-generator/DataFileGenerator.js";
-import { FixtureUpdater, classNameToFixtureKey } from "./pom-generator/FixtureUpdater.js";
+import { classNameToFixtureKey } from "./pom-generator/FixtureUpdater.js";
 import { TestDataGenerator }      from "./test-data-generator/TestDataGenerator.js";
 import { AIActionModelGenerator } from "./action-model/AIActionModelGenerator.js";
 import { AssertionGenerator }     from "./assertion-generator/AssertionGenerator.js";
 import { PlaywrightRenderer }     from "../../automation/src/renderers/PlaywrightRenderer.js";
 import { PlaywrightGenerator }    from "../../automation/src/generators/PlaywrightGenerator.js";
+import type { PomOptions }        from "../../automation/src/generators/PlaywrightGenerator.js";
 import { createRunContext }        from "../../src/reporting/RunContext.js";
 import { ExcelTestCaseWriter }    from "./utils/ExcelTestCaseWriter.js";
 import { PageAnalyzer }           from "./discovery/PageAnalyzer.js";
@@ -43,6 +44,41 @@ import { ScenarioInferenceEngine } from "./discovery/ScenarioInferenceEngine.js"
 import type { Requirement }       from "../../src/requirements/ExcelReader.js";
 import { ArtifactManifest }       from "./utils/ArtifactManifest.js";
 import type { KnowledgeBase }     from "./models/KnowledgeBase.js";
+
+// ─── Method registry ──────────────────────────────────────────────────────────
+
+function buildMethodRegistry(pageKey: string): Record<string, { click?: string; fill?: string }> {
+  const registries: Record<string, Record<string, { click?: string; fill?: string }>> = {
+    'ae-home': {
+      navHomeLink:            { click: 'verifyPageLoaded' },
+      navProductsLink:        { click: 'navigateToProducts' },
+      navCartLink:            { click: 'navigateToCart' },
+      navSignupLoginLink:     { click: 'navigateToLogin' },
+      navTestCasesLink:       { click: 'navigateToTestCases' },
+      navApiTestingLink:      { click: 'navigateToTestCases' },
+      addToCartButtons:       { click: 'clickAddToCart' },
+      continueShoppingButton: { click: 'clickContinueShopping' },
+      viewCartLink:           { click: 'viewCart' },
+      categoryWomenLink:      { click: 'expandWomenCategory' },
+      categoryMenLink:        { click: 'expandMenCategory' },
+      categoryKidsLink:       { click: 'expandKidsCategory' },
+      brandPoloLink:          { click: 'navigateToBrandPolo' },
+      brandHM:                { click: 'navigateToBrandHM' },
+      brandMadame:            { click: 'navigateToBrandMadame' },
+      testCasesButton:        { click: 'navigateToTestCases' },
+      apisListButton:         { click: 'navigateToApiList' },
+    },
+    'ae-login': {
+      loginEmailInput:    { fill: 'fillLoginEmail' },
+      loginPasswordInput: { fill: 'fillLoginPassword' },
+      loginButton:        { click: 'submitLogin' },
+      signupNameInput:    { fill: 'fillSignupName' },
+      signupEmailInput:   { fill: 'fillSignupEmail' },
+      signupButton:       { click: 'submitSignup' },
+    },
+  };
+  return registries[pageKey] ?? {};
+}
 
 // ─── CLI args ─────────────────────────────────────────────────────────────────
 
@@ -125,7 +161,6 @@ async function main() {
   const expander   = new RequirementExpander(llm);
   const pomGen     = new POMGenerator(llm);
   const dataGen    = new DataFileGenerator(llm);
-  const fixtureUpd = new FixtureUpdater();
   const pwGen      = new PlaywrightGenerator(
     new AIActionModelGenerator(llm),
     new PlaywrightRenderer(),
@@ -267,8 +302,8 @@ async function main() {
 
   for (const [pageKey] of pageGroups) {
     const className = kbKeyToClassName(pageKey);
-    const pomFile   = `src/pages/${className}.ts`;
-    const dataFile  = `src/data/${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
+    const pomFile   = `support/pages/${className}.ts`;
+    const dataFile  = `support/data/${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
 
     let kb: KnowledgeBase;
     try {
@@ -291,7 +326,7 @@ async function main() {
       process.stdout.write(`  ▸ Generating POM for ${className}... `);
       try {
         const pomResult = await pomGen.generate(kb, pageKey);
-        fs.mkdirSync("src/pages", { recursive: true });
+        fs.mkdirSync("support/pages", { recursive: true });
         fs.writeFileSync(pomFile, pomResult.code, "utf-8");
         console.log("done");
         tick(pomFile);
@@ -300,19 +335,9 @@ async function main() {
 
         if (!fs.existsSync(dataFile)) {
           const dataResult = await dataGen.generate(kb, pageKey);
-          fs.mkdirSync("src/data", { recursive: true });
+          fs.mkdirSync("support/data", { recursive: true });
           fs.writeFileSync(dataFile, dataResult.code, "utf-8");
           tick(dataFile);
-
-          fixtureUpd.update("src/fixtures/index.ts", {
-            className,
-            fileName:      pomResult.fileName,
-            fixtureKey:    classNameToFixtureKey(className),
-            dataInterface: dataResult.interfaceName,
-            dataVarName:   dataResult.interfaceName.charAt(0).toLowerCase() + dataResult.interfaceName.slice(1),
-            dataFileName:  dataResult.fileName,
-          });
-          tick("Fixtures updated");
         }
       } catch (err) {
         console.log("failed");
@@ -425,6 +450,36 @@ async function main() {
       continue;
     }
 
+    // Derive POM fixture info (POM was generated/checked in Step 3)
+    const pomClassName = kbKeyToClassName(pageKey);
+    const fixtureKey   = classNameToFixtureKey(pomClassName);
+    const pomFile      = `support/pages/${pomClassName}.ts`;
+    const pomExists    = fs.existsSync(pomFile);
+
+    // Write test data to a sidecar file — specs import from it instead of inlining
+    const testDataSidecarPath = path.join(OUTPUT_PATH, `${pageKey}.data.ts`);
+    fs.writeFileSync(
+      testDataSidecarPath,
+      `// Auto-generated — do not edit manually\n\nexport const testData = ${JSON.stringify(testData, null, 2)};\n`,
+      "utf-8",
+    );
+    tick(`${testDataSidecarPath}  (shared test data)`);
+
+    const pomOptions: PomOptions | undefined = pomExists ? {
+      fixtureKey,
+      fixtureImportPath:  "../../support/fixtures/visitFixture.js",
+      testDataImportPath: `./${pageKey}.data.js`,
+      pageClassName:      pomClassName,
+      pageImportPath:     `../../support/pages/${pomClassName}.js`,
+      methodRegistry:     buildMethodRegistry(pageKey),
+    } : undefined;
+
+    if (pomExists) {
+      info("POM fixture", fixtureKey);
+    } else {
+      warn(`No POM for "${pageKey}" — spec will use raw page.locator() calls`);
+    }
+
     const pageSpecFiles: string[] = [];
     let   pageHadError = false;
 
@@ -438,7 +493,7 @@ async function main() {
 
       process.stdout.write(label);
       try {
-        const script     = await pwGen.generate(batch, testData, kb);
+        const script     = await pwGen.generate(batch, testData, kb, pomOptions);
         const outputPath = path.join(OUTPUT_PATH, fileName);
 
         fs.writeFileSync(outputPath, script, "utf-8");

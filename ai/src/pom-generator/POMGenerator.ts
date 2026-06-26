@@ -234,11 +234,11 @@ JSON format:
 
     // Locator property declarations
     const locatorDecls = selectorKeys
-      .map(k => `  readonly ${k}: Locator;`)
+      .map(k => `  private readonly ${k}: Locator;`)
       .join('\n');
 
     const msgDecls = messageKeys
-      .map(k => `  readonly ${k}: Locator;`)
+      .map(k => `  private readonly ${k}: Locator;`)
       .join('\n');
 
     // Constructor wiring
@@ -263,9 +263,10 @@ JSON format:
 
     return `import type { Page, Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { BasePage } from './BasePage.js';
 
-export class ${className} extends BasePage {
+export default class ${className} {
+  private readonly page: Page;
+
   // Selectors (auto-generated from KB — validate each in Chrome DevTools)
 ${locatorDecls}
 
@@ -278,7 +279,7 @@ ${assertionType}
   };
 
   constructor(page: Page) {
-    super(page);
+    this.page = page;
 
 ${locatorInits}
 

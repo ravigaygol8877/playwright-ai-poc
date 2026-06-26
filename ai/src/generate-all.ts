@@ -36,7 +36,7 @@ import { createRunContext }         from "../../src/reporting/RunContext.js";
 import type { RunPaths }            from "../../src/reporting/RunContext.js";
 import { POMGenerator, kbKeyToClassName } from "./pom-generator/POMGenerator.js";
 import { DataFileGenerator }        from "./pom-generator/DataFileGenerator.js";
-import { FixtureUpdater, classNameToFixtureKey } from "./pom-generator/FixtureUpdater.js";
+import { classNameToFixtureKey } from "./pom-generator/FixtureUpdater.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -227,7 +227,6 @@ async function generateSuite(
   runs: RunPaths,
   pomGen: POMGenerator,
   dataGen: DataFileGenerator,
-  fixtureUpd: FixtureUpdater,
 ): Promise<SuiteResult> {
 
   section(`Suite ${index + 1} of ${total} — ${suite.name}`);
@@ -242,8 +241,8 @@ async function generateSuite(
 
     // Auto-generate POM + data file if not yet present for this page
     const className = kbKeyToClassName(suite.page);
-    const pomFile   = `src/pages/${className}.ts`;
-    const dataFile  = `src/data/${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
+    const pomFile   = `support/pages/${className}.ts`;
+    const dataFile  = `support/data/${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
 
     if (!fs.existsSync(pomFile)) {
       process.stdout.write(`  ▸ Generating POM (${className})... `);
@@ -261,15 +260,7 @@ async function generateSuite(
           tick(`Data → ${dataFile}`);
 
           const fixtureKey = classNameToFixtureKey(className);
-          fixtureUpd.update("src/fixtures/index.ts", {
-            className,
-            fileName:      pomResult.fileName,
-            fixtureKey,
-            dataInterface: dataResult.interfaceName,
-            dataVarName:   dataResult.interfaceName.charAt(0).toLowerCase() + dataResult.interfaceName.slice(1),
-            dataFileName:  dataResult.fileName,
-          });
-          tick("Fixtures updated");
+          tick(`Fixture key: ${fixtureKey} (add to visitFixture.ts manually if needed)`);
         }
       } catch (pomErr) {
         const msg = pomErr instanceof Error ? pomErr.message : String(pomErr);
@@ -370,8 +361,6 @@ async function main() {
   const reqGen    = new RequirementGenerator(llm);
   const pomGen    = new POMGenerator(llm);
   const dataGen   = new DataFileGenerator(llm);
-  const fixtureUpd = new FixtureUpdater();
-
   const actionModelGen     = new AIActionModelGenerator(llm);
   const renderer           = new PlaywrightRenderer();
   const assertionGenerator = new AssertionGenerator(llm);
@@ -390,7 +379,7 @@ async function main() {
           suite, i + j, config.suites.length,
           llm, kbService, playwrightGen, reqGen,
           config.testOutputPath, runs,
-          pomGen, dataGen, fixtureUpd
+          pomGen, dataGen
         )
       )
     );

@@ -56,3 +56,6 @@ reports/**
 
 # LLM response cache (auto-rebuilt — never commit)
 .llm-cache/
+
+# Reference repo cloned for pattern reference only — not part of this project
+sc-qa-automation-salesmanager/

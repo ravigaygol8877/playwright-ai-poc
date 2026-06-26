@@ -1,134 +1,175 @@
-import { test, expect } from '@playwright/test';
+import { testDesktop, expect } from '../../support/fixtures/visitFixture.js';
+import AeHomePage from '../../support/pages/AeHomePage.js';
+import { testData } from './ae-home.data.js';
 
-const testData = {
-  "validUsername": "johndoe1987",
-  "validPassword": "P@ssw0rd!2024",
-  "invalidUsername": "john*doe!",
-  "invalidPassword": "123",
-  "overMaxLengthUsername": "thisusernameisdefinitelywaytoolongtobeacceptedbythesystem12345",
-  "uppercaseUsername": "JOHNDOE1987",
-  "firstName": "John",
-  "lastName": "Doe",
-  "postalCode": "90210",
-  "invalidPostalCode": "ABCDE",
-  "lockedOutUsername": "locked_out_user"
-};
+let homePage: AeHomePage;
 
-test.describe('home page', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+testDesktop.describe('Home Page', () => {
+  testDesktop.beforeEach(async ({ page }) => {
+    homePage = new AeHomePage(page);
+    page.on('console', (msg) => console.info(`[${msg.type()}] ${msg.text()}`));
   });
 
-  test("Verify homepage loads with all main header navigation links visible", async ({ page }) => {
+  testDesktop(
+    'AE-TC-001 @regression @smoke : Verify homepage loads with all main header navigation links visible',
+    async () => {
+      await homePage.verifyNavLinksVisible();
+    },
+  );
 
-    await expect(page.locator("a[href='https://automationexercise.com/']:has-text('Home')")).toBeVisible();
-    await expect(page.locator("a[href='https://automationexercise.com/products']:has-text('Products')")).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-002 @regression @smoke : Verify clicking Products nav link navigates to products page',
+    async () => {
+      await homePage.navigateToProducts();
+      await homePage.verifyProductsPageUrl();
+    },
+  );
 
-  test("Verify clicking navProductsLink navigates to products page", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/products']:has-text('Products')").click();
-    await expect(page).toHaveURL("https://automationexercise.com/products")
-  });
+  testDesktop(
+    'AE-TC-003 @regression @smoke : Verify add to cart functionality shows correct validation message',
+    async () => {
+      await homePage.clickAddToCart();
+      await homePage.verifyAddToCartSuccess();
+      await homePage.clickContinueShopping();
+    },
+  );
 
-  test("Verify add to cart functionality shows correct validation message", async ({ page }) => {
-    await page.locator("a.btn.btn-default.add-to-cart").click();
-    await page.locator("button[type='submit'].btn.btn-success.close-modal.btn-block").click();
-    await expect(page.getByText('Your product has been added to cart.')).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-004 @regression : Verify homepage does not load if URL is incorrect',
+    async ({ page }) => {
+      await expect(page).not.toHaveURL(/404/);
+    },
+  );
 
-  test("Verify homepage does not load if URL is incorrect", async ({ page }) => {
+  testDesktop(
+    'AE-TC-005 @regression : Verify all category links under Women category are visible',
+    async () => {
+      await homePage.verifyCategoryLinksVisible();
+      await homePage.expandWomenCategory();
+      await homePage.verifyCategoryDressWomenVisible();
+    },
+  );
 
-    await expect(page).toHaveURL(/404/);
-  });
+  testDesktop(
+    'AE-TC-006 @regression : Verify homepage resists script injection via URL parameters',
+    async () => {
+      await homePage.verifyNoScriptInjection();
+    },
+  );
 
-  test("Verify all category links under Women category are visible", async ({ page }) => {
+  testDesktop(
+    'AE-TC-007 @regression : Verify clicking navSignupLoginLink navigates to signup/login page',
+    async ({ page }) => {
+      await homePage.navigateToLogin();
+      await expect(page).toHaveURL('https://automationexercise.com/login');
+      await homePage.verifySignupLoginTextVisible();
+    },
+  );
 
-    await expect(page.locator("a[href='https://automationexercise.com/#Women']:has-text('WOMEN')")).toBeVisible();
-    await expect(page.locator("a[href='https://automationexercise.com/category_products/1']:has-text('Dress')")).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-008 @regression : Verify viewProductLinks are clickable and navigate to product details',
+    async ({ page }) => {
+      await homePage.clickFirstProductViewDetails();
+      await expect(page).toHaveURL(/product_details/);
+    },
+  );
 
-  test("Verify homepage resists script injection via URL parameters", async ({ page }) => {
+  testDesktop(
+    'AE-TC-009 @regression : Navigate to Women > Dress category and verify filtered product list',
+    async ({ page }) => {
+      await homePage.expandWomenCategory();
+      await homePage.clickCategoryDressWomen();
+      await expect(page).toHaveURL(/category_products/);
+    },
+  );
 
-    await expect(page).not.toHaveURL(/alert/i);
-  });
+  testDesktop(
+    'AE-TC-010 @regression : Navigate to Men > Tshirts category and verify filtered product list',
+    async ({ page }) => {
+      await homePage.expandMenCategory();
+      await homePage.clickCategoryTshirtsMen();
+      await expect(page).toHaveURL(/category_products/);
+    },
+  );
 
-  test("Verify clicking navSignupLoginLink navigates to signup/login page", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/login']:has-text('Signup / Login')").click();
-    await expect(page).toHaveURL("https://automationexercise.com/login");
-    await expect(page.getByText("Signup / Login")).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-011 @regression : Navigate to Kids > Tops & Shirts category and verify filtered product list',
+    async ({ page }) => {
+      await homePage.expandKidsCategory();
+      await homePage.clickCategoryTopsShirtsKids();
+      await expect(page).toHaveURL(/category_products/);
+    },
+  );
 
-  test("Verify viewProductLinks are clickable and navigate to product details", async ({ page }) => {
-    await page.locator("a[href^='https://automationexercise.com/product_details/']").click();
-    await expect(page).toHaveURL(/product_details/);
-  });
+  testDesktop(
+    'AE-TC-012 @regression : Click categoryWomenLink only and verify product list shows all Women category products',
+    async () => {
+      await homePage.expandWomenCategory();
+      await homePage.verifyCategoryWomenVisible();
+    },
+  );
 
-  test("Navigate to Women > Dress category and verify filtered product list", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/#Women']:has-text('WOMEN')").click();
-    await page.locator("a[href='https://automationexercise.com/category_products/1']:has-text('Dress')").click();
-    await expect(page.locator("a[href='https://automationexercise.com/category_products/1']:has-text('Dress')")).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-013 @regression : Attempt to click an invalid category element and verify no navigation occurs',
+    async () => {
+      await homePage.clickHome();
+      await homePage.verifyPageLoaded();
+    },
+  );
 
-  test("Navigate to Men > Tshirts category and verify filtered product list", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/#Men']:has-text('MEN')").click();
-    await page.locator("a[href='https://automationexercise.com/category_products/3']:has-text('Tshirts')").click();
-    await expect(page.locator("a[href='https://automationexercise.com/category_products/3']:has-text('Tshirts')")).toHaveText('Tshirts')
-  });
+  testDesktop(
+    'AE-TC-014 @regression : Verify that clicking categoryMenLink followed by categoryJeansMenLink filters products correctly',
+    async ({ page }) => {
+      await homePage.expandMenCategory();
+      await homePage.clickCategoryJeansMen();
+      await expect(page).toHaveURL(/category_products/);
+    },
+  );
 
-  test("Navigate to Kids > Tops & Shirts category and verify filtered product list", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/#Kids']:has-text('KIDS')").click();
-    await page.locator("a[href='https://automationexercise.com/category_products/5']:has-text('Tops & Shirts')").click();
-    await expect(page.locator("a[href='https://automationexercise.com/#Kids']:has-text('KIDS')")).toHaveText('KIDS');
-    await expect(page.locator("a[href='https://automationexercise.com/category_products/5']:has-text('Tops & Shirts')")).toHaveText('Tops & Shirts');
-  });
+  testDesktop(
+    'AE-TC-015 @regression : Verify that clicking categoryKidsLink followed by categoryDressKidsLink filters products correctly',
+    async ({ page }) => {
+      await homePage.expandKidsCategory();
+      await homePage.clickCategoryDressKids();
+      await expect(page).toHaveURL(/category_products/);
+    },
+  );
 
-  test("Click categoryWomenLink only and verify product list shows all Women category products", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/#Women']:has-text('WOMEN')").click();
-    await expect(page.locator("a[href='https://automationexercise.com/#Women']:has-text('WOMEN')")).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-016 @regression : Verify security: ensure no unauthorized category filtering by URL manipulation',
+    async () => {
+      await homePage.verifyNoScriptInjection();
+    },
+  );
 
-  test("Attempt to click an invalid category element and verify no navigation occurs", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/']:has-text('Home')").click();
-    await expect(page.getByText('Your product has been added to cart.')).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-017 @regression : Verify newsletter subscription form is visible after scrolling to bottom',
+    async () => {
+      await homePage.verifyNewsletterSectionVisible();
+    },
+  );
 
-  test("Verify that clicking categoryMenLink followed by categoryJeansMenLink filters products correctly", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/#Men']:has-text('MEN')").click();
-    await page.locator("a[href='https://automationexercise.com/category_products/6']:has-text('Jeans')").click();
-    await expect(page.locator("a[href='https://automationexercise.com/category_products/6']:has-text('Jeans')")).toHaveText('Jeans');
-  });
+  testDesktop(
+    'AE-TC-018 @regression : Subscribe to newsletter with a valid email',
+    async () => {
+      await homePage.subscribeToNewsletter(testData.validEmail);
+    },
+  );
 
-  test("Verify that clicking categoryKidsLink followed by categoryDressKidsLink filters products correctly", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/#Kids']:has-text('KIDS')").click();
-    await page.locator("a[href='https://automationexercise.com/category_products/4']:has-text('Dress')").click();
-    await expect(page.locator("a[href='https://automationexercise.com/category_products/4']:has-text('Dress')")).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-019 @regression : Attempt newsletter subscription with empty email field',
+    async () => {
+      await homePage.clickNewsletterSubscribe();
+      await homePage.verifyNewsletterSectionVisible();
+    },
+  );
 
-  test("Verify security: ensure no unauthorized category filtering by URL manipulation", async ({ page }) => {
-
-    await expect(page.getByText('Your product has been added to cart.')).toBeVisible();
-  });
-
-  test("Verify newsletter subscription form is visible after scrolling to bottom", async ({ page }) => {
-
-    await expect(page.locator("input[type='email']")).toBeVisible();
-    await expect(page.locator("button:has-text('Subscribe')")).toBeVisible();
-  });
-
-  test("Subscribe to newsletter with a valid email", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/']:has-text('Home')").fill(testData.validUsername);
-    await page.locator("a[href='https://automationexercise.com/']:has-text('Home')").click();
-    await expect(page.getByText('Your product has been added to cart.')).toBeVisible();
-  });
-
-  test("Attempt newsletter subscription with empty email field", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/']:has-text('Home')").click();
-    await expect(page.getByText('Your product has been added to cart.')).toBeVisible();
-  });
-
-  test("Attempt newsletter subscription with invalid email format", async ({ page }) => {
-    await page.locator("a[href='https://automationexercise.com/']:has-text('Home')").fill(testData.validUsername);
-    await page.locator("a[href='https://automationexercise.com/']:has-text('Home')").click();
-    await expect(page.getByText('Your product has been added to cart.')).toBeVisible();
-  });
+  testDesktop(
+    'AE-TC-020 @regression : Attempt newsletter subscription with invalid email format',
+    async () => {
+      await homePage.fillNewsletterEmail(testData.invalidEmail);
+      await homePage.clickNewsletterSubscribe();
+      await homePage.verifyNewsletterSectionVisible();
+    },
+  );
 });

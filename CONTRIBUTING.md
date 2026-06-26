@@ -68,6 +68,29 @@ Open `demo-presentation.html` directly in any browser. No build step required.
 - No comments that just restate what the code does
 - Run `npm run build` (or `tsc --noEmit`) to verify before committing
 
+### Running Tests by Tag
+Use Playwright's built-in --grep flag to run tagged subsets:
+```bash
+npm run test:smoke       # @smoke — sanity checks, fast feedback
+npm run test:regression  # @regression — full suite
+npm run test:mobile      # @mobile — mobile viewport tests
+```
+
+### Moving the CI Workflow
+The ci-workflow.yml is at the project root due to a permissions issue.
+To move it to .github/workflows/ (required for GitHub Actions):
+```bash
+sudo chown -R $USER .github/
+mv ci-workflow.yml .github/workflows/ci.yml
+```
+
+### Adding a New Page Under Test
+1. Add a KB JSON to knowledge-base/
+2. Run: `npm run ai:run`
+3. The pipeline auto-generates: support/pages/PageName.ts, tests/e2e/ specs
+4. Enrich the POM with behavior/assertion methods following support/pages/AeHomePage.ts
+5. Update support/fixtures/visitFixture.ts if you add a new fixture type
+
 ## PR checklist
 
 - [ ] `tsc --noEmit` exits with 0 errors

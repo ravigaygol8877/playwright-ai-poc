@@ -5,5 +5,11 @@
   "testOutputPath": "tests/e2e/",
   "reportOutputPath": "reports/",
 
-  "suites": []
+  "suites": [
+    {
+      "name": "Home Page",
+      "page": "ae-home",
+      "outputFile": "ae-home.spec.ts"
+    }
+  ]
 }

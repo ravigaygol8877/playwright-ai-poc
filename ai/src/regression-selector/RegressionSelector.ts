@@ -60,14 +60,8 @@ ${JSON.stringify(changedFiles, null, 2)}
                 prompt
             );
 
-        const cleaned =
-            response
-                .replace(/```json/g, "")
-                .replace(/```/g, "")
-                .trim();
-
         const result =
-            AIJsonParser.parse<any>(response);
+            AIJsonParser.parse<RegressionSelection>(response);
 
         result.recommendedTests =
             result.recommendedTests.filter(

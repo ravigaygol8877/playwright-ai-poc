@@ -1,18 +1,26 @@
 {
-  "pageName": "Login and Signup Page",
+  "pageName": "signupLogin",
   "url": "https://automationexercise.com/login",
   "selectors": {
-    "loginEmailInput": "input[type='email'][name='email']",
-    "loginPasswordInput": "input[type='password'][name='password']",
-    "loginSubmitButton": "button[type='submit']:contains('Login')",
-    "signupNameInput": "input[type='text'][name='name']",
-    "signupEmailInput": "input[type='email'][name='email']",
-    "signupSubmitButton": "button[type='submit']:contains('Signup')",
-    "subscribeEmailInput": "#susbscribe_email",
-    "subscribeSubmitButton": "#subscribe"
+    "loginEmailInput": "input[name='email'][type='email']",
+    "loginPasswordInput": "input[name='password'][type='password']",
+    "loginButton": "button[type='submit']:has-text('Login')",
+    "signupNameInput": "input[name='name'][type='text']",
+    "signupEmailInput": "input[name='email'][type='email']:nth-of-type(2)",
+    "signupButton": "button[type='submit']:has-text('Signup')",
+    "subscriptionEmailInput": "input#susbscribe_email",
+    "subscriptionButton": "button#subscribe",
+    "navHomeLink": "a[href='https://automationexercise.com/']:has-text('Home')",
+    "navProductsLink": "a[href='https://automationexercise.com/products']:has-text('Products')",
+    "navCartLink": "a[href='https://automationexercise.com/view_cart']:has-text('Cart')",
+    "navSignupLoginLink": "a[href='https://automationexercise.com/login']:has-text('Signup / Login')",
+    "navTestCasesLink": "a[href='https://automationexercise.com/test_cases']:has-text('Test Cases')",
+    "navApiTestingLink": "a[href='https://automationexercise.com/api_list']:has-text('API Testing')",
+    "navVideoTutorialsLink": "a[href='https://www.youtube.com/c/AutomationExercise']:has-text('Video Tutorials')",
+    "navContactUsLink": "a[href='https://automationexercise.com/contact_us']:has-text('Contact us')"
   },
   "messages": {
-    "subscriptionSuccessMessage": "You have been successfully subscribed!"
+    "subscriptionSuccess": "You have been successfully subscribed!"
   },
   "success": {
     "redirectUrl": "",

@@ -6,9 +6,24 @@ import type { KnowledgeBase }  from "../models/KnowledgeBase.js";
 const MIN_TEST_CASES = 4;
 const MAX_TEST_CASES = 10;
 
+/**
+ * Generates a structured test-case suite from a single natural-language requirement.
+ *
+ * Enforces a count range of 4–10 test cases per call. If the LLM returns fewer than 4,
+ * the call throws so callers can retry; if it returns more than 10, excess cases are
+ * silently truncated to keep per-spec file size manageable.
+ */
 export class TestCaseGenerator {
   constructor(private llmProvider: LLMProvider) {}
 
+  /**
+   * Generate 4–10 test cases for the given requirement.
+   *
+   * @param requirement  - The requirement or user story to generate tests for.
+   * @param knowledgeBase - Optional page KB. When provided, element names and messages are
+   *                        injected into the prompt so test steps reference real selectors.
+   * @throws {Error} When the LLM returns fewer than 4 test cases.
+   */
   async generate(
     requirement: string,
     knowledgeBase?: KnowledgeBase,

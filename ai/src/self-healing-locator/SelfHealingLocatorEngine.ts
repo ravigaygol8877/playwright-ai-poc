@@ -7,6 +7,9 @@ from "./LocatorFailure.js";
 import type { LocatorHealingResult }
 from "./LocatorHealingResult.js";
 
+import type { KnowledgeBase }
+from "../models/KnowledgeBase.js";
+
 import { AIJsonParser }
 from "../utils/AIJsonParser.js";
 
@@ -18,7 +21,7 @@ export class SelfHealingLocatorEngine {
 
   async heal(
     failure: LocatorFailure,
-    knowledgeBase: any
+    knowledgeBase: KnowledgeBase
   ): Promise<LocatorHealingResult> {
 
     const prompt = `

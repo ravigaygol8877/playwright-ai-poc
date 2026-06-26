@@ -1,11 +1,25 @@
 import type { LLMProvider }    from "../../../llm/src/interfaces/LLMProvider.js";
 import type { KnowledgeBase } from "../models/KnowledgeBase.js";
 
+/**
+ * Converts a plain-English expected-result string into one or two `await expect(…)` lines.
+ *
+ * Uses the Knowledge Base to ground assertions in real selectors and messages rather
+ * than letting the LLM invent locators. The output is a ready-to-paste Playwright
+ * assertion block with no surrounding boilerplate.
+ */
 export class AssertionGenerator {
   constructor(
     private llmProvider: LLMProvider
   ) {}
 
+  /**
+   * Generate 1–2 `await expect(…)` assertions for the given expected result.
+   *
+   * @param expectedResult - Human-readable description of what should be true after the action.
+   * @param knowledgeBase  - Page KB supplying real selectors, messages, and success conditions.
+   * @returns Newline-separated `await expect(…)` lines, ready to insert into a test body.
+   */
   async generateAssertion(
     expectedResult: string,
     knowledgeBase: KnowledgeBase,
