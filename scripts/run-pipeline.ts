@@ -142,12 +142,12 @@ function preflight(): void {
   }
   tick(`Requirements file found: ${EXCEL_FILE}`);
 
-  const kbFiles = fs.existsSync("knowledge-base")
-    ? fs.readdirSync("knowledge-base").filter(f => f.endsWith(".json"))
+  const kbFiles = fs.existsSync("pipeline/kb/pages")
+    ? fs.readdirSync("pipeline/kb/pages").filter(f => f.endsWith(".json"))
     : [];
 
   if (kbFiles.length === 0) {
-    warn("No knowledge-base JSON files found.");
+    warn("No KB JSON files found in pipeline/kb/pages/.");
     warn("Run: npm run kb:generate <url> <page-name>  to generate one first.");
     warn("The pipeline will attempt to proceed but POM generation may be skipped.");
   } else {
@@ -175,7 +175,7 @@ async function main() {
 
   const genCmd = [
     `ENVIRONMENT=${ENVIRONMENT}`,
-    `tsx ai/src/generate-from-excel.ts`,
+    `tsx scripts/generate-from-excel.ts`,
     `--file "${EXCEL_FILE}"`,
   ].join(" ");
 

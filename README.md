@@ -4,6 +4,19 @@ An enterprise Playwright test framework with an integrated AI pipeline that conv
 
 ---
 
+**Documentation**
+
+| | |
+|---|---|
+| [Getting Started](docs/GETTING-STARTED.md) | Clone → configure → first run in 10 minutes |
+| [Command Reference](docs/COMMANDS.md) | Every npm script with examples |
+| [New Project Onboarding](docs/ONBOARDING.md) | Add a new target application |
+| [Framework Structure](docs/FRAMEWORK_STRUCTURE.md) | Every folder explained — purpose, owner, examples |
+| [Contributing](docs/CONTRIBUTING.md) | Add providers, extend the pipeline |
+| [AI Architecture Evaluation](docs/ai-architecture-evaluation.md) | MCP / Agents / RAG analysis |
+
+---
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -63,9 +76,9 @@ Everything generated follows the same patterns as hand-written tests — so gene
                        │
        ┌───────────────▼──────────────────┐
        │          Test Layer              │
-       │  support/fixtures/visitFixture   │  ← testDesktop / testMobile
-       │  support/pages/[PageName].ts     │  ← private locators + methods
-       │  support/helper/                 │  ← interceptHelper, CorePattern
+       │  tests/fixtures/base.ts        │  ← testDesktop / testMobile
+       │  tests/pages/[PageName].ts     │  ← private locators + methods
+       │  tests/helpers/               │  ← interceptHelper, CorePattern
        │  tests/e2e/[page].spec.ts        │  ← generated + maintained specs
        └──────────────────────────────────┘
 ```
@@ -87,83 +100,78 @@ Everything generated follows the same patterns as hand-written tests — so gene
 ```
 playwright-ai-poc/
 │
-├── support/                          # Framework support layer
+├── pipeline/                         # AI generation pipeline (all logic lives here)
+│   ├── models/                       # Shared TypeScript interfaces (KnowledgeBase, TestCase, TestData)
+│   ├── providers/                    # LLM provider abstraction
+│   │   ├── interfaces/LLMProvider.ts # Common LLMProvider interface
+│   │   ├── ProviderFactory.ts        # Reads LLM_PROVIDER env var, returns provider
+│   │   ├── GeminiProvider.ts / GitHubModelsProvider.ts / OpenRouterProvider.ts
+│   │   ├── CachingLLMProvider.ts     # File-based response cache
+│   │   └── FallbackProvider.ts       # Circuit breaker + auto-failover
+│   ├── kb/                           # Knowledge base layer
+│   │   ├── pages/                    # Per-page JSON (selectors, URLs, messages)
+│   │   ├── KnowledgeBaseService.ts   # Loads page JSON by name
+│   │   ├── KnowledgeBaseGenerator.ts # Crawls a live URL, generates KB JSON
+│   │   ├── SelectorRetriever.ts      # RAG: keyword + synonym scoring for selectors
+│   │   └── TestCatalogService.ts     # Lists available test suites
+│   ├── generators/                   # Code/artifact generators
+│   │   ├── test-cases/               # TestCaseGenerator — requirement → TestCase[]
+│   │   ├── test-data/                # TestDataGenerator — requirement → TestData
+│   │   ├── action-model/             # ActionModel + AI/Rule-based generators
+│   │   ├── assertions/               # AssertionGenerator — expectedResult → assertion
+│   │   ├── playwright/               # PlaywrightGenerator + PlaywrightRenderer → .spec.ts
+│   │   └── pom/                      # POMGenerator, DataFileGenerator, FixtureUpdater
+│   ├── analyzers/                    # Post-run analysis modules
+│   │   ├── flaky/                    # FlakyTestAnalyzer
+│   │   ├── root-cause/               # BugRootCauseAnalyzer
+│   │   ├── coverage/                 # CoverageAnalyzer
+│   │   ├── regression/               # RegressionSelector — impacted suites from diff
+│   │   └── self-healing/             # SelfHealingLocatorEngine
+│   ├── execution/                    # Test execution engine
+│   ├── readers/                      # ExcelReader + RequirementExpander
+│   ├── reporting/                    # ReportingService + RunContext
+│   ├── orchestrator/                 # TestIntelligenceOrchestrator
+│   └── utils/                        # AIJsonParser, ArtifactManifest, concurrency
+│
+├── tests/                            # Playwright test suite
+│   ├── e2e/                          # Spec files — generated + hand-written
+│   │   ├── ae-home-excel-{1,2,3,4}.spec.ts  # AE-TC-001–080 @regression @smoke
+│   │   ├── ae-home-mobile.spec.ts    # AE-MOB-001–004 @mobile
+│   │   └── ae-home.data.ts           # Shared test data
 │   ├── fixtures/
-│   │   └── visitFixture.ts           # testDesktop + testMobile — override page with viewport + auto-navigate
-│   ├── pages/
-│   │   ├── AeHomePage.ts             # POM: export default class, private readonly locators
+│   │   └── base.ts                   # testDesktop + testMobile custom fixtures
+│   ├── pages/                        # Page Object Models
+│   │   ├── AeHomePage.ts             # private readonly locators + public methods
 │   │   └── AeLoginPage.ts
-│   ├── helper/
-│   │   ├── interceptHelper.ts        # Standalone: loginWithValidCredentials, doLogOut, verifyPageTitle
-│   │   └── commonPattern.ts          # CorePattern class — shared nav helpers
-│   ├── utils/
-│   │   └── constants.ts              # DESKTOP_VIEW_PORT, MOBILE_VIEW_PORT
+│   ├── helpers/                      # interceptHelper, commonPattern, constants, waitUtils
 │   └── data/
 │       └── example.ts                # Template for page data interfaces
 │
-├── tests/
-│   └── e2e/
-│       ├── ae-home-excel-1.spec.ts   # Generated specs — AE-TC-001–020 @regression @smoke
-│       ├── ae-home-excel-2.spec.ts
-│       ├── ae-home-excel-3.spec.ts
-│       ├── ae-home-excel-4.spec.ts
-│       ├── ae-home-mobile.spec.ts    # Mobile viewport specs — AE-MOB-001–004 @mobile
-│       └── ae-home.data.ts           # Shared test data for home page specs
+├── scripts/                          # CLI entry points
+│   ├── run-pipeline.ts               # npm run ai:run
+│   ├── generate-all.ts               # npm run generate:all (reads config/platform.json)
+│   ├── generate-from-excel.ts        # npm run generate:from-excel
+│   ├── generate-pom.ts               # npm run generate:pom
+│   ├── generate-kb.ts                # npm run kb:generate
+│   ├── demo.ts                       # npm run demo — full live demo
+│   └── demo-*.ts / project-reset.ts  # Sub-demos and utilities
 │
-├── ai/
-│   └── src/
-│       ├── generate-all.ts           # PRIMARY: generates all suites from platform.config.json
-│       ├── generate-from-excel.ts    # Generates specs from requirements.xlsx
-│       ├── test-case-generator/      # TestCaseGenerator — requirement → TestCase[]
-│       ├── test-data-generator/      # TestDataGenerator — requirement → TestData
-│       ├── action-model/             # AIActionModelGenerator — step → ActionModel
-│       ├── assertion-generator/      # AssertionGenerator — expected result → assertion
-│       ├── pom-generator/            # POMGenerator + DataFileGenerator
-│       ├── self-healing-locator/     # SelfHealingLocatorEngine — heals broken selectors
-│       ├── regression-selector/      # RegressionSelector — impact analysis for CI
-│       ├── flaky-test-analyzer/      # FlakyTestAnalyzer
-│       ├── root-cause-analyzer/      # BugRootCauseAnalyzer
-│       └── utils/
-│           └── AIJsonParser.ts       # Strips markdown fences, parses typed JSON
-│
-├── automation/
-│   └── src/
-│       ├── generators/
-│       │   └── PlaywrightGenerator.ts  # Orchestrates actions + assertions → .spec.ts string
-│       └── renderers/
-│           └── PlaywrightRenderer.ts   # ActionModel → code string (method registry aware)
-│
-├── knowledge-base/
-│   ├── KnowledgeBaseService.ts         # Loads page JSON by name
-│   ├── TestCatalogService.ts           # Loads available test suite names
-│   ├── ae-home.json                    # Selectors + metadata for automationexercise.com home
-│   ├── ae-login.json                   # Selectors + metadata for login page
-│   └── test-catalog.json               # Registry of available suite names for regression selector
-│
-├── llm/
-│   └── src/
-│       ├── interfaces/LLMProvider.ts   # Common LLM interface
-│       ├── providers/                  # GeminiProvider, GitHubModelsProvider, OpenRouterProvider, MockLLMProvider
-│       ├── CachingLLMProvider.ts       # Wraps any provider with file-based response caching
-│       ├── FallbackProvider.ts         # Circuit breaker + automatic provider failover
-│       └── ProviderFactory.ts          # Single entry point — reads LLM_PROVIDER env var
+├── config/
+│   ├── platform.json                 # Suite definitions for generate:all
+│   └── environments/                 # Per-env .env files (qa, uat, production)
 │
 ├── requirements/
-│   └── requirements.xlsx               # Input requirements for the Excel-based pipeline
+│   └── requirements.xlsx             # Input requirements for the Excel pipeline
 │
 ├── docs/
-│   ├── DEMO_PITCH.md                   # 2-min pitch, 5-min demo script, feature summary
-│   ├── architecture.md
-│   ├── current-architecture.md
-│   └── self-healing-locator-design.md
+│   ├── GETTING-STARTED.md            # Clone → first run in 10 minutes
+│   ├── COMMANDS.md                   # Every npm script explained
+│   ├── ONBOARDING.md                 # Add a new target application
+│   └── CONTRIBUTING.md               # Add providers, extend the pipeline
 │
-├── platform.config.json               # Suite definitions for generate:all
-├── playwright.config.ts               # Playwright config — multi-browser, Allure, baseURL
-├── tsconfig.json                      # TypeScript strict mode config
-├── eslint.config.js                   # ESLint flat config + eslint-plugin-playwright
-├── .prettierrc                        # Prettier formatting config
-├── .env.example                       # Environment variable template — copy to .env
-└── ci-workflow.yml                    # CI workflow (move to .github/workflows/ci.yml)
+├── playwright.config.ts              # Multi-browser, Allure, baseURL
+├── tsconfig.json                     # TypeScript strict mode
+└── .env.example                      # Environment variable template
 ```
 
 ---
@@ -216,7 +224,7 @@ BASE_URL=https://automationexercise.com   # defaults to this if omitted
 
 ### 2. Platform config (for AI pipeline)
 
-`platform.config.json` defines which pages the AI pipeline generates tests for:
+`config/platform.json` defines which pages the AI pipeline generates tests for:
 
 ```json
 {
@@ -235,19 +243,19 @@ BASE_URL=https://automationexercise.com   # defaults to this if omitted
 }
 ```
 
-The `page` field must match a JSON file in `knowledge-base/` (e.g. `"ae-home"` → `knowledge-base/ae-home.json`).
+The `page` field must match a JSON file in ``pipeline/kb/pages/` (e.g. `"ae-home"` → `pipeline/kb/pages/ae-home.json`).
 
 ---
 
 ## Generating Tests with AI
 
-### Generate from `platform.config.json` (recommended)
+### Generate from `config/platform.json` (recommended)
 
 ```bash
 npm run generate:all
 ```
 
-Reads all suites from `platform.config.json` and generates POMs + specs for each.
+Reads all suites from `config/platform.json` and generates POMs + specs for each.
 
 ```bash
 # With a specific environment
@@ -299,37 +307,33 @@ npx playwright show-report
 
 ## Available Scripts
 
+For the full command reference see **[docs/COMMANDS.md](docs/COMMANDS.md)**.
+
 | Script | Description |
 |---|---|
-| `npm run generate:all` | AI pipeline — generate specs from platform.config.json |
-| `npm run generate:all:qa` | Same, with `ENVIRONMENT=qa` |
-| `npm run generate:all:uat` | Same, with `ENVIRONMENT=uat` |
-| `npm run ai:run` | AI pipeline — generate specs from requirements.xlsx |
-| `npm run test:unit` | Run 69 unit + integration tests for the framework itself |
+| `npm run ai:run` | Full pipeline — requirements.xlsx → specs → tests → report |
+| `npm run generate:all` | Generate specs from config/platform.json (no test execution) |
+| `npm run test:unit` | Unit tests for the framework itself |
 | `npm run test:smoke` | Run `@smoke` tagged tests |
 | `npm run test:regression` | Run `@regression` tagged tests |
 | `npm run test:mobile` | Run `@mobile` tagged tests |
-| `npm run test:chromium` | Run tests in Chromium only |
-| `npm run test:firefox` | Run tests in Firefox only |
-| `npm run test:webkit` | Run tests in WebKit only |
-| `npm run lint` | ESLint check (0 errors required) |
-| `npm run lint:fix` | ESLint auto-fix |
+| `npm run lint` | ESLint check |
+| `npm run typecheck` | TypeScript type check (0 errors required) |
 | `npm run format` | Prettier — format all files |
-| `npm run format:check` | Prettier — check formatting without writing |
 
 ---
 
 ## Adding a New Page
 
-1. **Add a knowledge base file** — `knowledge-base/my-page.json` with `pageName`, `url`, and `selectors`
-2. **Add a suite to platform.config.json**:
+1. **Add a knowledge base file** — `pipeline/kb/pages/my-page.json` with `pageName`, `url`, and `selectors`
+2. **Add a suite to config/platform.json**:
    ```json
    { "name": "My Page", "page": "my-page", "outputFile": "my-page.spec.ts" }
    ```
 3. **Run the pipeline**: `npm run generate:all`
-   - This creates `support/pages/MyPage.ts` and `tests/e2e/my-page.spec.ts`
-4. **Enrich the POM** — add behavior/assertion methods following the pattern in `support/pages/AeHomePage.ts`
-5. **Update `support/fixtures/visitFixture.ts`** if you need a custom fixture for the new page
+   - This creates `tests/pages/MyPage.ts` and `tests/e2e/my-page.spec.ts`
+4. **Enrich the POM** — add behavior/assertion methods following the pattern in `tests/pages/AeHomePage.ts`
+5. **Update `tests/fixtures/base.ts`** if you need a custom fixture for the new page
 
 ---
 
@@ -403,22 +407,15 @@ LLM_PROVIDER=openrouter MODEL=openai/gpt-4.1-mini npm run generate:all
 
 ### Adding a New Provider
 
-1. Create `llm/src/providers/YourProvider.ts` implementing `LLMProvider`
-2. Add a branch in `llm/src/ProviderFactory.ts`
+1. Create `pipeline/providers/YourProvider.ts` implementing `LLMProvider`
+2. Add a branch in `pipeline/providers/ProviderFactory.ts`
 3. Add the required env var to `.env.example` and all `config/environments/*.env` files
 
 ---
 
 ## CI
 
-The CI workflow runs on every push and pull request to `main`.
-
-> **Note:** `ci-workflow.yml` is currently at the project root due to a file permission issue.
-> To activate GitHub Actions, run:
-> ```bash
-> sudo chown -R $USER .github/
-> mv ci-workflow.yml .github/workflows/ci.yml
-> ```
+The CI workflow (`.github/workflows/playwright.yml`) runs on every push and PR to `main`.
 
 ### What runs in CI
 
