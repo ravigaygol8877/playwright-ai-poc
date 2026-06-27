@@ -1,5 +1,5 @@
-import { testDesktop, expect } from '../../support/fixtures/visitFixture.js';
-import AeHomePage from '../../support/pages/AeHomePage.js';
+import { testDesktop, expect } from '../fixtures/base.js';
+import AeHomePage from '../pages/AeHomePage.js';
 import { testData } from './ae-home.data.js';
 
 let homePage: AeHomePage;

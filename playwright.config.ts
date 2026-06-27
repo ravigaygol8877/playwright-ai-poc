@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import { config as loadEnv } from 'dotenv';
 import { existsSync } from 'fs';
 import path from 'path';
-import { resolveRunContext } from './src/reporting/RunContext.js';
+import { resolveRunContext } from './pipeline/reporting/RunContext.js';
 
 const env     = process.env['ENVIRONMENT'] ?? 'development';
 const envFile = `config/environments/${env}.env`;

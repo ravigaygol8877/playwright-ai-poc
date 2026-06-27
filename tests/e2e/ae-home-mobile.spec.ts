@@ -1,5 +1,5 @@
-import { testMobile, expect } from '../../support/fixtures/visitFixture.js';
-import AeHomePage from '../../support/pages/AeHomePage.js';
+import { testMobile, expect } from '../fixtures/base.js';
+import AeHomePage from '../pages/AeHomePage.js';
 
 let homePage: AeHomePage;
 
