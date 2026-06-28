@@ -271,7 +271,7 @@
     </div>
     <div style="position:absolute;right:72px;bottom:120px;text-align:right;">
       <div style="font-size:11px;color:#484f58;">Demo Application</div>
-      <div style="font-size:13px;color:#58a6ff;font-weight:600;margin-top:4px;">parabank.parasoft.com</div>
+      <div style="font-size:13px;color:#58a6ff;font-weight:600;margin-top:4px;">automationexercise.com</div>
     </div>
   </div>
 
@@ -447,7 +447,7 @@
             <li><div class="step-num-badge">2</div><div>DOM is parsed: forms, buttons, headings, nav links extracted into <code style="color:#58a6ff;">PageContext</code></div></li>
             <li><div class="step-num-badge">3</div><div>LLM receives PageContext + your existing Excel scenarios → infers what else is testable</div></li>
             <li><div class="step-num-badge">4</div><div>New scenarios appended as <code style="color:#bc8cff;">AI-Discovered</code> requirements — your Excel rows untouched</div></li>
-            <li><div class="step-num-badge">5</div><div>Results cached in <code style="color:#f0883e;">knowledge-base/{page}-scenarios.json</code> — no re-crawl on next run</div></li>
+            <li><div class="step-num-badge">5</div><div>Results cached in <code style="color:#f0883e;">pipeline/kb/pages/{page}-scenarios.json</code> — no re-crawl on next run</div></li>
           </ul>
           <div class="card purple-border" style="margin-top:14px;padding:12px 16px;">
             <div style="font-size:11px;color:#bc8cff;font-weight:700;margin-bottom:6px;">Output — Sheet 2 "Generated Test Cases"</div>
@@ -478,7 +478,7 @@
           </div>
           <div style="text-align:center;color:#484f58;margin:8px 0;">↓ AI Pipeline ↓</div>
           <div class="card green-border">
-            <div style="font-size:11px;color:#484f58;margin-bottom:6px;">OUTPUT — <code style="color:#3fb950;">tests/generated/login.spec.ts</code></div>
+            <div style="font-size:11px;color:#484f58;margin-bottom:6px;">OUTPUT — <code style="color:#3fb950;">tests/e2e/login.spec.ts</code></div>
             <div style="font-size:13px;color:#8b949e;">
               ✓ 8 test cases (positive + negative + edge)<br>
               ✓ Realistic test data (valid + invalid credentials)<br>
@@ -502,7 +502,7 @@
     invalidPassword: <span class="str">"wrong"</span>
   };
 
-  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://parabank.../login'</span>);
+  <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'https://automationexercise.com/login'</span>);
   <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#username'</span>, testData.validUsername);
   <span class="kw">await</span> page.<span class="fn">fill</span>(<span class="str">'#password'</span>, testData.validPassword);
   <span class="kw">await</span> page.<span class="fn">click</span>(<span class="str">'input[value="Log In"]'</span>);
@@ -515,17 +515,17 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
-       SLIDE 4 — PARABANK INTRO
+       SLIDE 4 — DEMO APPLICATION
   ═══════════════════════════════════════════ -->
   <div class="slide" id="s4">
     <div class="eyebrow">Demo Application</div>
-    <h2>ParaBank — Our Real-World Target</h2>
+    <h2>Automation Exercise — Our Real-World Target</h2>
     <div class="slide-content">
       <div class="cols-6040">
         <div>
-          <p class="body">ParaBank is a publicly available demo banking application by Parasoft. It is an ideal showcase target — it has login, accounts, transfers, bill pay, and contact — the same feature set you find in any enterprise web application.</p>
+          <p class="body">Automation Exercise is a live e-commerce application purpose-built for practising test automation. It is our real-world target — it has home, login, product listing, cart, and checkout — the same feature set you find in any enterprise web application.</p>
           <div style="margin-top:16px;">
-            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">open https://parabank.parasoft.com/parabank/index.htm</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">open https://www.automationexercise.com</span></div>
           </div>
           <table style="margin-top:20px;">
             <tr><th>Feature</th><th>Test Scenarios We Generate</th></tr>
@@ -549,11 +549,11 @@
         </div>
         <div>
           <div class="card" style="height:100%;min-height:280px;">
-            <div style="font-size:11px;color:#484f58;margin-bottom:12px;text-transform:uppercase;letter-spacing:.6px;">ParaBank Knowledge Base</div>
+            <div style="font-size:11px;color:#484f58;margin-bottom:12px;text-transform:uppercase;letter-spacing:.6px;">Automation Exercise Knowledge Base</div>
             <pre style="font-size:11px;padding:12px 14px;">{
   <span class="str">"pageName"</span>: <span class="str">"Login Page"</span>,
-  <span class="str">"url"</span>: <span class="str">"https://parabank.parasoft
-          .com/parabank/login.htm"</span>,
+  <span class="str">"url"</span>: <span class="str">"https://automationexercise.com
+          </span>,
   <span class="str">"selectors"</span>: {
     <span class="str">"username"</span>: <span class="str">"#username"</span>,
     <span class="str">"password"</span>: <span class="str">"#password"</span>,
@@ -588,7 +588,7 @@
           <div class="layer-content">
             <div class="layer-title blue">AI Modules Layer <span style="color:#484f58;font-weight:400;font-size:12px;">— the intelligence</span></div>
             <div class="layer-desc">10 independent modules: TestCaseGenerator · TestDataGenerator · ActionModelGenerator · AssertionGenerator · SelfHealingLocator · FlakyAnalyzer · RootCauseAnalyzer · CoverageAnalyzer · RegressionSelector · ScenarioInferenceEngine</div>
-            <div class="layer-files">ai/src/</div>
+            <div class="layer-files">pipeline/</div>
           </div>
           <span class="pill pill-blue">10 Modules</span>
         </div>
@@ -597,7 +597,7 @@
           <div class="layer-content">
             <div class="layer-title purple">Automation Layer <span style="color:#484f58;font-weight:400;font-size:12px;">— code generation, no AI</span></div>
             <div class="layer-desc">PlaywrightGenerator orchestrates steps · PlaywrightRenderer converts ActionModel to code strings deterministically</div>
-            <div class="layer-files">automation/src/</div>
+            <div class="layer-files">pipeline/generators/playwright/</div>
           </div>
           <span class="pill pill-purple">Pure Code</span>
         </div>
@@ -606,7 +606,7 @@
           <div class="layer-content">
             <div class="layer-title orange">Knowledge Base Layer <span style="color:#484f58;font-weight:400;font-size:12px;">— ground truth, prevents hallucination</span></div>
             <div class="layer-desc">JSON files per page: real selectors · real URLs · real error messages · test suite catalog</div>
-            <div class="layer-files">knowledge-base/ · login-page.json · test-catalog.json</div>
+            <div class="layer-files">pipeline/kb/pages/ · ae-home.json · ae-login.json</div>
           </div>
           <span class="pill pill-orange">JSON files</span>
         </div>
@@ -615,7 +615,7 @@
           <div class="layer-content">
             <div class="layer-title green">LLM Provider Layer <span style="color:#484f58;font-weight:400;font-size:12px;">— swap any model in one line</span></div>
             <div class="layer-desc">Interface: <code>generateResponse(prompt)</code> · Implementations: OpenRouterProvider · GeminiProvider · GitHubModelsProvider · LMStudioProvider (offline) · MockLLMProvider</div>
-            <div class="layer-files">llm/src/ · interfaces/LLMProvider.ts · providers/</div>
+            <div class="layer-files">pipeline/providers/ · interfaces/LLMProvider.ts</div>
           </div>
           <span class="pill pill-green">Swappable</span>
         </div>
@@ -636,7 +636,7 @@
       <div class="cols">
         <div>
           <div class="card orange-border" style="margin-bottom:10px;">
-            <div style="font-size:11px;color:#f0883e;font-weight:700;margin-bottom:8px;">INPUT — knowledge-base/login-page.json (excerpt)</div>
+            <div style="font-size:11px;color:#f0883e;font-weight:700;margin-bottom:8px;">INPUT — pipeline/kb/pages/ae-login.json (excerpt)</div>
             <pre style="font-size:11px;padding:10px 12px;">{
   <span class="str">"selectors"</span>: {
     <span class="str">"username"</span>:    <span class="str">"#username"</span>,
@@ -651,7 +651,7 @@
           </div>
           <div style="text-align:center;color:#484f58;font-size:16px;margin:6px 0;">↓ POMGenerator.generate() ↓</div>
           <div class="card green-border" style="padding:12px 14px;">
-            <div style="font-size:11px;color:#3fb950;font-weight:700;margin-bottom:6px;">OUTPUT — src/pages/LoginPage.ts</div>
+            <div style="font-size:11px;color:#3fb950;font-weight:700;margin-bottom:6px;">OUTPUT — tests/pages/AeLoginPage.ts</div>
             <pre style="font-size:11px;padding:10px 12px;"><span class="kw">export class</span> <span class="cls">LoginPage</span> <span class="kw">extends</span> <span class="cls">BasePage</span> {
   <span class="kw">readonly</span> username:    <span class="cls">Locator</span>;
   <span class="kw">readonly</span> loginButton: <span class="cls">Locator</span>;
@@ -669,12 +669,12 @@
         </div>
         <div>
           <ul class="step-list">
-            <li><div class="step-num-badge">1</div><div>Check if <code style="color:#f0883e;">src/pages/{ClassName}.ts</code> already exists — skip if so</div></li>
+            <li><div class="step-num-badge">1</div><div>Check if <code style="color:#f0883e;">tests/pages/{ClassName}.ts</code> already exists — skip if so</div></li>
             <li><div class="step-num-badge">2</div><div>Parse KB selectors → typed <code style="color:#58a6ff;">Locator</code> declarations with <code>.or()</code> fallback chains</div></li>
             <li><div class="step-num-badge">3</div><div>AI generates action methods (<code>loginWith</code>, <code>fillUsername</code>, ...)</div></li>
             <li><div class="step-num-badge">4</div><div>Typed <code>assertions</code> object built from every selector + message</div></li>
-            <li><div class="step-num-badge">5</div><div>Data file generated — <code>src/data/loginPage.data.ts</code></div></li>
-            <li><div class="step-num-badge">6</div><div><code>src/fixtures/index.ts</code> updated automatically — no manual wiring</div></li>
+            <li><div class="step-num-badge">5</div><div>Data file generated — <code>tests/data/loginPage.data.ts</code></div></li>
+            <li><div class="step-num-badge">6</div><div><code>tests/fixtures/base.ts</code> updated automatically — no manual wiring</div></li>
           </ul>
           <div class="card" style="margin-top:12px;padding:12px 16px;">
             <div style="font-size:11px;color:#484f58;margin-bottom:6px;">COMMANDS</div>
@@ -768,10 +768,10 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
-       SLIDE 7 — PARABANK SCENARIO 1: LOGIN
+       SLIDE 7 — DEMO SCENARIO 1: LOGIN
   ═══════════════════════════════════════════ -->
   <div class="slide" id="s7">
-    <div class="eyebrow">ParaBank Demo — Scenario 1</div>
+    <div class="eyebrow">Demo Scenario 1</div>
     <h2>Login Test Generation</h2>
     <div class="slide-content">
       <div class="cols-6040">
@@ -829,8 +829,8 @@
   <span class="kw">async</span> ({ page }) => {
 
   <span class="kw">await</span> page.<span class="fn">goto</span>(
-    <span class="str">'https://parabank.parasoft.com
-     /parabank/login.htm'</span>
+    <span class="str">'https://automationexercise.com
+     /login'</span>
   );
 
   <span class="kw">await</span> page.<span class="fn">fill</span>(
@@ -860,10 +860,10 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
-       SLIDE 8 — PARABANK SCENARIO 2: REGISTER
+       SLIDE 8 — DEMO SCENARIO 2: REGISTER
   ═══════════════════════════════════════════ -->
   <div class="slide" id="s8">
-    <div class="eyebrow">ParaBank Demo — Scenario 2</div>
+    <div class="eyebrow">Demo Scenario 2</div>
     <h2>Registration Test Generation</h2>
     <div class="slide-content">
       <div class="cols">
@@ -873,12 +873,12 @@
           </div>
           <div class="card blue-border" style="margin-bottom:12px;">
             <div style="font-size:11px;color:#484f58;margin-bottom:6px;">REQUIREMENT</div>
-            <code style="color:#a5d6ff;font-size:13px;">"User should be able to register a new account on ParaBank with valid personal information"</code>
+            <code style="color:#a5d6ff;font-size:13px;">"User should be able to register a new account on Automation Exercise with valid personal information"</code>
           </div>
           <div class="card" style="margin-top:12px;">
-            <div style="font-size:11px;color:#484f58;margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px;">Knowledge Base — register-page.json</div>
+            <div style="font-size:11px;color:#484f58;margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px;">Knowledge Base — ae-login.json</div>
             <div style="font-size:12px;line-height:1.8;color:#8b949e;">
-              <code style="color:#f0883e;">"url"</code>: /parabank/register.htm<br>
+              <code style="color:#f0883e;">"url"</code>: /signup<br>
               <code style="color:#f0883e;">"selectors.firstName"</code>: #customer.firstName<br>
               <code style="color:#f0883e;">"selectors.lastName"</code>: #customer.lastName<br>
               <code style="color:#f0883e;">"selectors.username"</code>: #customer.username<br>
@@ -908,15 +908,15 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
-       SLIDE 9 — PARABANK SCENARIO 3: SELF-HEALING
+       SLIDE 9 — DEMO SCENARIO 3: SELF-HEALING
   ═══════════════════════════════════════════ -->
   <div class="slide" id="s9">
-    <div class="eyebrow">ParaBank Demo — Scenario 3</div>
+    <div class="eyebrow">Demo Scenario 3</div>
     <h2>Self-Healing Locator — Live Demo</h2>
     <div class="slide-content">
       <div class="cols">
         <div>
-          <p class="body" style="margin-bottom:16px;">ParaBank updated its login button. The old selector breaks. The healing engine finds the correct one automatically.</p>
+          <p class="body" style="margin-bottom:16px;">The application updated its login button. The old selector breaks. The healing engine finds the correct one automatically.</p>
           <div class="before-box" style="margin-bottom:12px;padding:14px 16px;">
             <div class="ba-label" style="color:#f85149;font-size:11px;">❌ BROKEN SELECTOR</div>
             <pre style="background:transparent;border:none;padding:0;margin-top:8px;font-size:13px;"><span class="str">"#loginForm .btn-primary"</span>
@@ -938,7 +938,7 @@
           <pre style="font-size:12px;"><span class="kw">import</span> { <span class="cls">SelfHealingLocatorEngine</span> }
   <span class="kw">from</span> <span class="str">'./SelfHealingLocatorEngine.js'</span>;
 <span class="kw">import</span> { <span class="cls">KnowledgeBaseService</span> }
-  <span class="kw">from</span> <span class="str">'../../knowledge-base/...'</span>;
+  <span class="kw">from</span> <span class="str">'../../kb/KnowledgeBaseService.js'</span>;
 
 <span class="kw">const</span> engine = <span class="kw">new</span> <span class="cls">SelfHealingLocatorEngine</span>(
   llmProvider
@@ -969,15 +969,15 @@ console.<span class="fn">log</span>(result.confidence);
   </div>
 
   <!-- ═══════════════════════════════════════════
-       SLIDE 10 — PARABANK SCENARIO 4: ROOT CAUSE
+       SLIDE 10 — DEMO SCENARIO 4: ROOT CAUSE
   ═══════════════════════════════════════════ -->
   <div class="slide" id="s10">
-    <div class="eyebrow">ParaBank Demo — Scenario 4</div>
+    <div class="eyebrow">Demo Scenario 4</div>
     <h2>Root Cause Analyzer — CI Failure Diagnosis</h2>
     <div class="slide-content">
       <div class="cols">
         <div>
-          <p class="body" style="margin-bottom:14px;">ParaBank's funds transfer test fails in CI. Instead of reading the stack trace manually, the AI diagnoses it instantly.</p>
+          <p class="body" style="margin-bottom:14px;">A funds transfer test fails in CI. Instead of reading the stack trace manually, the AI diagnoses it instantly.</p>
           <div class="card red-border" style="margin-bottom:12px;">
             <div style="font-size:11px;color:#f85149;margin-bottom:8px;font-weight:700;">CI FAILURE INPUT</div>
             <div style="font-size:12px;color:#8b949e;line-height:1.8;">
@@ -1037,17 +1037,17 @@ console.<span class="fn">log</span>(result.confidence);
   </div>
 
   <!-- ═══════════════════════════════════════════
-       SLIDE 11 — PARABANK SCENARIO 5: FLAKY + COVERAGE
+       SLIDE 11 — DEMO SCENARIO 5: FLAKY + COVERAGE
   ═══════════════════════════════════════════ -->
   <div class="slide" id="s11">
-    <div class="eyebrow">ParaBank Demo — Scenario 5</div>
+    <div class="eyebrow">Demo Scenario 5</div>
     <h2>Flaky Test Analyzer + Coverage Gap Finder</h2>
     <div class="slide-content">
       <div class="grid-2">
         <div>
           <div class="card red-border" style="height:100%;">
             <div style="font-size:12px;font-weight:700;color:#f85149;margin-bottom:10px;">⚠️ FLAKY TEST ANALYZER</div>
-            <p class="body" style="margin-bottom:10px;">ParaBank's bill-pay test fails 3 out of 10 runs. Is it a real bug or timing issue?</p>
+            <p class="body" style="margin-bottom:10px;">A bill-pay test fails 3 out of 10 runs. Is it a real bug or timing issue?</p>
             <pre style="font-size:11px;padding:10px 12px;">Input:
   testName:       <span class="str">'bill-pay.spec.ts'</span>
   retryCount:     <span class="num">3</span>
@@ -1070,7 +1070,7 @@ Output:
         <div>
           <div class="card green-border" style="height:100%;">
             <div style="font-size:12px;font-weight:700;color:#3fb950;margin-bottom:10px;">📊 COVERAGE ANALYZER</div>
-            <p class="body" style="margin-bottom:10px;">Which ParaBank requirements have no test coverage?</p>
+            <p class="body" style="margin-bottom:10px;">Which requirements have no test coverage?</p>
             <pre style="font-size:11px;padding:10px 12px;">Input:
   requirements: [
     <span class="str">"User can login"</span>,
@@ -1316,7 +1316,7 @@ Output:
 <span class="cmt">// sha256(version + prompt) → .llm-cache/</span>
 📦 LLM cache: <span class="green">47 hits</span> / <span class="orange">5 misses</span>
    (<span class="green">90%</span> cached — saved ~38 API calls)</pre>
-          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>llm/src/providers/CachingLLMProvider.ts</code></div>
+          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>pipeline/providers/CachingLLMProvider.ts</code></div>
         </div>
         <div class="card green-border">
           <div style="font-size:18px;margin-bottom:6px;">🔀</div>
@@ -1328,7 +1328,7 @@ Output:
   req =&gt; expander.<span class="fn">expand</span>(req, kb),
   <span class="num">8</span>  <span class="cmt">// 8 parallel LLM calls</span>
 );</pre>
-          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>ai/src/utils/concurrency.ts</code></div>
+          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>pipeline/utils/concurrency.ts</code></div>
         </div>
         <div class="card orange-border">
           <div style="font-size:18px;margin-bottom:6px;">🎯</div>
@@ -1339,7 +1339,7 @@ Output:
 <span class="cmt">// "Navigate to login page"  → goto  (rule)</span>
 <span class="cmt">// "Verify error is visible" → noop  (rule)</span>
 <span class="cmt">// "Do something unusual"    → AI    (fallback)</span></pre>
-          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>ai/src/action-model/RuleBasedActionModelGenerator.ts</code></div>
+          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>pipeline/action-model/RuleBasedActionModelGenerator.ts</code></div>
         </div>
         <div class="card purple-border">
           <div style="font-size:18px;margin-bottom:6px;">📋</div>
@@ -1350,7 +1350,7 @@ Output:
 <span class="cmt">// AND all spec files still exist on disk</span>
 ⏭ ae-login — specs unchanged
    (cache hit, <span class="num">2</span> file(s))</pre>
-          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>ai/src/generate-from-excel.ts</code></div>
+          <div style="margin-top:8px;font-size:11px;color:#484f58;">Files: <code>scripts/generate-from-excel.ts</code></div>
         </div>
       </div>
       <div class="card" style="margin-top:14px;padding:12px 20px;">
@@ -1447,9 +1447,9 @@ Output:
       <div class="grid-3">
         <div class="card blue-border">
           <div style="font-size:11px;color:#58a6ff;font-weight:700;margin-bottom:8px;">NEW PAGE</div>
-          <p class="body" style="margin-bottom:10px;">Add ParaBank Bill Pay page support</p>
+          <p class="body" style="margin-bottom:10px;">Add a new Bill Pay page for your app</p>
           <pre style="font-size:11px;padding:10px 12px;"><span class="cmt">// 1. Create JSON file</span>
-knowledge-base/
+pipeline/kb/pages/
   bill-pay-page.json
 
 <span class="cmt">// 2. Change one line</span>
@@ -1633,7 +1633,7 @@ PriorityScoredResult.ts
         <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Root cause &amp; flaky analysis — working</div>
         <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Coverage gap analyzer — working</div>
         <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Regression selector — working</div>
-        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; ParaBank demo scenarios — ready</div>
+        <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Automation Exercise demo scenarios — ready</div>
         <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; URL-first AI scenario discovery — working</div>
         <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Local LLM (LM Studio) — offline, no API cost</div>
         <div style="font-size:14px;color:#8b949e;"><span class="green">✓</span>&nbsp; Smart artifact cache — zero LLM calls on re-run</div>

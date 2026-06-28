@@ -30,6 +30,13 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Docs — demo artifacts (auto-generated / presentation files)
+docs/interactive-demo.html
+docs/demo-video.html
+docs/demo-presentation.html
+docs/DEMO_SCRIPT.md
+docs/DEMO_PITCH.md
+
 # Editor/IDE
 .vscode/
 .idea/
