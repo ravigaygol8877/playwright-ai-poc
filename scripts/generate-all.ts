@@ -245,6 +245,8 @@ async function generateSuite(
     const dataFile  = `tests/data/${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
 
     if (!fs.existsSync(pomFile)) {
+      fs.mkdirSync("tests/pages", { recursive: true });
+      fs.mkdirSync("tests/data",  { recursive: true });
       process.stdout.write(`  ▸ Generating POM (${className})... `);
       try {
         const pomResult = await pomGen.generate(kb, suite.page);

@@ -23,7 +23,7 @@ EXCEL_FILE=custom.xlsx npm run ai:run  # use a different requirements file
 ---
 
 ### `npm run generate:from-excel`
-Steps 1–4 only — parses requirements and generates spec files without running them.
+Runs Steps 1–5 of the pipeline plus Step 2.5 (scenario discovery) — parses requirements, generates the Knowledge Base if not present, infers test scenarios, and generates spec files without executing them.
 
 ```bash
 npm run generate:from-excel
@@ -45,7 +45,7 @@ Use this when you've manually edited a KB JSON and want to regenerate the POM wi
 ---
 
 ### `npm run generate`
-Runs the full AI generation sequence (same as Steps 1–4 of `ai:run`) but with verbose output useful for debugging prompts.
+Older single-suite generation entry point with verbose output. For multi-suite projects, prefer `generate:from-excel` or `generate:all`.
 
 ```bash
 npm run generate
@@ -70,17 +70,19 @@ npm run generate:all:uat   # with UAT environment overrides
 Generates a knowledge-base (KB) JSON file for a page by crawling its live URL with a headless browser and extracting selectors via AI.
 
 ```bash
-npm run kb:generate
+npm run kb:generate <url> <page-name>
 ```
 
-Follow the prompts for URL and page name. Output goes to `pipeline/kb/pages/<page-name>.json`.
+Example: `npm run kb:generate https://myapp.com/login myapp-login`
+
+Output goes to `pipeline/kb/pages/<page-name>.json`.
 
 ---
 
 ## Demo Scripts
 
 ### `npm run demo`
-Full end-to-end demo covering all 9 AI scenarios (login, registration, transfer, self-healing locator, root cause, flaky test analysis, coverage gaps, regression selection).
+Full end-to-end demo covering all AI scenarios (login, registration, transfer, self-healing locator, root cause, flaky test analysis, coverage gaps, regression selection).
 
 ```bash
 npm run demo

@@ -46,38 +46,12 @@ import { ArtifactManifest }       from "../pipeline/utils/ArtifactManifest.js";
 import type { KnowledgeBase }     from "../pipeline/models/KnowledgeBase.js";
 
 // ─── Method registry ──────────────────────────────────────────────────────────
+// Returns an empty registry — PlaywrightGenerator falls back to raw locator calls.
+// POMGenerator names its methods from the KB selectors; a future enhancement could
+// auto-derive this mapping from the generated POM instead of hardcoding it here.
 
-function buildMethodRegistry(pageKey: string): Record<string, { click?: string; fill?: string }> {
-  const registries: Record<string, Record<string, { click?: string; fill?: string }>> = {
-    'ae-home': {
-      navHomeLink:            { click: 'verifyPageLoaded' },
-      navProductsLink:        { click: 'navigateToProducts' },
-      navCartLink:            { click: 'navigateToCart' },
-      navSignupLoginLink:     { click: 'navigateToLogin' },
-      navTestCasesLink:       { click: 'navigateToTestCases' },
-      navApiTestingLink:      { click: 'navigateToTestCases' },
-      addToCartButtons:       { click: 'clickAddToCart' },
-      continueShoppingButton: { click: 'clickContinueShopping' },
-      viewCartLink:           { click: 'viewCart' },
-      categoryWomenLink:      { click: 'expandWomenCategory' },
-      categoryMenLink:        { click: 'expandMenCategory' },
-      categoryKidsLink:       { click: 'expandKidsCategory' },
-      brandPoloLink:          { click: 'navigateToBrandPolo' },
-      brandHM:                { click: 'navigateToBrandHM' },
-      brandMadame:            { click: 'navigateToBrandMadame' },
-      testCasesButton:        { click: 'navigateToTestCases' },
-      apisListButton:         { click: 'navigateToApiList' },
-    },
-    'ae-login': {
-      loginEmailInput:    { fill: 'fillLoginEmail' },
-      loginPasswordInput: { fill: 'fillLoginPassword' },
-      loginButton:        { click: 'submitLogin' },
-      signupNameInput:    { fill: 'fillSignupName' },
-      signupEmailInput:   { fill: 'fillSignupEmail' },
-      signupButton:       { click: 'submitSignup' },
-    },
-  };
-  return registries[pageKey] ?? {};
+function buildMethodRegistry(_pageKey: string): Record<string, { click?: string; fill?: string }> {
+  return {};
 }
 
 // ─── CLI args ─────────────────────────────────────────────────────────────────
@@ -197,7 +171,7 @@ async function main() {
   // Loop over pageUrls (not pageGroups) so that discovery-only rows — those with
   // only URL + Page + Feature and no Description — also trigger KB generation.
   for (const [pageKey, url] of parseResult.pageUrls) {
-    const kbFile   = path.join("knowledge-base", `${pageKey}.json`);
+    const kbFile   = path.join("pipeline/kb/pages", `${pageKey}.json`);
     const urlChanged = manifest.isUrlChanged(pageKey, url);
 
     if (fs.existsSync(kbFile) && !urlChanged) {
@@ -212,7 +186,7 @@ async function main() {
 
     process.stdout.write(`  ▸ Generating KB for "${pageKey}" from ${url} ... `);
     try {
-      fs.mkdirSync("knowledge-base", { recursive: true });
+      fs.mkdirSync("pipeline/kb/pages", { recursive: true });
       await kbGen.generate(url, pageKey, httpCredentials);
       console.log("done");
       tick(kbFile);
@@ -236,7 +210,7 @@ async function main() {
     const existingReqs      = pageGroups.get(pageKey) ?? [];
     const existingScenarios = existingReqs.map(r => r.scenario).filter(Boolean);
     const featureName       = existingReqs[0]?.feature ?? pageKey;
-    const cacheFile         = path.join("knowledge-base", `${pageKey}-scenarios.json`);
+    const cacheFile         = path.join("pipeline/kb/pages", `${pageKey}-scenarios.json`);
 
     // Load from cache if already discovered — skip Playwright crawl + LLM call
     if (fs.existsSync(cacheFile)) {
@@ -265,7 +239,7 @@ async function main() {
       }
 
       // Persist so reruns skip this step
-      fs.mkdirSync("knowledge-base", { recursive: true });
+      fs.mkdirSync("pipeline/kb/pages", { recursive: true });
       fs.writeFileSync(cacheFile, JSON.stringify(inferred, null, 2));
 
       const newReqs: Requirement[] = inferred.map((s, i) => ({
@@ -314,7 +288,7 @@ async function main() {
       continue;
     }
 
-    const kbFile      = path.join("knowledge-base", `${pageKey}.json`);
+    const kbFile      = path.join("pipeline/kb/pages", `${pageKey}.json`);
     const pageUrl     = parseResult.pageUrls.get(pageKey) ?? "";
     const kbChanged   = manifest.isKbChangedSincePomGen(pageKey, kbFile);
     const needsPom    = !fs.existsSync(pomFile) || kbChanged;

@@ -1,434 +1,293 @@
-AI Test Intelligence Platform - Current Architecture
-
-Overview
-
-The AI Test Intelligence Platform is a modular framework that combines traditional Playwright automation with AI-powered testing capabilities.
-
-The platform focuses on:
-
-* AI-assisted test generation
-* AI-assisted test intelligence
-* AI-assisted failure analysis
-* Knowledge-driven automation
-* Provider-independent LLM integration
-
-⸻
-
-Architecture Principles
-
-1. Separation of Concerns
-
-Each module has a single responsibility.
-
-Examples:
-
-* TestCaseGenerator → Generates test cases
-* TestDataGenerator → Generates test data
-* RegressionSelector → Selects impacted test suites
-* FlakyTestAnalyzer → Analyzes flaky executions
-* SelfHealingLocatorEngine → Suggests locator fixes
-* BugRootCauseAnalyzer → Performs failure analysis
-
-⸻
-
-2. Provider Independence
-
-The platform depends on the LLMProvider interface rather than a specific LLM vendor.
-ProviderFactory selects the correct implementation at runtime from env vars.
-
-Supported:
-
-* GeminiProvider       (LLM_PROVIDER=gemini)
-* GitHubModelsProvider (LLM_PROVIDER=github-models)
-* OpenRouterProvider   (LLM_PROVIDER=openrouter)
-
-Planned:
-
-* ClaudeProvider
-* OpenAIProvider
-* AzureOpenAIProvider
-
-⸻
-
-3. Knowledge-Driven Generation
-
-AI is constrained using:
-
-* Knowledge Base
-* Test Catalog
-* Application Metadata
-
-This prevents AI from generating arbitrary automation code.
-
-⸻
-
-4. Human-Controlled AI
-
-AI produces recommendations.
-
-Framework validates recommendations before use.
-
-Examples:
-
-* Locator healing validation
-* Root cause confidence validation
-* Structured JSON validation
-
-⸻
-
-High Level Architecture
-
-                     +----------------+
-                     |  Requirement   |
-                     +--------+-------+
-                              |
-                              v
-                  +-----------+------------+
-                  | Test Case Generator    |
-                  +-----------+------------+
-                              |
-                              v
-                  +-----------+------------+
-                  | Test Data Generator    |
-                  +-----------+------------+
-                              |
-                              v
-                  +-----------+------------+
-                  | Action Model Generator |
-                  +-----------+------------+
-                              |
-                              v
-                  +-----------+------------+
-                  | Playwright Renderer    |
-                  +-----------+------------+
-                              |
-                              v
-                     Generated Tests
-
-⸻
-
-AI Test Generation Layer
-
-TestCaseGenerator
-
-Purpose:
-
-Generate structured test cases from requirements.
-
-Input:
-
-User should be able to login using valid username and password
-
-Output:
-
-[
-  {
-    "id": "TC_001",
-    "title": "Login with valid username and password"
-  }
-]
-
-⸻
-
-TestDataGenerator
-
-Purpose:
-
-Generate reusable test data.
-
-Output:
-
-{
-  "validUsername": "user123",
-  "validPassword": "Passw0rd!"
-}
-
-⸻
-
-AIActionModelGenerator
-
-Purpose:
-
-Convert natural-language test steps into structured action models.
-
-Example:
-
-{
-  "action": "fill",
-  "target": "username",
-  "dataKey": "validUsername"
-}
-
-⸻
-
-PlaywrightRenderer
-
-Purpose:
-
-Convert Action Models into executable Playwright code.
-
-Example:
-
-await page.fill(
-  "#username",
-  testData.validUsername
-);
-
-⸻
-
-AI Test Intelligence Layer
-
-RegressionSelector
-
-Purpose:
-
-Identify impacted test suites based on changed files.
-
-Input:
-
-{
-  "changedFiles": [
-    "AuthService.ts",
-    "LoginController.ts"
-  ]
-}
-
-Output:
-
-{
-  "recommendedTests": [
-    "Login Tests",
-    "Password Reset Tests"
-  ]
-}
-
-⸻
-
-FlakyTestAnalyzer
-
-Purpose:
-
-Analyze historical execution failures.
-
-Input:
-
-{
-  "retryCount": 3,
-  "duration": 45000,
-  "failureMessage": "Timeout 30000ms exceeded"
-}
-
-Output:
-
-{
-  "flakyProbability": 75,
-  "recommendation": "Replace fixed waits"
-}
-
-⸻
-
-SelfHealingLocatorEngine
-
-Purpose:
-
-Recommend alternative locators when existing locators fail.
-
-Input:
-
-{
-  "failedLocator": "#loginBtn"
-}
-
-Output:
-
-{
-  "healedLocator": "#login",
-  "confidence": 95
-}
-
-Validation:
-
-* Must exist in Knowledge Base
-* AI cannot invent selectors
-
-⸻
-
-BugRootCauseAnalyzer
-
-Purpose:
-
-Analyze failures and suggest probable causes.
-
-Input:
-
-{
-  "failureMessage": "Timeout 30000ms exceeded",
-  "stackTrace": "locator.click timeout"
-}
-
-Output:
-
-{
-  "failureType": "Timeout",
-  "probableCause": "Element not clickable",
-  "recommendation": "Add explicit wait",
-  "confidence": 85
-}
-
-Validation:
-
-* Required fields validation
-* Confidence score validation
-
-⸻
-
-Shared Infrastructure
-
-LLMProvider
-
-Provider abstraction layer. All providers implement the same interface.
-
-ProviderFactory.create() is the single entry point — reads LLM_PROVIDER and MODEL
-from the environment and returns the correct provider implementation.
-
-Current providers:
-
-* GeminiProvider       — Google Gemini (default)   LLM_PROVIDER=gemini
-* GitHubModelsProvider — GitHub Models inference    LLM_PROVIDER=github-models
-* OpenRouterProvider   — OpenRouter gateway         LLM_PROVIDER=openrouter
-
-Planned providers:
-
-* OpenAIProvider
-* ClaudeProvider
-* AzureOpenAIProvider
-
-⸻
-
-AIJsonParser
-
-Single source of truth for AI JSON parsing.
-
-Responsibilities:
-
-* Remove markdown
-* Extract JSON
-* Parse JSON safely
-
-Used by:
-
-* TestDataGenerator
-* AIActionModelGenerator
-* RegressionSelector
-* FlakyTestAnalyzer
-* SelfHealingLocatorEngine
-* BugRootCauseAnalyzer
-
-⸻
-
-KnowledgeBaseService
-
-Stores application metadata.
-
-Example:
-
-{
-  "pageName": "Login Page",
-  "selectors": {
-    "username": "#username",
-    "password": "#password",
-    "loginButton": "#login"
-  }
-}
-
-⸻
-
-TestCatalogService
-
-Stores available test suites.
-
-Example:
-
-{
-  "testSuites": [
-    "Login Tests",
-    "Registration Tests",
-    "Password Reset Tests"
-  ]
-}
-
-⸻
-
-Current Project Structure
-
-ai/
-├── action-model
-├── assertion-generator
-├── flaky-test-analyzer
-├── regression-selector
-├── root-cause-analyzer
-├── self-healing-locator
-├── test-case-generator
-├── test-data-generator
-└── utils
-automation/
-├── generators
-└── renderers
-knowledge-base/
-├── KnowledgeBaseService.ts
-├── TestCatalogService.ts
-└── test-catalog.json
-llm/
-├── interfaces
-└── providers
-tests/
-└── generated
-
-⸻
-
-Current Platform Capabilities
-
-Completed Modules:
-
-1. Test Case Generator
-2. Test Data Generator
-3. Action Model Generator
-4. Playwright Renderer
-5. Regression Selector
-6. Flaky Test Analyzer
-7. Self-Healing Locator Engine
-8. Root Cause Analyzer
-
-⸻
-
-Future Roadmap
-
-Planned Modules:
-
-1. AI Test Coverage Analyzer
-2. AI Bug Analysis Assistant
-3. Natural Language → Automation Generator
-4. Release Risk Predictor
-5. Vector Search / RAG Integration
-6. Multi-Agent AI Workflows
-7. AI-Assisted Test Maintenance
-
-⸻
-
-Current Status
-
-Platform Version:
-
-v1.0 Foundation Complete
-
-Architecture Status:
-
-Stable
-
-Design Pattern:
-
-Input Model → AI Engine → Output Model
-
-Primary Goal:
-
-Production-style AI Test Intelligence Platform for Playwright Automation.
+# AI Test Intelligence Platform — Current Architecture
+
+## Overview
+
+A modular, AI-powered Playwright test automation framework. The only manual step is writing requirements in Excel. Everything else — KB generation, POM generation, test case expansion, spec generation, test execution, and reporting — runs automatically through a single command.
+
+- **104 unit tests passing** (Vitest)
+- **5 LLM providers** supported (Gemini, GitHub Models, OpenRouter, LM Studio, Fallback)
+- **10 AI modules** across generation and analysis
+- **Smart caching** — unchanged requirements skip all LLM calls
+
+---
+
+## 4-Layer Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Layer 1 — LLM Providers                                      │
+│  GeminiProvider · GitHubModelsProvider · OpenRouterProvider   │
+│  LMStudioProvider · FallbackProvider · CachingLLMProvider     │
+│  Single interface: generateResponse(prompt): Promise<string>  │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+┌────────────────────────▼─────────────────────────────────────┐
+│  Layer 2 — Knowledge Base                                      │
+│  KnowledgeBaseGenerator  →  pipeline/kb/pages/{page}.json     │
+│  KnowledgeBaseService    →  loads KB for any module           │
+│  PageAnalyzer + ScenarioInferenceEngine  →  live discovery    │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+┌────────────────────────▼─────────────────────────────────────┐
+│  Layer 3 — AI Modules                                          │
+│  GENERATORS: TestCaseGenerator · TestDataGenerator            │
+│              AIActionModelGenerator · AssertionGenerator       │
+│              RequirementExpander · POMGenerator                │
+│  ANALYZERS:  BugRootCauseAnalyzer · FlakyTestAnalyzer         │
+│              CoverageAnalyzer · RegressionSelector            │
+│              SelfHealingLocatorEngine                         │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+┌────────────────────────▼─────────────────────────────────────┐
+│  Layer 4 — Automation & Code Generation                        │
+│  PlaywrightGenerator · PlaywrightRenderer                     │
+│  DataFileGenerator · FixtureUpdater                           │
+│  Output: tests/e2e/*.spec.ts · tests/pages/*.ts               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Project Structure
+
+```
+playwright-ai-poc/
+├── pipeline/                              # All AI engine code
+│   ├── providers/
+│   │   ├── interfaces/LLMProvider.ts      # generateResponse(prompt): Promise<string>
+│   │   ├── GeminiProvider.ts
+│   │   ├── GitHubModelsProvider.ts
+│   │   ├── OpenRouterProvider.ts
+│   │   ├── LMStudioProvider.ts
+│   │   ├── FallbackProvider.ts            # Circuit breaker (5 failures → auto-switch)
+│   │   ├── CachingLLMProvider.ts          # SHA-256 disk cache → .llm-cache/
+│   │   └── ProviderFactory.ts
+│   ├── kb/
+│   │   ├── KnowledgeBaseService.ts        # Reads pipeline/kb/pages/
+│   │   ├── KnowledgeBaseGenerator.ts      # Live URL → DOM → AI → JSON
+│   │   └── pages/                         # Project KB files (deleted on reset)
+│   ├── generators/
+│   │   ├── test-cases/TestCaseGenerator.ts
+│   │   ├── test-data/TestDataGenerator.ts
+│   │   ├── action-model/AIActionModelGenerator.ts
+│   │   ├── assertions/AssertionGenerator.ts
+│   │   ├── playwright/PlaywrightGenerator.ts + PlaywrightRenderer.ts
+│   │   ├── pom/POMGenerator.ts + DataFileGenerator.ts + FixtureUpdater.ts
+│   │   ├── requirements/RequirementGenerator.ts
+│   │   └── discovery/PageAnalyzer.ts + ScenarioInferenceEngine.ts
+│   ├── analyzers/
+│   │   ├── self-healing/SelfHealingLocatorEngine.ts
+│   │   ├── root-cause/BugRootCauseAnalyzer.ts
+│   │   ├── flaky/FlakyTestAnalyzer.ts
+│   │   ├── coverage/CoverageAnalyzer.ts
+│   │   └── regression/RegressionSelector.ts
+│   ├── readers/ExcelReader.ts + RequirementExpander.ts
+│   ├── reporting/RunContext.ts
+│   ├── utils/AIJsonParser.ts + ArtifactManifest.ts + ExcelTestCaseWriter.ts
+│   └── models/TestCase.ts + KnowledgeBase.ts
+│
+├── scripts/
+│   ├── run-pipeline.ts                    # npm run ai:run
+│   ├── generate-from-excel.ts             # npm run generate:from-excel
+│   ├── generate-kb.ts                     # npm run kb:generate
+│   ├── generate-pom.ts                    # npm run generate:pom
+│   ├── generate-all.ts                    # npm run generate:all
+│   ├── project-reset.ts                   # npm run project:reset
+│   ├── demo.ts                            # npm run demo (ParaBank, 9 scenarios)
+│   ├── demo-*.ts                          # individual demo scripts
+│   ├── create-requirements-template.ts
+│   └── test-*.ts
+│
+├── tests/
+│   ├── e2e/                               # Generated specs + .data.ts files
+│   ├── pages/                             # Generated POMs
+│   ├── data/                              # Generated data files + example.ts
+│   ├── fixtures/base.ts                   # Framework: testDesktop + testMobile
+│   └── helpers/
+│       ├── constants.ts                   # Framework: viewport sizes
+│       ├── waitUtils.ts                   # Framework: generic wait utilities
+│       ├── interceptHelper.ts             # Project-specific (deleted on reset)
+│       └── commonPattern.ts              # Project-specific (deleted on reset)
+│
+├── config/
+│   ├── platform.json                      # projectName, suites[], llmModel
+│   └── environments/                      # qa.env · uat.env · production.env · development.env
+│
+├── requirements/                          # requirements.xlsx — the only manual input
+├── reports/                               # Timestamped run folders + latest/ symlink
+├── ai-metadata/artifacts.json             # Content hash manifest (git-tracked)
+├── .llm-cache/                            # Raw LLM response cache (gitignored)
+└── docs/
+```
+
+---
+
+## AI Modules
+
+### Generators
+
+| Module | Input | Output |
+|--------|-------|--------|
+| `TestCaseGenerator` | Requirement text | `TestCase[]` with id, title, steps, expectedResult |
+| `TestDataGenerator` | Requirement text | Typed test data (validUsername, validPassword, …) |
+| `AIActionModelGenerator` | TestCase + KnowledgeBase | Structured action model per step |
+| `AssertionGenerator` | TestCase + KnowledgeBase | Playwright assertion code |
+| `RequirementExpander` | Excel row (blank TestCases) | Expanded `TestCase[]` written back to Excel |
+| `POMGenerator` | KnowledgeBase | TypeScript Page Object Model class |
+| `DataFileGenerator` | KnowledgeBase | TypeScript data file for the page |
+| `RequirementGenerator` | KnowledgeBase | Auto-generated requirement string |
+
+### Analyzers
+
+| Module | Input | Output |
+|--------|-------|--------|
+| `BugRootCauseAnalyzer` | Failure message + stack trace + logs | failureType, probableCause, recommendation, confidence% |
+| `FlakyTestAnalyzer` | Test name + retryCount + duration + failureMessage | flakyProbability%, possibleCauses[], recommendation |
+| `CoverageAnalyzer` | Requirements list + existing test files | coveragePercentage%, covered[], missingCoverage[] |
+| `RegressionSelector` | Changed file paths | impactedFeatures[], recommendedTests[], reasoning |
+| `SelfHealingLocatorEngine` | Broken selector + KnowledgeBase | healedLocator, confidence%, reasoning |
+
+### Discovery
+
+| Module | Role |
+|--------|------|
+| `PageAnalyzer` | Opens live URL headless, extracts DOM context |
+| `ScenarioInferenceEngine` | Infers untested scenarios from page context — supplements Excel requirements |
+
+---
+
+## generate-from-excel Pipeline
+
+`npm run generate:from-excel` (called internally by `npm run ai:run`)
+
+```
+requirements.xlsx
+       │
+       ▼ Step 1 — ExcelReader
+   Requirements[]
+       │
+       ▼ Step 2 — KnowledgeBaseGenerator
+   pipeline/kb/pages/{page}.json  (auto-generated from URL column if missing)
+       │
+       ▼ Step 2.5 — PageAnalyzer + ScenarioInferenceEngine
+   Additional scenarios discovered from live pages
+   Cached to pipeline/kb/pages/{page}-scenarios.json
+       │
+       ▼ Step 3 — POMGenerator + DataFileGenerator
+   tests/pages/{Page}.ts
+   tests/data/{page}.data.ts
+       │
+       ▼ Step 4 — RequirementExpander
+   TestCase[] per requirement (written back to Excel Sheet 2)
+       │
+       ▼ Step 5 — PlaywrightGenerator
+   tests/e2e/{page}-excel-{n}.spec.ts
+```
+
+---
+
+## LLM Providers
+
+| Provider | Env var | Notes |
+|----------|---------|-------|
+| `GeminiProvider` | `LLM_PROVIDER=gemini` | Default. Requires `GOOGLE_API_KEY` |
+| `GitHubModelsProvider` | `LLM_PROVIDER=github-models` | Requires `GITHUB_TOKEN` |
+| `OpenRouterProvider` | `LLM_PROVIDER=openrouter` | Requires `OPENROUTER_API_KEY` |
+| `LMStudioProvider` | `LLM_PROVIDER=lm-studio` | Local models, no key needed |
+| `FallbackProvider` | `LLM_PROVIDER=fallback` | Circuit breaker: 5 failures → auto-switch to next provider in chain |
+
+**`CachingLLMProvider`** wraps every provider transparently:
+- Key: `SHA-256("v1" + prompt)` → `.llm-cache/{hash}.json`
+- Cache hit: returns stored response with zero LLM calls
+- Cleared by `npm run project:reset` or `npm run cache:clear`
+
+---
+
+## Smart Caching (ArtifactManifest)
+
+`ai-metadata/artifacts.json` is a git-tracked manifest that prevents redundant LLM calls across runs:
+
+| Change detected | Action taken |
+|-----------------|-------------|
+| Requirement content unchanged | Return cached TestCase[] — zero LLM calls |
+| Requirement content changed | Re-expand with LLM |
+| URL in Excel changed for a page | Regenerate KB JSON |
+| KB file hash changed | Regenerate POM |
+| Spec content hash unchanged | Skip spec generation |
+
+The `.llm-cache/` directory is a separate raw-response cache (gitignored). Both are cleared on `npm run project:reset`.
+
+---
+
+## AIJsonParser — 3-Pass Repair
+
+All AI modules parse LLM output through `AIJsonParser.parse<T>()`:
+
+1. **Pass 1** — Native `JSON.parse()` (instant, no cost)
+2. **Pass 2** — `jsonrepair` library (handles trailing commas, unquoted keys)
+3. **Pass 3** — Truncation recovery (finds last complete JSON object/array)
+
+This ensures robust parsing even when the LLM wraps output in markdown or truncates it.
+
+---
+
+## project:reset Behaviour
+
+`npm run project:reset` prepares the framework for a new target application.
+
+**Deleted (project artifacts):**
+- `tests/e2e/*.spec.ts` and `*.data.ts`
+- `tests/pages/*.ts` (generated POMs)
+- `tests/data/*.data.ts` (generated data files)
+- `tests/helpers/interceptHelper.ts` and `commonPattern.ts`
+- `pipeline/kb/pages/*.json` (KB files and scenario cache)
+- `ai-metadata/artifacts.json`
+- `reports/`, `.llm-cache/`, `playwright-report/`, `test-results/`
+
+**Reset:**
+- `config/platform.json` → blank template with empty `suites[]`
+
+**Preserved (framework):**
+- `pipeline/` — all AI modules
+- `scripts/` — all pipeline scripts
+- `tests/fixtures/base.ts` — `testDesktop` / `testMobile`
+- `tests/helpers/constants.ts` and `waitUtils.ts`
+- `tests/data/example.ts` — data file template
+- `requirements/*.xlsx` — Excel input files
+- `.env` — API keys
+
+---
+
+## Key npm Commands
+
+| Command | Purpose |
+|---------|---------|
+| `npm run ai:run` | Full pipeline: Excel → specs → run tests → Allure report |
+| `npm run ai:run:qa` / `ai:run:uat` | Environment-specific full pipeline |
+| `npm run generate:from-excel` | Generation only (no test execution) |
+| `npm run kb:generate <url> <name>` | Generate KB JSON from a live URL |
+| `npm run generate:pom` | Generate POMs from existing KB files |
+| `npm run generate:all` | Platform.json-driven suite generation |
+| `npm run project:reset` | Wipe all project artifacts; ready for new project |
+| `npm run requirements:template` | Create blank Excel requirements file |
+| `npm run demo` | Run ParaBank 9-scenario live demo |
+| `npm run test:qa` / `test:uat` / `test:prod` | Env-specific Playwright test run |
+| `npm run report:latest` | Open latest Playwright HTML report |
+| `npm run allure:serve` | Open Allure report |
+| `npm run cache:clear` | Clear LLM response cache only |
+| `npm run typecheck` | TypeScript compile check |
+| `npm run test:unit` | Run 104 unit tests (Vitest) |
+
+---
+
+## Architecture Principles
+
+**Separation of concerns** — Each module has one job. `TestCaseGenerator` only generates test cases; it has no knowledge of Playwright or selectors.
+
+**Provider independence** — Every module depends on `LLMProvider` (the interface), not a vendor SDK. Swapping providers requires changing one env var.
+
+**Knowledge-constrained AI** — Selectors, messages, and success states come from KB JSON files, not AI imagination. AI cannot invent selectors that don't exist on the page.
+
+**Validated output** — All AI output goes through `AIJsonParser` (3-pass repair) and model-specific validation before use.
+
+**Zero manual intervention** — After filling the Excel file, the entire pipeline runs unattended. The only exception is writing project-specific helpers (`interceptHelper.ts`, `commonPattern.ts`) for a new target app.

@@ -175,7 +175,7 @@ def slide_01_title(prs):
         ("TypeScript Strict", ACCENT1, RGBColor(0x1f,0x3c,0x6e)),
         ("Playwright + Allure", ACCENT2, RGBColor(0x0f,0x2d,0x1a)),
         ("Multi-Provider LLM", ACCENT3, RGBColor(0x3d,0x20,0x00)),
-        ("9 AI Modules", ACCENT4, RGBColor(0x2d,0x1f,0x6e)),
+        ("10 AI Modules", ACCENT4, RGBColor(0x2d,0x1f,0x6e)),
         ("Self-Healing Tests", ACCENT2, RGBColor(0x0f,0x2d,0x1a)),
     ]
     x = Inches(0.6)
@@ -372,8 +372,8 @@ def slide_05_architecture(prs):
          "KnowledgeBaseService · KnowledgeBaseGenerator · SelectorRetriever (RAG)",
          "pipeline/kb/pages/  ·  ae-home.json · ae-login.json"),
         (ACCENT1, "3", "AI Modules Layer",
-         "Nine independent, independently testable intelligence modules.",
-         "TestCaseGenerator · TestDataGenerator · ActionModelGen · AssertionGenerator · Self-Healing · Flaky · RootCause · Coverage · Regression",
+         "Ten independent, independently testable intelligence modules.",
+         "TestCaseGenerator · TestDataGenerator · ActionModelGen · AssertionGenerator · RequirementExpander · Self-Healing · Flaky · RootCause · Coverage · Regression",
          "pipeline/generators/  ·  pipeline/analyzers/"),
         (ACCENT4, "4", "Code Generation Layer",
          "No AI. Deterministic. Takes structured JSON, renders TypeScript.",
@@ -590,7 +590,7 @@ def slide_08_features(prs):
                     font_size=10, color=MUTED, wrap=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SLIDE 9 — AI CAPABILITIES (9 modules)
+# SLIDE 9 — AI CAPABILITIES (10 modules)
 # ══════════════════════════════════════════════════════════════════════════════
 def slide_09_ai_modules(prs):
     s = blank_slide(prs)
