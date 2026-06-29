@@ -242,6 +242,264 @@
     position: fixed; bottom: 28px; right: 28px;
     font-size: 11px; color: #484f58;
   }
+
+  /* ═══════════════════════════════════════════
+     ENHANCED ANIMATIONS & INTERACTIVE FEATURES
+  ═══════════════════════════════════════════ */
+
+  /* --- Slide Transition Keyframes --- */
+  @keyframes slideEnterRight {
+    from { opacity:0; transform:translateX(52px) scale(0.97); }
+    to   { opacity:1; transform:translateX(0) scale(1); }
+  }
+  @keyframes slideEnterLeft {
+    from { opacity:0; transform:translateX(-52px) scale(0.97); }
+    to   { opacity:1; transform:translateX(0) scale(1); }
+  }
+  @keyframes slideExitLeft {
+    from { opacity:1; transform:translateX(0); }
+    to   { opacity:0; transform:translateX(-40px); }
+  }
+  @keyframes slideExitRight {
+    from { opacity:1; transform:translateX(0); }
+    to   { opacity:0; transform:translateX(40px); }
+  }
+  @keyframes fadeInUp    { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+  @keyframes fadeInDown  { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:none} }
+  @keyframes fadeInLeft  { from{opacity:0;transform:translateX(-22px)} to{opacity:1;transform:none} }
+  @keyframes fadeInRight { from{opacity:0;transform:translateX(22px)} to{opacity:1;transform:none} }
+  @keyframes scaleIn     { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
+  @keyframes glowPulse   { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 20px rgba(88,166,255,.3)} }
+  @keyframes firstSlide  { from{opacity:0} to{opacity:1} }
+
+  /* --- Card Hover Effects --- */
+  .card { transition: transform .22s ease, box-shadow .22s ease !important; will-change: transform; }
+  .card:hover { transform:translateY(-3px); box-shadow:0 8px 28px rgba(0,0,0,.5); }
+  .card.blue-border:hover   { box-shadow:0 8px 28px rgba(31,111,235,.25),0 2px 8px rgba(0,0,0,.3); }
+  .card.green-border:hover  { box-shadow:0 8px 28px rgba(35,134,54,.25),0 2px 8px rgba(0,0,0,.3); }
+  .card.orange-border:hover { box-shadow:0 8px 28px rgba(158,106,3,.25),0 2px 8px rgba(0,0,0,.3); }
+  .card.purple-border:hover { box-shadow:0 8px 28px rgba(110,64,201,.25),0 2px 8px rgba(0,0,0,.3); }
+  .card.red-border:hover    { box-shadow:0 8px 28px rgba(218,54,51,.25),0 2px 8px rgba(0,0,0,.3); }
+
+  /* --- Layer Hover --- */
+  .layer { transition:transform .2s ease, box-shadow .2s ease !important; }
+  .layer:hover { transform:translateX(6px); box-shadow:-3px 0 0 0 rgba(88,166,255,.4), 4px 0 16px rgba(0,0,0,.25); }
+  .layer:hover .layer-num { animation:glowPulse 1.5s ease infinite; }
+
+  /* --- Module Card Expand --- */
+  .module-card {
+    transition:transform .2s ease, box-shadow .2s ease, background .2s ease !important;
+    cursor:pointer;
+  }
+  .module-card:hover { transform:translateY(-3px) scale(1.01); box-shadow:0 8px 24px rgba(0,0,0,.4); }
+  .module-card.expanded { background:#1a2332 !important; border:1px solid rgba(88,166,255,.4) !important; }
+  .module-detail {
+    display:none; font-size:11px; color:#8b949e; line-height:1.7;
+    margin-top:8px; padding-top:8px; border-top:1px solid #30363d;
+  }
+  .module-card.expanded .module-detail { display:block; }
+
+  /* --- Flow Step Hover --- */
+  .flow-step { transition:transform .2s ease, box-shadow .2s ease !important; }
+  .flow-step:hover { transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,0,0,.4); }
+
+  /* --- Before/After Hover --- */
+  .before-box, .after-box { transition:transform .2s ease, box-shadow .2s ease; }
+  .before-box:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(218,54,51,.18); }
+  .after-box:hover  { transform:translateY(-2px); box-shadow:0 6px 20px rgba(63,185,80,.18); }
+
+  /* --- Step List Hover --- */
+  .step-list li { transition:transform .18s ease; }
+  .step-list li:hover { transform:translateX(5px); }
+
+  /* --- Pill Hover --- */
+  .pill { transition:transform .15s ease; display:inline-block; }
+  .pill:hover { transform:scale(1.06); }
+
+  /* --- Title Slide Gradient --- */
+  #s1 h1 {
+    background:linear-gradient(135deg,#e6edf3 0%,#79c0ff 45%,#56d364 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+
+  /* --- Progress Bar Glow --- */
+  .progress-bar { box-shadow:0 0 10px rgba(88,166,255,.35),0 0 20px rgba(63,185,80,.15); }
+
+  /* --- Keyboard Hint Enhancement --- */
+  .kbd-hint {
+    background:rgba(22,27,34,.85); backdrop-filter:blur(8px);
+    padding:4px 14px; border-radius:20px; border:1px solid rgba(48,54,61,.4);
+    transition:opacity .4s ease;
+  }
+
+  /* --- Nav Enhancement --- */
+  .nav { transition:opacity .4s ease; }
+  .nav button { transition:background .2s, transform .15s, box-shadow .15s !important; }
+  .nav button:hover:not(:disabled) { transform:scale(1.04); box-shadow:0 4px 12px rgba(0,0,0,.3); }
+
+  /* --- Control Group (top-left) --- */
+  #ctrl-group {
+    position:fixed; top:16px; left:24px;
+    display:flex; gap:8px; z-index:300;
+    transition:opacity .4s ease;
+  }
+  .ctrl-btn {
+    background:#21262d; border:1px solid #30363d; color:#8b949e;
+    width:30px; height:30px; border-radius:6px; font-size:14px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:background .2s, color .2s, transform .15s;
+  }
+  .ctrl-btn:hover { background:#30363d; color:#e6edf3; transform:scale(1.07); }
+
+  /* --- Slide Overview Overlay --- */
+  #overview {
+    position:fixed; inset:0; background:rgba(13,17,23,.96);
+    backdrop-filter:blur(14px); z-index:500;
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:12px; padding:72px 40px 60px;
+    overflow-y:auto; opacity:0; pointer-events:none;
+    transition:opacity .3s ease;
+  }
+  #overview.visible { opacity:1; pointer-events:all; }
+  #overview::-webkit-scrollbar { width:4px; }
+  #overview::-webkit-scrollbar-thumb { background:#30363d; border-radius:2px; }
+  .ov-card {
+    background:#161b22; border:1px solid #30363d; border-radius:8px;
+    padding:14px 16px; cursor:pointer;
+    transition:border-color .2s, transform .2s, box-shadow .2s;
+  }
+  .ov-card:hover { border-color:#58a6ff; transform:translateY(-2px); box-shadow:0 6px 20px rgba(88,166,255,.15); }
+  .ov-card.current { border-color:#3fb950; background:#0d2118; }
+  .ov-num   { font-size:10px; color:#484f58; margin-bottom:3px; }
+  .ov-title { font-size:12px; font-weight:600; color:#e6edf3; line-height:1.4; }
+  .ov-eye   { font-size:10px; color:#58a6ff; margin-top:4px; }
+
+  /* --- Overview Header --- */
+  #ov-header {
+    position:fixed; top:0; left:0; right:0; height:56px;
+    display:none; align-items:center; justify-content:space-between;
+    padding:0 40px; z-index:502;
+    background:rgba(13,17,23,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid #21262d;
+  }
+  #ov-header.visible { display:flex; }
+  #ov-hint-text { font-size:11px; color:#484f58; }
+  #ov-close-btn { background:none; border:none; color:#8b949e; font-size:20px; cursor:pointer; transition:color .2s; padding:4px 8px; }
+  #ov-close-btn:hover { color:#e6edf3; }
+
+  /* --- Tooltip --- */
+  #tooltip {
+    position:fixed; background:#1f2937; border:1px solid #30363d; border-radius:6px;
+    padding:7px 12px; font-size:11px; color:#e6edf3; z-index:400;
+    pointer-events:none; opacity:0; transition:opacity .18s ease;
+    max-width:260px; line-height:1.6; box-shadow:0 4px 16px rgba(0,0,0,.45);
+  }
+  #tooltip.visible { opacity:1; }
+  [data-tip] { cursor:help; border-bottom:1px dotted rgba(72,79,88,.6); }
+
+  /* --- Loader --- */
+  #loader {
+    position:fixed; inset:0; background:#0d1117; z-index:1000;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    transition:opacity .6s ease;
+  }
+  #loader.done { opacity:0; pointer-events:none; }
+  .ld-title { font-size:22px; font-weight:700; color:#e6edf3; letter-spacing:-.5px; }
+  .ld-sub   { font-size:11px; color:#484f58; letter-spacing:.8px; text-transform:uppercase; }
+  .ld-bar   { width:200px; height:2px; background:#21262d; border-radius:1px; overflow:hidden; }
+  .ld-fill  { height:100%; background:linear-gradient(90deg,#58a6ff,#3fb950); width:0%; transition:width .8s cubic-bezier(.16,1,.3,1); }
+
+  /* --- Light Mode --- */
+  body.light { background:#f6f8fa; color:#1f2328; }
+  body.light .card { background:#fff; border-color:#d0d7de; }
+  body.light .layer { background:#fff; border-color:#d0d7de; }
+  body.light .flow-step { background:#fff; border-color:#d0d7de; }
+  body.light .module-card { background:#fff; border-color:#d0d7de; }
+  body.light .before-box { background:#fff5f5; }
+  body.light .after-box  { background:#f0fff4; }
+  body.light pre  { background:#f0f4f8 !important; border-color:#d0d7de; }
+  body.light .cmd { background:#f0f4f8; border-color:#d0d7de; }
+  body.light .cmd-text { color:#1f2328; }
+  body.light .eyebrow { color:#0969da; }
+  body.light h1,body.light h2,body.light h3 { color:#1f2328; }
+  body.light .body { color:#57606a; }
+  body.light .subtitle { color:#57606a; }
+  body.light .blue   { color:#0969da; }
+  body.light .green  { color:#1a7f37; }
+  body.light .orange { color:#9a6700; }
+  body.light .purple { color:#8250df; }
+  body.light .red    { color:#cf222e; }
+  body.light .nav button { background:#fff; border-color:#d0d7de; color:#1f2328; }
+  body.light .dot { background:#d0d7de; }
+  body.light .dot.active { background:#0969da; }
+  body.light #slideTag { color:#57606a; }
+  body.light .kbd-hint { color:#57606a; background:rgba(255,255,255,.9); border-color:#d0d7de; }
+  body.light .ctrl-btn { background:#fff; border-color:#d0d7de; color:#57606a; }
+  body.light .ctrl-btn:hover { background:#f0f4f8; color:#1f2328; }
+  body.light #s1 h1 { background:linear-gradient(135deg,#1f2328 0%,#0969da 50%,#1a7f37 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  body.light .module-card.expanded { background:#f0f4f8 !important; }
+  body.light .module-detail { color:#57606a; border-color:#d0d7de; }
+  body.light table th { background:#f6f8fa; border-color:#d0d7de; color:#57606a; }
+  body.light table td { border-color:#eaeef2; }
+  body.light .progress-bar { box-shadow:0 0 10px rgba(9,105,218,.25); }
+  body.light .pill-blue   { background:#ddf4ff; color:#0969da; }
+  body.light .pill-green  { background:#dafbe1; color:#1a7f37; }
+  body.light .pill-orange { background:#fff8c5; color:#9a6700; }
+  body.light .pill-purple { background:#fbefff; color:#8250df; }
+  body.light .pill-red    { background:#ffebe9; color:#cf222e; }
+  body.light #ov-header { background:rgba(246,248,250,.95); border-color:#d0d7de; }
+  body.light .ov-card { background:#fff; border-color:#d0d7de; }
+  body.light .ov-card.current { background:#dafbe1; border-color:#1a7f37; }
+  body.light .ov-title { color:#1f2328; }
+  body.light #overview { background:rgba(246,248,250,.97); }
+  body.light .step-num-badge { background:#0969da; }
+
+  /* --- Auto-hide --- */
+  .auto-hide { transition:opacity .5s ease !important; }
+  .auto-hide.hidden { opacity:0 !important; pointer-events:none !important; }
+
+  /* --- Responsive --- */
+  @media(max-width:900px){
+    .slide{padding:28px 24px 60px;}
+    h1{font-size:34px;} h2{font-size:22px;}
+    .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+    .cols,.cols-6040{grid-template-columns:1fr;}
+    .before-after{grid-template-columns:1fr;}
+    .module-grid{grid-template-columns:1fr 1fr;}
+    #ctrl-group{top:10px;left:12px;}
+    #overview{padding:72px 16px 40px;}
+  }
+  @media(max-width:600px){
+    .module-grid{grid-template-columns:1fr;}
+    .flow{flex-direction:column;}
+    .arrow{transform:rotate(90deg);}
+    .nav button{padding:6px 14px;font-size:12px;}
+  }
+  /* ── Code walkthrough panels ─────────────────────────────────── */
+  .code-panel{border:1px solid #21262d;border-radius:8px;margin-top:8px;overflow:hidden;}
+  .code-panel-header{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:#161b22;cursor:pointer;font-size:11px;color:#8b949e;user-select:none;transition:background .15s;}
+  .code-panel-header:hover{background:#1c2128;color:#e6edf3;}
+  .cp-title{font-weight:600;color:#e6edf3;font-size:12px;}
+  .cp-file{font-size:10px;color:#484f58;font-family:monospace;margin-left:8px;}
+  .cp-arrow{transition:transform .2s;font-size:10px;flex-shrink:0;}
+  .code-panel.open .cp-arrow{transform:rotate(90deg);}
+  .code-panel-body{display:none;}
+  .code-panel.open .code-panel-body{display:block;position:relative;}
+  .code-panel-body pre{margin:0;padding:12px 44px 12px 16px;font-size:11px;border-radius:0;border:none;border-top:1px solid #21262d;background:#0d1117;max-height:220px;overflow-y:auto;}
+  .copy-btn{position:absolute;top:6px;right:6px;background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;transition:all .15s;z-index:2;}
+  .copy-btn:hover{background:#30363d;color:#e6edf3;}
+  .copy-btn.copied{color:#3fb950;border-color:#238636;}
+  /* ── Architecture code-map table ─────────────────────────────── */
+  .code-map{width:100%;border-collapse:collapse;font-size:11px;}
+  .code-map th{background:#161b22;color:#8b949e;padding:5px 9px;text-align:left;font-weight:600;border-bottom:1px solid #21262d;white-space:nowrap;}
+  .code-map td{padding:5px 9px;border-bottom:1px solid #161b22;color:#8b949e;vertical-align:top;}
+  .code-map tr:hover td{background:#161b22;}
+  .cm-layer{font-weight:700;font-size:10px;color:#484f58;}
+  .cm-comp{color:#e6edf3;font-weight:600;}
+  .cm-file{font-family:monospace;color:#58a6ff;font-size:10px;}
+  .cm-class{font-family:monospace;color:#bc8cff;font-size:10px;}
+  .cm-method{font-family:monospace;color:#3fb950;font-size:10px;}
+  .cm-return{font-family:monospace;color:#f0883e;font-size:10px;}
 </style>
 </head>
 <body>
@@ -622,6 +880,149 @@
       </div>
       <div style="margin-top:16px;font-size:13px;color:#484f58;text-align:center;">
         Every AI module follows the same pattern: <strong style="color:#8b949e;">Input Interface → Engineered Prompt → LLM Call → Parse → Validate → Typed Output</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE — ARCHITECTURE → CODE MAP
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s_codemap">
+    <div class="eyebrow">System Design · Implementation</div>
+    <h2>Architecture → Code Map</h2>
+    <div class="slide-content">
+      <table class="code-map">
+        <tr>
+          <th>Layer</th><th>Component</th><th>Key File</th><th>Key Class</th><th>Key Method</th><th>Returns</th>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">1 — LLM</span></td>
+          <td><span class="cm-comp">LLM Interface</span></td>
+          <td><span class="cm-file">providers/interfaces/LLMProvider.ts</span></td>
+          <td><span class="cm-class">LLMProvider</span></td>
+          <td><span class="cm-method">generateResponse(prompt)</span></td>
+          <td><span class="cm-return">Promise&lt;string&gt;</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">1 — LLM</span></td>
+          <td><span class="cm-comp">Smart Cache</span></td>
+          <td><span class="cm-file">providers/CachingLLMProvider.ts</span></td>
+          <td><span class="cm-class">CachingLLMProvider</span></td>
+          <td><span class="cm-method">SHA-256(v1+prompt) → disk</span></td>
+          <td><span class="cm-return">Promise&lt;string&gt;</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">1 — LLM</span></td>
+          <td><span class="cm-comp">Fallback Chain</span></td>
+          <td><span class="cm-file">providers/FallbackProvider.ts</span></td>
+          <td><span class="cm-class">FallbackProvider</span></td>
+          <td><span class="cm-method">circuit breaker @ 5 failures</span></td>
+          <td><span class="cm-return">Promise&lt;string&gt;</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">2 — KB</span></td>
+          <td><span class="cm-comp">Knowledge Base</span></td>
+          <td><span class="cm-file">kb/pages/ae-login.json</span></td>
+          <td><span class="cm-class">KnowledgeBaseService</span></td>
+          <td><span class="cm-method">load(pageKey)</span></td>
+          <td><span class="cm-return">PageKnowledge</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">3 — AI</span></td>
+          <td><span class="cm-comp">Test Case Generator</span></td>
+          <td><span class="cm-file">generators/TestCaseGenerator.ts</span></td>
+          <td><span class="cm-class">TestCaseGenerator</span></td>
+          <td><span class="cm-method">generate(requirement)</span></td>
+          <td><span class="cm-return">TestCase[]</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">3 — AI</span></td>
+          <td><span class="cm-comp">Flaky Analyzer</span></td>
+          <td><span class="cm-file">analyzers/flaky/FlakyTestAnalyzer.ts</span></td>
+          <td><span class="cm-class">FlakyTestAnalyzer</span></td>
+          <td><span class="cm-method">analyze(executionData)</span></td>
+          <td><span class="cm-return">FlakyTestAnalysis</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">3 — AI</span></td>
+          <td><span class="cm-comp">Root Cause</span></td>
+          <td><span class="cm-file">analyzers/root-cause/BugRootCauseAnalyzer.ts</span></td>
+          <td><span class="cm-class">BugRootCauseAnalyzer</span></td>
+          <td><span class="cm-method">analyze(input)</span></td>
+          <td><span class="cm-return">RootCauseResult</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">Util</span></td>
+          <td><span class="cm-comp">AI JSON Parser</span></td>
+          <td><span class="cm-file">utils/AIJsonParser.ts</span></td>
+          <td><span class="cm-class">AIJsonParser</span></td>
+          <td><span class="cm-method">parse&lt;T&gt;(raw) — 3-pass</span></td>
+          <td><span class="cm-return">T (generic)</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">Input</span></td>
+          <td><span class="cm-comp">Excel Reader</span></td>
+          <td><span class="cm-file">readers/ExcelReader.ts</span></td>
+          <td><span class="cm-class">ExcelReader</span></td>
+          <td><span class="cm-method">read(xlsxPath)</span></td>
+          <td><span class="cm-return">ExcelParseResult</span></td>
+        </tr>
+        <tr>
+          <td><span class="cm-layer">4 — Gen</span></td>
+          <td><span class="cm-comp">Playwright Renderer</span></td>
+          <td><span class="cm-file">generators/playwright/PlaywrightRenderer.ts</span></td>
+          <td><span class="cm-class">PlaywrightRenderer</span></td>
+          <td><span class="cm-method">render(actionModel)</span></td>
+          <td><span class="cm-return">string (.ts code)</span></td>
+        </tr>
+      </table>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+        <div class="code-panel" id="cp-llm-iface">
+          <div class="code-panel-header" onclick="togglePanel('cp-llm-iface')">
+            <span><span class="cp-title">LLM Provider Interface</span><span class="cp-file">pipeline/providers/interfaces/LLMProvider.ts</span></span>
+            <span class="cp-arrow">▶</span>
+          </div>
+          <div class="code-panel-body">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><span class="cmt">// ONE method. Any provider — Gemini, OpenRouter,</span>
+<span class="cmt">// LM Studio (offline), Mock — implements this one interface.</span>
+<span class="cmt">// Swap providers: change LLM_PROVIDER= in .env. Zero code changes.</span>
+
+<span class="kw">export interface</span> <span class="cls">LLMProvider</span> {
+  <span class="fn">generateResponse</span>(
+    prompt: <span class="tp">string</span>
+  ): <span class="cls">Promise</span>&lt;<span class="tp">string</span>&gt;;
+}</pre>
+          </div>
+        </div>
+        <div class="code-panel" id="cp-caching">
+          <div class="code-panel-header" onclick="togglePanel('cp-caching')">
+            <span><span class="cp-title">Smart Cache — SHA-256 Disk Persistence</span><span class="cp-file">pipeline/providers/CachingLLMProvider.ts</span></span>
+            <span class="cp-arrow">▶</span>
+          </div>
+          <div class="code-panel-body">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><span class="kw">async</span> <span class="fn">generateResponse</span>(prompt: <span class="tp">string</span>) {
+  <span class="kw">const</span> file = this.<span class="fn">cacheFile</span>(prompt);
+
+  <span class="kw">if</span> (fs.<span class="fn">existsSync</span>(file)) {       <span class="cmt">// ← instant hit</span>
+    this.hits++;
+    <span class="kw">return</span> <span class="cls">JSON</span>.<span class="fn">parse</span>(
+      fs.<span class="fn">readFileSync</span>(file, <span class="str">'utf-8'</span>)
+    ).response;
+  }
+  this.misses++;
+  <span class="kw">const</span> r = <span class="kw">await</span> this.inner.<span class="fn">generateResponse</span>(prompt);
+  fs.<span class="fn">writeFileSync</span>(file, <span class="cls">JSON</span>.<span class="fn">stringify</span>({ response: r }));
+  <span class="kw">return</span> r;
+}
+<span class="kw">private</span> <span class="fn">cacheFile</span>(p: <span class="tp">string</span>) {
+  <span class="kw">return</span> path.<span class="fn">join</span>(this.cacheDir,
+    <span class="fn">createHash</span>(<span class="str">'sha256'</span>)
+      .<span class="fn">update</span>(<span class="str">`v1:`</span> + p).<span class="fn">digest</span>(<span class="str">'hex'</span>) + <span class="str">'.json'</span>);
+}</pre>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1033,6 +1434,34 @@ console.<span class="fn">log</span>(result.confidence);
           </div>
         </div>
       </div>
+      <div class="code-panel" id="cp-rootcause">
+        <div class="code-panel-header" onclick="togglePanel('cp-rootcause')">
+          <span><span class="cp-title">View Implementation — BugRootCauseAnalyzer.analyze()</span><span class="cp-file">pipeline/analyzers/root-cause/BugRootCauseAnalyzer.ts</span></span>
+          <span class="cp-arrow">▶</span>
+        </div>
+        <div class="code-panel-body">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="kw">async</span> <span class="fn">analyze</span>(input: <span class="cls">FailureAnalysisInput</span>): <span class="cls">Promise</span>&lt;<span class="cls">RootCauseAnalysisResult</span>&gt; {
+  <span class="kw">const</span> prompt = <span class="str">`You are a Senior QA Architect. Analyze the test failure:
+1. Failure Type  2. Probable Root Cause  3. Impacted Component
+4. Recommendation  5. Confidence Score (0–100)
+Rules: Return ONLY JSON. No markdown. No code fences.
+
+${JSON.stringify(input, null, 2)}`</span>;
+
+  <span class="kw">const</span> response = <span class="kw">await</span> this.llmProvider.<span class="fn">generateResponse</span>(prompt);
+  <span class="kw">const</span> result = <span class="cls">AIJsonParser</span>.<span class="fn">parse</span>&lt;<span class="cls">RootCauseAnalysisResult</span>&gt;(response);
+
+  <span class="cmt">// Built-in validation — throws if AI returns invalid data</span>
+  <span class="kw">if</span> (result.confidence &lt; <span class="num">0</span> || result.confidence &gt; <span class="num">100</span>)
+    <span class="kw">throw new</span> <span class="cls">Error</span>(<span class="str">`Invalid confidence: ${result.confidence}`</span>);
+  <span class="kw">if</span> (!result.failureType || !result.probableCause)
+    <span class="kw">throw new</span> <span class="cls">Error</span>(<span class="str">'Incomplete root cause result'</span>);
+
+  <span class="kw">return</span> result;
+}</pre>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1095,6 +1524,31 @@ Output:
     <span class="str">"Create 3 new test suites"</span></pre>
             <div class="cmd" style="margin-top:8px;"><span class="cmd-prompt">$</span><span class="cmd-text">npm run demo:coverage</span></div>
           </div>
+        </div>
+      </div>
+      <div class="code-panel" id="cp-flaky">
+        <div class="code-panel-header" onclick="togglePanel('cp-flaky')">
+          <span><span class="cp-title">View Implementation — FlakyTestAnalyzer.analyze()</span><span class="cp-file">pipeline/analyzers/flaky/FlakyTestAnalyzer.ts</span></span>
+          <span class="cp-arrow">▶</span>
+        </div>
+        <div class="code-panel-body">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="kw">async</span> <span class="fn">analyze</span>(executionData: <span class="cls">TestExecutionData</span>): <span class="cls">Promise</span>&lt;<span class="cls">FlakyTestAnalysis</span>&gt; {
+  <span class="kw">const</span> prompt = <span class="str">`You are a Senior QA Architect. Analyze the test execution data.
+Determine: 1. Flaky probability (0-100)  2. Possible causes  3. Recommendation
+Return ONLY JSON:
+{
+  "testName": "bill-pay.spec.ts",
+  "flakyProbability": 85,
+  "possibleCauses": ["Timing issue", "Network dependency"],
+  "recommendation": "Replace fixed waits with locator assertions."
+}
+
+${JSON.stringify(executionData, null, 2)}`</span>;
+
+  <span class="kw">const</span> response = <span class="kw">await</span> this.llmProvider.<span class="fn">generateResponse</span>(prompt);
+  <span class="kw">return</span> <span class="cls">AIJsonParser</span>.<span class="fn">parse</span>(response); <span class="cmt">// 3-pass JSON repair built-in</span>
+}</pre>
         </div>
       </div>
     </div>
@@ -1201,6 +1655,126 @@ Output:
         <div class="card" style="padding:12px 14px;text-align:center;">
           <div style="font-size:22px;font-weight:700;color:#f0883e;">~$0.03</div>
           <div style="font-size:12px;color:#8b949e;margin-top:2px;">API cost per full run</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SLIDE — PIPELINE IN CODE
+  ═══════════════════════════════════════════ -->
+  <div class="slide" id="s_pipeline_code">
+    <div class="eyebrow">Pipeline · Orchestration</div>
+    <h2>Pipeline in Code — 5 Steps, 1 Command</h2>
+    <div class="slide-content">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px;">
+        <div class="card" style="padding:8px 10px;text-align:center;">
+          <div style="font-size:10px;color:#3fb950;font-weight:700;">STEP 1</div>
+          <div style="font-size:11px;color:#e6edf3;margin-top:2px;">ExcelReader</div>
+          <div style="font-size:10px;color:#484f58;margin-top:1px;">Parse .xlsx</div>
+          <div style="font-size:10px;color:#484f58;">blank → aiGenerate</div>
+        </div>
+        <div class="card" style="padding:8px 10px;text-align:center;">
+          <div style="font-size:10px;color:#f0883e;font-weight:700;">STEP 2</div>
+          <div style="font-size:11px;color:#e6edf3;margin-top:2px;">Auto-KB</div>
+          <div style="font-size:10px;color:#484f58;margin-top:1px;">Missing KB JSON</div>
+          <div style="font-size:10px;color:#484f58;">AI-generated</div>
+        </div>
+        <div class="card" style="padding:8px 10px;text-align:center;">
+          <div style="font-size:10px;color:#1f6feb;font-weight:700;">STEP 3</div>
+          <div style="font-size:11px;color:#e6edf3;margin-top:2px;">Auto-POM</div>
+          <div style="font-size:10px;color:#484f58;margin-top:1px;">KB JSON</div>
+          <div style="font-size:10px;color:#484f58;">→ .ts page objects</div>
+        </div>
+        <div class="card" style="padding:8px 10px;text-align:center;">
+          <div style="font-size:10px;color:#bc8cff;font-weight:700;">STEP 4</div>
+          <div style="font-size:11px;color:#e6edf3;margin-top:2px;">AI Expand</div>
+          <div style="font-size:10px;color:#484f58;margin-top:1px;">aiGenerate rows</div>
+          <div style="font-size:10px;color:#484f58;">→ 8 test cases</div>
+        </div>
+        <div class="card" style="padding:8px 10px;text-align:center;">
+          <div style="font-size:10px;color:#58a6ff;font-weight:700;">STEP 5</div>
+          <div style="font-size:11px;color:#e6edf3;margin-top:2px;">Generate</div>
+          <div style="font-size:10px;color:#484f58;margin-top:1px;">ActionModels +</div>
+          <div style="font-size:10px;color:#484f58;">Assertions → .spec.ts</div>
+        </div>
+      </div>
+      <div class="code-panel" id="cp-excel">
+        <div class="code-panel-header" onclick="togglePanel('cp-excel')">
+          <span><span class="cp-title">Step 1 — ExcelReader: blank cell = AI generate flag</span><span class="cp-file">pipeline/readers/ExcelReader.ts</span></span>
+          <span class="cp-arrow">▶</span>
+        </div>
+        <div class="code-panel-body">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><span class="kw">interface</span> <span class="cls">Requirement</span> {
+  page: <span class="tp">string</span>; url: <span class="tp">string</span>; feature: <span class="tp">string</span>; scenario: <span class="tp">string</span>;
+  description: <span class="tp">string</span>; priority: <span class="tp">string</span>;
+  testCases?: <span class="tp">string</span>;
+  aiGenerate: <span class="tp">boolean</span>;  <span class="cmt">// ← set true when col G is blank</span>
+}
+
+ws.<span class="fn">eachRow</span>({ includeEmpty: <span class="kw">false</span> }, (row, idx) =&gt; {
+  <span class="kw">if</span> (idx === <span class="num">1</span>) <span class="kw">return</span>; <span class="cmt">// skip header row</span>
+  <span class="kw">const</span> testCasesCell = row.<span class="fn">getCell</span>(<span class="num">7</span>).<span class="fn">toString</span>().<span class="fn">trim</span>();
+  requirements.<span class="fn">push</span>({
+    page:       row.<span class="fn">getCell</span>(<span class="num">1</span>).<span class="fn">toString</span>(),
+    url:        row.<span class="fn">getCell</span>(<span class="num">2</span>).<span class="fn">toString</span>(),
+    scenario:   row.<span class="fn">getCell</span>(<span class="num">4</span>).<span class="fn">toString</span>(),
+    testCases:  testCasesCell || <span class="kw">undefined</span>,
+    aiGenerate: testCasesCell === <span class="str">''</span>,  <span class="cmt">// ← blank col G → AI generates in Step 4</span>
+  });
+});</pre>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="code-panel" id="cp-factory">
+          <div class="code-panel-header" onclick="togglePanel('cp-factory')">
+            <span><span class="cp-title">Provider Factory — env-driven selection</span><span class="cp-file">providers/ProviderFactory.ts</span></span>
+            <span class="cp-arrow">▶</span>
+          </div>
+          <div class="code-panel-body">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><span class="kw">static</span> <span class="fn">create</span>(modelOverride?: <span class="tp">string</span>): <span class="cls">LLMProvider</span> {
+  <span class="kw">const</span> name = process.env[<span class="str">'LLM_PROVIDER'</span>] ?? <span class="str">'gemini'</span>;
+  <span class="kw">const</span> model = modelOverride ?? process.env[<span class="str">'MODEL'</span>];
+
+  <span class="kw">if</span> (name === <span class="str">'fallback'</span>)
+    <span class="kw">return</span> <span class="cls">ProviderFactory</span>.<span class="fn">wrapWithCache</span>(
+      <span class="cls">ProviderFactory</span>.<span class="fn">createFallback</span>(model)
+    );
+  <span class="kw">return</span> <span class="cls">ProviderFactory</span>.<span class="fn">wrapWithCache</span>(
+    <span class="cls">ProviderFactory</span>.<span class="fn">createSingle</span>(name, model)
+  );
+}
+<span class="cmt">// Default fallback chain:</span>
+<span class="cmt">// lm-studio → gemini → openrouter → github-models</span>
+<span class="cmt">// Cache wraps ALL providers automatically</span></pre>
+          </div>
+        </div>
+        <div class="code-panel" id="cp-jsonparser">
+          <div class="code-panel-header" onclick="togglePanel('cp-jsonparser')">
+            <span><span class="cp-title">AI JSON Parser — 3-Pass Repair</span><span class="cp-file">utils/AIJsonParser.ts</span></span>
+            <span class="cp-arrow">▶</span>
+          </div>
+          <div class="code-panel-body">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><span class="kw">static</span> <span class="fn">parse</span>&lt;T&gt;(raw: <span class="tp">string</span>): T {
+  <span class="kw">const</span> cleaned = raw
+    .<span class="fn">replace</span>(/```json/gi, <span class="str">''</span>).<span class="fn">replace</span>(/```/g, <span class="str">''</span>).<span class="fn">trim</span>();
+
+  <span class="cmt">// Pass 1 — native JSON.parse (fast path)</span>
+  <span class="kw">try</span> { <span class="kw">return</span> <span class="cls">JSON</span>.<span class="fn">parse</span>(cleaned); } <span class="kw">catch</span> {}
+
+  <span class="cmt">// Pass 2 — jsonrepair (trailing commas, missing quotes)</span>
+  <span class="kw">try</span> { <span class="kw">return</span> <span class="cls">JSON</span>.<span class="fn">parse</span>(<span class="fn">jsonrepair</span>(cleaned)); } <span class="kw">catch</span> {}
+
+  <span class="cmt">// Pass 3 — truncation recovery (LLM hit token limit mid-array)</span>
+  <span class="kw">const</span> t = <span class="cls">AIJsonParser</span>.<span class="fn">truncateToLastCompleteObject</span>(cleaned);
+  <span class="kw">if</span> (t) <span class="kw">return</span> <span class="cls">JSON</span>.<span class="fn">parse</span>(t);
+
+  <span class="kw">throw new</span> <span class="cls">JsonRepairError</span>(<span class="str">'All 3 passes failed'</span>);
+}</pre>
+          </div>
         </div>
       </div>
     </div>
@@ -1661,68 +2235,448 @@ PriorityScoredResult.ts
   <button id="nextBtn" onclick="navigate(1)">Next →</button>
 </div>
 
-<div class="kbd-hint">← → arrow keys to navigate</div>
+<div class="kbd-hint">← → navigate · Esc overview · F fullscreen · T theme</div>
+
+<!-- ── Loader ───────────────────────────── -->
+<div id="loader">
+  <div class="ld-title">AI Test Intelligence Platform</div>
+  <div class="ld-bar"><div class="ld-fill" id="ldFill"></div></div>
+  <div class="ld-sub">Loading presentation…</div>
+</div>
+
+<!-- ── Controls (top-left) ──────────────── -->
+<div id="ctrl-group">
+  <button class="ctrl-btn" id="themeBtn" title="Toggle light mode (T)">☀</button>
+  <button class="ctrl-btn" id="fsBtn"    title="Fullscreen (F)">⛶</button>
+  <button class="ctrl-btn" id="ovBtn"    title="Slide overview (Esc)">⊞</button>
+</div>
+
+<!-- ── Slide Overview ───────────────────── -->
+<div id="overview"></div>
+<div id="ov-header">
+  <span style="font-size:13px;color:#8b949e;font-weight:600;">Slide Overview</span>
+  <span id="ov-hint-text">Click a slide to jump · Press Esc to close</span>
+  <button id="ov-close-btn" onclick="closeOverview()">✕</button>
+</div>
+
+<!-- ── Tooltip ──────────────────────────── -->
+<div id="tooltip"></div>
 
 <script>
-  const SLIDES = [
-    's1','s2','s_excel','s_discovery','s3','s4','s5','s_pom','s6',
-    's7','s8','s9','s10','s11','s12',
-    's_smartcache','s_perf',
-    's13','s14','s_reports','s15','s16'
-  ];
-  const TOTAL = SLIDES.length;
-  let current = 0;
+'use strict';
 
-  function updateUI() {
-    document.querySelectorAll('.slide').forEach(s => { s.style.display = 'none'; s.style.opacity = '0'; });
-    const el = document.getElementById(SLIDES[current]);
-    el.style.display = 'flex';
-    setTimeout(() => el.style.opacity = '1', 10);
-    const n = current + 1;
-    document.getElementById('progressBar').style.width = (n / TOTAL * 100) + '%';
-    document.getElementById('slideTag').textContent = n + ' / ' + TOTAL;
-    document.getElementById('counter').textContent   = n + ' / ' + TOTAL;
-    document.getElementById('prevBtn').disabled = current === 0;
-    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
-    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
-  }
+const SLIDES = [
+  {id:'s1',          title:'AI Test Intelligence Platform',      eye:'Proof of Concept · 2026'},
+  {id:'s2',          title:'The Problem',                        eye:'Why We Built This'},
+  {id:'s_excel',     title:'Excel-Driven Requirements',          eye:'Step 0 — Requirements Input'},
+  {id:'s_discovery', title:'URL-First Discovery',                eye:'Step 2.5 — Hybrid AI Discovery'},
+  {id:'s3',          title:'One Sentence In. Running Tests Out.',eye:'The Solution'},
+  {id:'s4',          title:'Automation Exercise',                eye:'Demo Application'},
+  {id:'s5',          title:'Four-Layer Architecture',            eye:'System Design'},
+  {id:'s_codemap',   title:'Architecture → Code Map',           eye:'System Design · Implementation'},
+  {id:'s_pom',       title:'Auto-Generated Page Objects',        eye:'Phase 4 — Auto-POM Generation'},
+  {id:'s6',          title:'10 AI Modules — One Platform',       eye:'Platform Capabilities'},
+  {id:'s7',          title:'Login Test Generation',              eye:'Demo Scenario 1'},
+  {id:'s8',          title:'Registration Test Generation',       eye:'Demo Scenario 2'},
+  {id:'s9',          title:'Self-Healing Locator',               eye:'Demo Scenario 3'},
+  {id:'s10',         title:'Root Cause Analyzer',                eye:'Demo Scenario 4'},
+  {id:'s11',         title:'Flaky + Coverage',                   eye:'Demo Scenario 5'},
+  {id:'s12',              title:'End-to-End Flow',               eye:'Pipeline'},
+  {id:'s_pipeline_code',  title:'Pipeline in Code',             eye:'Orchestration · 5 Steps'},
+  {id:'s_smartcache',     title:'Smart Regeneration',           eye:'Enterprise Optimization'},
+  {id:'s_perf',      title:'Performance Engineering',            eye:'Enterprise Optimization'},
+  {id:'s13',         title:'Tech Stack',                         eye:'Technology'},
+  {id:'s14',         title:'Add Anything in Minutes',            eye:'Extensibility'},
+  {id:'s_reports',   title:'Every Run Fully Archived',           eye:'Reports Infrastructure'},
+  {id:'s15',         title:'What the Team Gains',                eye:'Impact'},
+  {id:'s16',         title:'Built. Running. Ready.',             eye:'Summary'},
+];
+const TOTAL = SLIDES.length;
 
-  function navigate(dir) {
-    const next = current + dir;
-    if (next < 0 || next >= TOTAL) return;
-    const old = document.getElementById(SLIDES[current]);
-    old.style.opacity = '0';
-    setTimeout(() => { old.style.display = 'none'; }, 200);
-    current = next;
-    const el = document.getElementById(SLIDES[current]);
-    el.style.opacity = '0';
-    el.style.display = 'flex';
-    setTimeout(() => el.style.opacity = '1', 50);
-    const n = current + 1;
-    document.getElementById('progressBar').style.width = (n / TOTAL * 100) + '%';
-    document.getElementById('slideTag').textContent = n + ' / ' + TOTAL;
-    document.getElementById('counter').textContent   = n + ' / ' + TOTAL;
-    document.getElementById('prevBtn').disabled = current === 0;
-    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
-    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
-  }
+let current     = 0;
+let isAnimating = false;
+let isOvOpen    = false;
+let isLight     = false;
+let hideTimer   = null;
 
-  // Build dots
-  const dotsEl = document.getElementById('dots');
-  for (let i = 0; i < TOTAL; i++) {
+const $  = id => document.getElementById(id);
+const sl = i  => $(SLIDES[i].id);
+
+/* ── bootstrap ─────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  buildDots();
+  buildOverview();
+  setupModuleCards();
+  setupTooltips();
+  setupAutoHide();
+  setupControls();
+  bootLoader();
+});
+
+function bootLoader() {
+  const fill   = $('ldFill');
+  const loader = $('loader');
+  if (!loader) { activateFirst(); return; }
+  setTimeout(() => { fill.style.width = '100%'; }, 150);
+  setTimeout(() => {
+    loader.classList.add('done');
+    setTimeout(() => { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 650);
+    activateFirst();
+  }, 1050);
+}
+
+function activateFirst() {
+  SLIDES.forEach(s => {
+    const e = $(s.id);
+    e.style.display = 'none';
+    e.style.opacity = '';
+    e.style.animation = '';
+    e.classList.remove('active');
+  });
+  const e = sl(0);
+  e.style.display   = 'flex';
+  e.style.opacity   = '0';
+  e.style.animation = 'firstSlide .65s ease forwards';
+  e.classList.add('active');
+  e.addEventListener('animationend', () => {
+    e.style.animation = '';
+    e.style.opacity   = '';
+    animateContent(e);
+    animateCounters(e);
+  }, {once: true});
+  current = 0;
+  updateHUD();
+}
+
+/* ── navigation ────────────────────────────────────────────────── */
+function navigate(dir) {
+  if (isAnimating) return;
+  const next = current + dir;
+  if (next < 0 || next >= TOTAL) return;
+  transition(next, dir);
+}
+
+function goTo(idx) {
+  if (isAnimating || idx === current) return;
+  if (isOvOpen) closeOverview();
+  transition(idx, idx > current ? 1 : -1);
+}
+
+function transition(idx, dir) {
+  isAnimating = true;
+  showControls();
+
+  const exitEl  = sl(current);
+  const enterEl = sl(idx);
+  const exitAnim  = dir > 0 ? 'slideExitLeft'  : 'slideExitRight';
+  const enterAnim = dir > 0 ? 'slideEnterRight' : 'slideEnterLeft';
+
+  /* EXIT */
+  exitEl.classList.remove('active');
+  exitEl.style.display   = 'flex';
+  exitEl.style.opacity   = '1';
+  exitEl.style.animation = exitAnim + ' .3s cubic-bezier(.4,0,1,1) forwards';
+  exitEl.addEventListener('animationend', () => {
+    exitEl.style.display   = 'none';
+    exitEl.style.opacity   = '';
+    exitEl.style.animation = '';
+  }, {once: true});
+
+  /* ENTER */
+  enterEl.style.display   = 'flex';
+  enterEl.style.opacity   = '0';
+  enterEl.style.animation = enterAnim + ' .45s cubic-bezier(.16,1,.3,1) .04s both';
+  enterEl.addEventListener('animationend', () => {
+    enterEl.style.animation = '';
+    enterEl.style.opacity   = '';
+    enterEl.classList.add('active');
+    isAnimating = false;
+    animateContent(enterEl);
+    animateCounters(enterEl);
+  }, {once: true});
+
+  current = idx;
+  updateHUD();
+  updateOvCurrent();
+}
+
+/* ── HUD ───────────────────────────────────────────────────────── */
+function updateHUD() {
+  const n = current + 1;
+  $('progressBar').style.width = (n / TOTAL * 100) + '%';
+  $('slideTag').textContent    = n + ' / ' + TOTAL;
+  $('counter').textContent     = n + ' / ' + TOTAL;
+  $('prevBtn').disabled = current === 0;
+  $('nextBtn').disabled = current === TOTAL - 1;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+}
+
+/* ── dots ──────────────────────────────────────────────────────── */
+function buildDots() {
+  const wrap = $('dots');
+  wrap.innerHTML = '';
+  SLIDES.forEach((s, i) => {
     const d = document.createElement('div');
     d.className = 'dot' + (i === 0 ? ' active' : '');
-    d.onclick = (function(idx) { return function() { navigate(idx - current); }; })(i);
-    dotsEl.appendChild(d);
+    d.title = s.title;
+    d.onclick = () => goTo(i);
+    wrap.appendChild(d);
+  });
+}
+
+/* ── content entrance animations ───────────────────────────────── */
+function animateContent(slideEl) {
+  const toAnim = [];
+  const dur  = '.42s';
+  const ease = 'cubic-bezier(.16,1,.3,1)';
+
+  function prep(el, kf, delay) {
+    if (!el) return;
+    el.style.opacity   = '0';
+    el.style.animation = kf + ' ' + dur + ' ' + ease + ' ' + delay + 's both';
+    toAnim.push(el);
   }
 
-  // Keyboard
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
-  });
+  const eyebrow = slideEl.querySelector('.eyebrow');
+  if (eyebrow) prep(eyebrow, 'fadeInDown', 0);
 
-  updateUI();
+  slideEl.querySelectorAll('h1,h2').forEach((h, i) => prep(h, 'fadeInUp', 0.06 + i * 0.04));
+  slideEl.querySelectorAll('.layer').forEach((l, i) => prep(l, 'fadeInLeft', 0.10 + i * 0.08));
+  slideEl.querySelectorAll('.card,.before-box,.after-box').forEach((c, i) =>
+    prep(c, 'scaleIn', 0.12 + i * 0.06));
+  slideEl.querySelectorAll('.module-card').forEach((c, i) =>
+    prep(c, 'scaleIn', 0.08 + i * 0.04));
+  slideEl.querySelectorAll('.flow-step').forEach((f, i) =>
+    prep(f, 'fadeInUp', 0.08 + i * 0.05));
+  slideEl.querySelectorAll('.step-list li').forEach((li, i) =>
+    prep(li, 'fadeInLeft', 0.12 + i * 0.05));
+  slideEl.querySelectorAll('table').forEach((t, i) =>
+    prep(t, 'fadeInUp', 0.15 + i * 0.08));
+  slideEl.querySelectorAll('pre').forEach((p, i) =>
+    prep(p, 'fadeInRight', 0.18 + i * 0.06));
+
+  toAnim.forEach(e => {
+    e.addEventListener('animationend', () => {
+      e.style.opacity   = '';
+      e.style.animation = '';
+    }, {once: true});
+  });
+}
+
+/* ── animated counters ─────────────────────────────────────────── */
+const _counted = new WeakSet();
+
+function animateCounters(slideEl) {
+  slideEl.querySelectorAll('[style]').forEach(el => {
+    if (_counted.has(el)) return;
+    const fs = el.style.fontSize || '';
+    if (!fs.includes('22px') && !fs.includes('20px')) return;
+    const txt = el.textContent.trim();
+    const m = txt.match(/^(\d+)(.*)/);
+    if (!m) return;
+    const end = parseInt(m[1], 10);
+    if (end < 2 || end > 500) return;
+    _counted.add(el);
+    const suffix = m[2];
+    const t0  = performance.now();
+    const dur = 950;
+    function tick(now) {
+      const p  = Math.min((now - t0) / dur, 1);
+      const ep = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(end * ep) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = txt;
+    }
+    setTimeout(() => requestAnimationFrame(tick), 250);
+  });
+}
+
+/* ── module card expand (click to reveal detail) ────────────────── */
+const MODULE_INFO = {
+  'Test Case Generator':       'Validates output — retries if fewer than 4 cases returned. Covers positive, negative, validation, and edge scenarios.',
+  'Test Data Generator':       'Context-aware data from the knowledge base: valid credentials, invalid formats, empty strings, and boundary values.',
+  'Action Model Generator':    'Returns {action, selector, description} JSON — never raw code. ~90% of steps classified by rules; only novel steps call the LLM.',
+  'Assertion Generator':       'Builds typed Playwright expect() calls grounded in KB selectors and error messages. Every assertion is traceable.',
+  'Self-Healing Locator':      'Semantic similarity scoring vs the KB. Returns healedLocator + confidence score + reasoning. Never silently fails.',
+  'Flaky Test Analyzer':       'Input: retry count, duration variance. Output: flakiness probability + root cause category + specific fix recommendation.',
+  'Root Cause Analyzer':       'Classifies failures by type. Returns impacted component + confidence score + actionable recommendation.',
+  'Coverage Analyzer':         'Cross-references requirements vs existing tests. Returns coverage % + specific missing test suite names.',
+  'Regression Selector':       'Input: git-diff file list. Output: exactly the test suites that test those changed files only.',
+  'Scenario Inference Engine': 'Playwright DOM extraction + LLM inference from a live page. Results are cached — no re-crawl on unchanged pages.',
+};
+
+function setupModuleCards() {
+  document.querySelectorAll('.module-card').forEach(card => {
+    const nm = card.querySelector('.module-name');
+    if (!nm) return;
+    const name = nm.textContent.trim();
+    const info = MODULE_INFO[name];
+    if (!info) return;
+    if (!card.querySelector('.module-detail')) {
+      const d = document.createElement('div');
+      d.className = 'module-detail';
+      d.textContent = info;
+      card.appendChild(d);
+    }
+    card.addEventListener('click', () => {
+      const was = card.classList.contains('expanded');
+      document.querySelectorAll('.module-card.expanded').forEach(c => c.classList.remove('expanded'));
+      if (!was) card.classList.add('expanded');
+    });
+  });
+}
+
+/* ── tooltip system ────────────────────────────────────────────── */
+const TIP = {
+  'LLMProvider':          'Interface: generateResponse(prompt): Promise<string>. All AI providers implement this 4-line contract.',
+  'KnowledgeBaseService': 'Loads page JSON by name. Ground truth for selectors — prevents AI hallucination.',
+  'CachingLLMProvider':   'SHA-256 hashes prompts. Returns cached disk responses — zero API calls on cache hit.',
+  'FallbackProvider':     'Wraps a provider list. Circuit-breaks after 5 failures, switches to next provider automatically.',
+  'AIJsonParser':         'Strips markdown fences from LLM output. Parses typed JSON. Used by every AI module.',
+  'PlaywrightRenderer':   'Rule-based renderer — no AI. Converts ActionModel[] to deterministic Playwright code strings.',
+  'POMGenerator':         'Generates Page Object Model classes from KB JSON. Output matches hand-written POMs exactly.',
+  'SelectorRetriever':    'RAG: scores KB selectors by keyword relevance. Passes only top matches — keeps prompts lean.',
+  'RequirementExpander':  'Normalises and enriches requirements before LLM. Also guards against prompt injection.',
+};
+
+function setupTooltips() {
+  document.querySelectorAll('code').forEach(el => {
+    const key = el.textContent.replace(/['".()\[\]]/g, '').trim();
+    if (TIP[key]) el.setAttribute('data-tip', TIP[key]);
+  });
+  const tip = $('tooltip');
+  document.addEventListener('mousemove', e => {
+    const t = e.target.closest('[data-tip]');
+    if (t) {
+      tip.textContent = t.dataset.tip;
+      tip.classList.add('visible');
+      tip.style.left = Math.min(e.clientX + 16, window.innerWidth  - 280) + 'px';
+      tip.style.top  = Math.min(e.clientY + 22, window.innerHeight -  90) + 'px';
+    } else {
+      tip.classList.remove('visible');
+    }
+  });
+}
+
+/* ── overview ──────────────────────────────────────────────────── */
+function buildOverview() {
+  const ov = $('overview');
+  ov.innerHTML = '';
+  SLIDES.forEach((s, i) => {
+    const c = document.createElement('div');
+    c.className = 'ov-card';
+    c.innerHTML = '<div class="ov-num">Slide ' + (i + 1) + '</div>'
+                + '<div class="ov-title">' + s.title + '</div>'
+                + '<div class="ov-eye">'   + s.eye   + '</div>';
+    c.onclick = () => goTo(i);
+    ov.appendChild(c);
+  });
+  updateOvCurrent();
+}
+
+function openOverview() {
+  isOvOpen = true;
+  $('overview').classList.add('visible');
+  $('ov-header').classList.add('visible');
+  updateOvCurrent();
+}
+function closeOverview() {
+  isOvOpen = false;
+  $('overview').classList.remove('visible');
+  $('ov-header').classList.remove('visible');
+}
+function toggleOverview() { isOvOpen ? closeOverview() : openOverview(); }
+function updateOvCurrent() {
+  document.querySelectorAll('.ov-card').forEach((c, i) => c.classList.toggle('current', i === current));
+}
+
+/* ── auto-hide controls ────────────────────────────────────────── */
+function _ctrlEls() {
+  return [
+    document.querySelector('.nav'),
+    document.querySelector('.kbd-hint'),
+    $('ctrl-group'),
+  ].filter(Boolean);
+}
+function showControls() {
+  _ctrlEls().forEach(e => { e.classList.add('auto-hide'); e.classList.remove('hidden'); });
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => {
+    _ctrlEls().forEach(e => e.classList.add('hidden'));
+  }, 4500);
+}
+function setupAutoHide() {
+  ['mousemove', 'keydown', 'click', 'touchstart'].forEach(ev =>
+    document.addEventListener(ev, showControls, {passive: true}));
+  showControls();
+}
+
+/* ── controls setup ────────────────────────────────────────────── */
+function setupControls() {
+  $('themeBtn').addEventListener('click', () => {
+    isLight = !isLight;
+    document.body.classList.toggle('light', isLight);
+    $('themeBtn').textContent = isLight ? '🌙' : '☀';
+  });
+  $('fsBtn').addEventListener('click', toggleFs);
+  $('ovBtn').addEventListener('click', toggleOverview);
+}
+
+function toggleFs() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    $('fsBtn').textContent = '⊡';
+  } else {
+    document.exitFullscreen();
+    $('fsBtn').textContent = '⛶';
+  }
+}
+
+/* ── code panels ───────────────────────────────────────────────── */
+function togglePanel(id) {
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.toggle('open');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-panel-body').querySelector('pre');
+  if (!pre) return;
+  const text = pre.innerText;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+    }).catch(() => selectText(pre));
+  } else { selectText(pre); }
+}
+function selectText(el) {
+  const sel = window.getSelection(), r = document.createRange();
+  r.selectNodeContents(el); sel.removeAllRanges(); sel.addRange(r);
+}
+
+/* ── keyboard ──────────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (isOvOpen) { if (e.key === 'Escape') closeOverview(); return; }
+  switch (e.key) {
+    case 'ArrowRight': case 'ArrowDown': case ' ': e.preventDefault(); navigate(1);  break;
+    case 'ArrowLeft':  case 'ArrowUp':             e.preventDefault(); navigate(-1); break;
+    case 'Escape': toggleOverview(); break;
+    case 'f': case 'F': toggleFs(); break;
+    case 't': case 'T': $('themeBtn').click(); break;
+    case 'Home': goTo(0);          break;
+    case 'End':  goTo(TOTAL - 1); break;
+  }
+});
+
+/* ── touch / swipe ─────────────────────────────────────────────── */
+let _tx = 0;
+document.addEventListener('touchstart', e => { _tx = e.touches[0].clientX; }, {passive: true});
+document.addEventListener('touchend',   e => {
+  const dx = _tx - e.changedTouches[0].clientX;
+  if (Math.abs(dx) > 55) navigate(dx > 0 ? 1 : -1);
+}, {passive: true});
 </script>
 </body>
 </html>
