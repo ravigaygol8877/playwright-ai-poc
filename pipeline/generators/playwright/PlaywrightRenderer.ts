@@ -44,6 +44,7 @@ export class PlaywrightRenderer {
 
             case "fill": {
                 if (!action.target) return "";
+                if (!action.dataKey) return "";
                 const value = action.dataKey === "empty"
                     ? "''"
                     : `testData.${action.dataKey}`;

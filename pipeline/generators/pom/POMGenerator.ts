@@ -165,6 +165,9 @@ export class POMGenerator {
       .map(([k, v]) => `  - ${k}: "${v}"`)
       .join('\n');
 
+    let promptPathname = url;
+    try { promptPathname = new URL(url).pathname; } catch { /* relative path — use as-is */ }
+
     const prompt = `
 You are a Senior Playwright Automation Engineer.
 
@@ -184,7 +187,7 @@ Rules:
 - Only generate methods for meaningful user actions (e.g., login, search, fill form, submit).
 - Each method body uses "this.propertyName" — NOT page.locator(selector).
 - Use "await" for every locator interaction.
-- For goto: await this.navigate('${new URL(url).pathname}'); await this.waitForPageReady();
+- For goto: await this.navigate('${promptPathname}'); await this.waitForPageReady();
 - Return ONLY JSON. No markdown. No explanation.
 
 JSON format:
@@ -264,7 +267,7 @@ JSON format:
     return `import type { Page, Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-export default class ${className} {
+export class ${className} {
   private readonly page: Page;
 
   // Selectors (auto-generated from KB — validate each in Chrome DevTools)
@@ -291,6 +294,14 @@ ${assertionImpl}
   }
 
 ${methodBlocks}
+
+  private async navigate(path: string): Promise<void> {
+    await this.page.goto(path);
+  }
+
+  private async waitForPageReady(): Promise<void> {
+    await this.page.waitForLoadState('load');
+  }
 }
 `;
   }

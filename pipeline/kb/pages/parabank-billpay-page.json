@@ -1,0 +1,35 @@
+{
+  "pageName": "Bill Pay",
+  "describeName": "billPay",
+  "url": "https://parabank.parasoft.com/parabank/billpay.htm",
+  "selectors": {
+    "payeeName": "input[name='payee.name']",
+    "payeeStreet": "input[name='payee.address.street']",
+    "payeeCity": "input[name='payee.address.city']",
+    "payeeState": "input[name='payee.address.state']",
+    "payeeZip": "input[name='payee.address.zipCode']",
+    "payeePhone": "input[name='payee.phoneNumber']",
+    "payeeAccount": "input[name='payee.accountNumber']",
+    "verifyAccount": "input[name='verifyAccount']",
+    "amount": "input[name='amount']",
+    "fromAccount": "select[name='fromAccountId']",
+    "sendPaymentButton": "input[type='submit'][value='Send Payment']"
+  },
+  "messages": {
+    "paymentComplete": "Bill Payment Complete",
+    "accountMismatch": "Account number confirmation mismatch.",
+    "payeeNameRequired": "Payee name is required.",
+    "addressRequired": "Address is required.",
+    "cityRequired": "City is required.",
+    "stateRequired": "State is required.",
+    "zipRequired": "Zip Code is required.",
+    "phoneRequired": "Phone number is required.",
+    "accountRequired": "Account number is required.",
+    "amountRequired": "The amount cannot be empty.",
+    "invalidAmount": "Please enter a valid amount."
+  },
+  "success": {
+    "redirectUrl": "",
+    "landmarkText": "Bill Payment Complete"
+  }
+}

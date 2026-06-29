@@ -1,0 +1,24 @@
+{
+  "pageName": "Account Registration",
+  "url": "https://parabank.parasoft.com/parabank/register.htm",
+  "selectors": {
+    "firstNameInput": "input[id=\"customer.firstName\"]",
+    "lastNameInput": "input[id=\"customer.lastName\"]",
+    "addressStreetInput": "input[id=\"customer.address.street\"]",
+    "cityInput": "input[id=\"customer.address.city\"]",
+    "stateInput": "input[id=\"customer.address.state\"]",
+    "zipCodeInput": "input[id=\"customer.address.zipCode\"]",
+    "phoneNumberInput": "input[id=\"customer.phoneNumber\"]",
+    "ssnInput": "input[id=\"customer.ssn\"]",
+    "usernameInput": "input[id=\"customer.username\"]",
+    "passwordInput": "input[id=\"customer.password\"]",
+    "confirmPasswordInput": "input[id=\"repeatedPassword\"]",
+    "submitButton": "input[type=\"submit\", class=\"button\"]",
+    "forgotLoginLink": "a:has-text(\"Forgot login info?\")"
+  },
+  "messages": {},
+  "success": {
+    "redirectUrl": "",
+    "landmarkText": ""
+  }
+}

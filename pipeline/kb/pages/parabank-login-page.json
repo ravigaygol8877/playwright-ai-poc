@@ -1,0 +1,27 @@
+{
+  "pageName": "onlineBankingLogin",
+  "url": "https://parabank.parasoft.com/parabank/index.htm",
+  "selectors": {
+    "usernameField": "input[name='username']",
+    "passwordField": "input[name='password']",
+    "loginButton": "input[type='submit'].button",
+    "forgotLoginLink": "a:has-text('Forgot login info?')",
+    "registerLink": "a:has-text('Register')",
+    "aboutUsLink": "a:has-text('About Us')",
+    "servicesLink": "a:has-text('Services')",
+    "productsLink": "a[href='http://www.parasoft.com/jsp/products.jsp']",
+    "locationsLink": "a[href='http://www.parasoft.com/jsp/pr/contacts.jsp']",
+    "adminPageLink": "a:has-text('Admin Page')",
+    "homeLink": "a:has-text('Home')",
+    "contactUsLink": "a:has-text('Contact Us')",
+    "siteMapLink": "a:has-text('Site Map')"
+  },
+  "messages": {
+    "experienceBanner": "Experience the difference",
+    "customerLoginTitle": "Customer Login"
+  },
+  "success": {
+    "redirectUrl": "",
+    "landmarkText": ""
+  }
+}
