@@ -20,6 +20,7 @@
 import "dotenv/config";
 import fs from "fs";
 import path from "path";
+import { ensureScaffoldFiles } from "./ensureScaffold.js";
 
 import type { LLMProvider } from "../pipeline/providers/interfaces/LLMProvider.js";
 import { createRunContext } from "../pipeline/reporting/RunContext.js";
@@ -126,6 +127,7 @@ async function generateSuite(
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  ensureScaffoldFiles();
 
   console.clear();
   console.log(`

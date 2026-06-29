@@ -12,6 +12,7 @@
 import "dotenv/config";
 import fs from "fs";
 import path from "path";
+import { ensureScaffoldFiles } from "./ensureScaffold.js";
 
 import { ProviderFactory }     from "../pipeline/providers/ProviderFactory.js";
 import { KnowledgeBaseService } from "../pipeline/kb/KnowledgeBaseService.js";
@@ -30,6 +31,7 @@ function cross(msg: string) { console.log(`  ❌  ${msg}`); }
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  ensureScaffoldFiles();
 
   const llm       = ProviderFactory.create();
   const kbService = new KnowledgeBaseService();
