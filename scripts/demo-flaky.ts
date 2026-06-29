@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { ensureScaffoldFiles } from "./ensureScaffold.js";
 
 import { ProviderFactory }
 from "../pipeline/providers/ProviderFactory.js";
@@ -7,6 +8,7 @@ import { FlakyTestAnalyzer }
 from "../pipeline/analyzers/flaky/FlakyTestAnalyzer.js";
 
 async function main() {
+  ensureScaffoldFiles();
 
   const provider = ProviderFactory.create();
 

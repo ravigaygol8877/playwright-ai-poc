@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { ensureScaffoldFiles } from "./ensureScaffold.js";
 
 import { ProviderFactory }
 from "../pipeline/providers/ProviderFactory.js";
@@ -10,6 +11,7 @@ import { SelfHealingLocatorEngine }
 from "../pipeline/analyzers/self-healing/SelfHealingLocatorEngine.js";
 
 async function main() {
+  ensureScaffoldFiles();
 
   const provider = ProviderFactory.create();
 

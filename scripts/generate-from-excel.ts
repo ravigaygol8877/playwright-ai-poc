@@ -22,6 +22,7 @@ import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import { createHash } from "crypto";
+import { ensureScaffoldFiles } from "./ensureScaffold.js";
 
 import { ProviderFactory }        from "../pipeline/providers/ProviderFactory.js";
 import { KnowledgeBaseService }   from "../pipeline/kb/KnowledgeBaseService.js";
@@ -98,6 +99,7 @@ function info(k: string, v: string) { console.log(`       ${k.padEnd(18)}: ${v}`
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  ensureScaffoldFiles();
 
   if (!fs.existsSync(EXCEL_FILE)) {
     console.error(`\n  ERROR: Requirements file not found: ${EXCEL_FILE}`);

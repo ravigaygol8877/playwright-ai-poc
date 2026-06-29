@@ -14,6 +14,7 @@
 import "dotenv/config";
 import fs from "fs";
 import path from "path";
+import { ensureScaffoldFiles } from "./ensureScaffold.js";
 import { ProviderFactory }   from "../pipeline/providers/ProviderFactory.js";
 import { KnowledgeBaseGenerator } from "../pipeline/kb/KnowledgeBaseGenerator.js";
 
@@ -40,6 +41,7 @@ function loadEnvFile(): void {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  ensureScaffoldFiles();
   loadEnvFile();
 
 
