@@ -44,7 +44,6 @@ export class TestIntelligenceOrchestrator {
         const generatedScript =
             await this.playwrightGenerator.generate(
                 testCases,
-                testData,
                 knowledgeBase
             );
 

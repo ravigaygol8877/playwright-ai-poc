@@ -36,7 +36,7 @@ export default defineConfig({
     ['html',              { open: 'never', outputFolder: runs.playwright }],
     ['json',              { outputFile: path.join(runs.playwright, 'results.json') }],
     ['junit',             { outputFile: path.join(runs.playwright, 'junit.xml') }],
-    ['allure-playwright', { detail: true, outputFolder: runs.allureResults, suiteTitle: false }],
+    ['allure-playwright', { detail: true, outputFolder: 'allure-results', suiteTitle: false }],
     CI ? ['github'] : ['list'],
   ],
 

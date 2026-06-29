@@ -55,7 +55,7 @@ EXACT ERROR/STATUS MESSAGES (copy these verbatim — never paraphrase or invent 
 ${messageLines}
 
 AVAILABLE SELECTORS (format: "name → css-selector"):
-Use the css-selector string on the right in page.locator("..."). NEVER use the name on the left as a variable.
+Use the css-selector string on the right in page.locator('...'). NEVER use the name on the left as a variable.
 ${selectorLines}
 
 SUCCESS: redirectUrl=${redirectUrl || "(none)"}, landmarkText=${landmarkText || "(none)"}
@@ -88,9 +88,10 @@ ${expectedResult}
       .trim();
 
     // Guard: split any comma-chained await expressions onto separate lines
+    // Strip leading ( that LLMs sometimes wrap around the expression
     return cleaned
       .split(/,\s*(?=await\s)/)
-      .map(s => s.trim())
+      .map(s => s.trim().replace(/^\(+(await\s)/, '$1'))
       .join("\n");
   }
 }

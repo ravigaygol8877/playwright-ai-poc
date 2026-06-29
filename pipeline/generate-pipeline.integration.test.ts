@@ -6,8 +6,7 @@
  *
  * Coverage:
  *   - TestCaseGenerator: output shape, MIN/MAX enforcement
- *   - PlaywrightGenerator: testDesktop template with pomOptions
- *   - PlaywrightGenerator: legacy fixture template (pomOptions without pageClassName)
+ *   - PlaywrightGenerator: enterprise dual-viewport spec output
  *   - PlaywrightRenderer: method-registry vs. fallback rendering
  */
 
@@ -15,13 +14,9 @@ import { describe, it, expect, vi } from "vitest";
 import { TestCaseGenerator }    from "./generators/test-cases/TestCaseGenerator.js";
 import { PlaywrightGenerator }  from "./generators/playwright/PlaywrightGenerator.js";
 import { PlaywrightRenderer }   from "./generators/playwright/PlaywrightRenderer.js";
-import { AIActionModelGenerator } from "./generators/action-model/AIActionModelGenerator.js";
-import { AssertionGenerator }   from "./generators/assertions/AssertionGenerator.js";
 import type { LLMProvider }     from "./providers/interfaces/LLMProvider.js";
 import type { KnowledgeBase }   from "./models/KnowledgeBase.js";
 import type { TestCase }        from "./models/TestCase.js";
-import type { TestData }        from "./models/TestData.js";
-import type { PomOptions }      from "./generators/playwright/PlaywrightGenerator.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -55,31 +50,6 @@ const FIXTURE_KB: KnowledgeBase = {
   messages: { loginError: "Your email or password is incorrect!" },
 };
 
-const FIXTURE_TEST_DATA: TestData = {
-  validUsername:         "user@example.com",
-  validPassword:         "Secret123!",
-  invalidUsername:       "bad@example.com",
-  invalidPassword:       "wrong",
-  overMaxLengthUsername: "a".repeat(256),
-  uppercaseUsername:     "USER@EXAMPLE.COM",
-  firstName:             "Jane",
-  lastName:              "Doe",
-  postalCode:            "10001",
-  invalidPostalCode:     "00000",
-  lockedOutUsername:     "locked@example.com",
-};
-
-const FIXTURE_POM_OPTIONS: PomOptions = {
-  fixtureKey:         "aeHomePage",
-  fixtureImportPath:  "../../support/fixtures/base.js",
-  testDataImportPath: "./ae-home.data.js",
-  pageClassName:      "AeHomePage",
-  pageImportPath:     "../../support/pages/AeHomePage.js",
-  methodRegistry: {
-    navSignupLoginLink: { click: "navigateToLogin" },
-    loginButton:        { click: "submitLogin" },
-  },
-};
 
 // ─── TestCaseGenerator integration ───────────────────────────────────────────
 
@@ -145,119 +115,43 @@ describe("Pipeline — TestCaseGenerator integration", () => {
 
 // ─── PlaywrightGenerator integration ─────────────────────────────────────────
 
-describe("Pipeline — PlaywrightGenerator integration (testDesktop template)", () => {
+describe("Pipeline — PlaywrightGenerator integration (enterprise dual-viewport)", () => {
 
-  const CLICK_ACTION_JSON = JSON.stringify({ action: "click", target: "loginButton" });
-  const ASSERTION_CODE    = "await expect(page).toHaveURL(/home/);";
-
-  it("output contains 'testDesktop.describe' when pageClassName is provided", async () => {
-    // LLM is called for: action model (1 call per step) + assertion (1 call per test case)
-    // Both return the same mock; action model gets click, assertion gets the assertion line.
-    const provider  = makeMockProvider(CLICK_ACTION_JSON);
-    const assertProv = makeMockProvider(ASSERTION_CODE);
-    const actionGen = new AIActionModelGenerator(provider);
-    const renderer  = new PlaywrightRenderer();
-    const assertGen = new AssertionGenerator(assertProv);
-    const pwGen     = new PlaywrightGenerator(actionGen, renderer, assertGen);
-
-    const testCases = Array.from({ length: 1 }, (_, i) => makeTestCase(`TC_00${i + 1}`));
-    const output    = await pwGen.generate(testCases, FIXTURE_TEST_DATA, FIXTURE_KB, FIXTURE_POM_OPTIONS);
+  it("output contains 'testDesktop.describe' and 'testMobile.describe'", async () => {
+    const pwGen   = new PlaywrightGenerator();
+    const output  = await pwGen.generate([makeTestCase("TC_001")], FIXTURE_KB);
 
     expect(output).toContain("testDesktop.describe");
+    expect(output).toContain("testMobile.describe");
   });
 
-  it("output contains 'import { testDesktop' when pageClassName is provided", async () => {
-    const provider  = makeMockProvider(CLICK_ACTION_JSON);
-    const assertProv = makeMockProvider(ASSERTION_CODE);
-    const pwGen     = new PlaywrightGenerator(
-      new AIActionModelGenerator(provider),
-      new PlaywrightRenderer(),
-      new AssertionGenerator(assertProv),
-    );
+  it("output imports from support/fixtures/visitFixture", async () => {
+    const pwGen  = new PlaywrightGenerator();
+    const output = await pwGen.generate([makeTestCase("TC_001")], FIXTURE_KB);
 
-    const testCases = [makeTestCase("TC_001")];
-    const output    = await pwGen.generate(testCases, FIXTURE_TEST_DATA, FIXTURE_KB, FIXTURE_POM_OPTIONS);
-
-    expect(output).toContain("import { testDesktop");
+    expect(output).toContain("support/fixtures/visitFixture");
   });
 
-  it("output contains the pageClassName (AeHomePage)", async () => {
-    const provider  = makeMockProvider(CLICK_ACTION_JSON);
-    const assertProv = makeMockProvider(ASSERTION_CODE);
-    const pwGen     = new PlaywrightGenerator(
-      new AIActionModelGenerator(provider),
-      new PlaywrightRenderer(),
-      new AssertionGenerator(assertProv),
-    );
+  it("output imports from support/helper/interceptHelper", async () => {
+    const pwGen  = new PlaywrightGenerator();
+    const output = await pwGen.generate([makeTestCase("TC_001")], FIXTURE_KB);
 
-    const testCases = [makeTestCase("TC_001")];
-    const output    = await pwGen.generate(testCases, FIXTURE_TEST_DATA, FIXTURE_KB, FIXTURE_POM_OPTIONS);
-
-    expect(output).toContain("AeHomePage");
+    expect(output).toContain("support/helper/interceptHelper");
   });
 
-  it("output contains the fixtureKey as a variable name", async () => {
-    const provider  = makeMockProvider(CLICK_ACTION_JSON);
-    const assertProv = makeMockProvider(ASSERTION_CODE);
-    const pwGen     = new PlaywrightGenerator(
-      new AIActionModelGenerator(provider),
-      new PlaywrightRenderer(),
-      new AssertionGenerator(assertProv),
-    );
+  it("test names follow the TC-{id} @regression pattern", async () => {
+    const pwGen  = new PlaywrightGenerator();
+    const output = await pwGen.generate([makeTestCase("TC_001")], FIXTURE_KB);
 
-    const testCases = [makeTestCase("TC_001")];
-    const output    = await pwGen.generate(testCases, FIXTURE_TEST_DATA, FIXTURE_KB, FIXTURE_POM_OPTIONS);
-
-    // The fixture key "aeHomePage" appears as the let variable declaration
-    expect(output).toContain("aeHomePage");
+    expect(output).toMatch(/TC-TC_001 @regression/);
   });
-});
 
-describe("Pipeline — PlaywrightGenerator integration (pomOptions without pageClassName)", () => {
-
-  it("uses legacy test.describe template when pageClassName is omitted", async () => {
-    const provider   = makeMockProvider(JSON.stringify({ action: "click", target: "loginButton" }));
-    const assertProv = makeMockProvider("await expect(page).toHaveURL(/login/);");
-    const pwGen      = new PlaywrightGenerator(
-      new AIActionModelGenerator(provider),
-      new PlaywrightRenderer(),
-      new AssertionGenerator(assertProv),
-    );
-
-    const legacyOptions: PomOptions = {
-      fixtureKey:         "aeHomePage",
-      fixtureImportPath:  "../../support/fixtures/base.js",
-      testDataImportPath: "./ae-home.data.js",
-      // pageClassName intentionally omitted
-    };
-
-    const testCases = [makeTestCase("TC_001")];
-    const output    = await pwGen.generate(testCases, FIXTURE_TEST_DATA, FIXTURE_KB, legacyOptions);
+  it("generates an API spec with test.describe and test.beforeAll", async () => {
+    const pwGen  = new PlaywrightGenerator();
+    const output = await pwGen.generateApiSpec([makeTestCase("TC_001")], FIXTURE_KB);
 
     expect(output).toContain("test.describe");
-    expect(output).toContain("import { test, expect }");
-    expect(output).not.toContain("testDesktop.describe");
-  });
-
-  it("emits the correct fixture import path in legacy template", async () => {
-    const provider   = makeMockProvider(JSON.stringify({ action: "noop" }));
-    const assertProv = makeMockProvider("await expect(page.getByText('Home')).toBeVisible();");
-    const pwGen      = new PlaywrightGenerator(
-      new AIActionModelGenerator(provider),
-      new PlaywrightRenderer(),
-      new AssertionGenerator(assertProv),
-    );
-
-    const legacyOptions: PomOptions = {
-      fixtureKey:         "aeHomePage",
-      fixtureImportPath:  "../../support/fixtures/base.js",
-      testDataImportPath: "./ae-home.data.js",
-    };
-
-    const testCases = [makeTestCase("TC_001")];
-    const output    = await pwGen.generate(testCases, FIXTURE_TEST_DATA, FIXTURE_KB, legacyOptions);
-
-    expect(output).toContain("../../support/fixtures/base.js");
+    expect(output).toContain("test.beforeAll");
   });
 });
 

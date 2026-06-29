@@ -1,179 +1,121 @@
 import type { TestCase }
   from "../../models/TestCase.js";
 
-import type { TestData }
-  from "../../models/TestData.js";
-
 import type { KnowledgeBase }
   from "../../models/KnowledgeBase.js";
 
-import { AIActionModelGenerator }
-  from "../action-model/AIActionModelGenerator.js";
-
-import { RuleBasedActionModelGenerator }
-  from "../action-model/RuleBasedActionModelGenerator.js";
-
-import { PlaywrightRenderer }
-  from "./PlaywrightRenderer.js";
-
-import { AssertionGenerator }
-  from "../assertions/AssertionGenerator.js";
+import { kbKeyToClassName }
+  from "../pom/POMGenerator.js";
 
 import { pMap }
   from "../../utils/concurrency.js";
 
-import { SelectorRetriever }
-  from "../../kb/SelectorRetriever.js";
-
-export interface PomOptions {
-  fixtureKey:         string;  // e.g. "aeHomePage" (legacy fixture param name)
-  fixtureImportPath:  string;  // e.g. "../../support/fixtures/base.js"
-  testDataImportPath: string;  // e.g. "./ae-home.data.js"
-  pageClassName?:     string;  // e.g. "AeHomePage" — triggers testDesktop + POM class template
-  pageImportPath?:    string;  // e.g. "../../support/pages/AeHomePage.js"
-  methodRegistry?:    Record<string, { click?: string; fill?: string }>;
-  noPageClass?:       boolean; // use testDesktop from fixtures without a POM class import
+interface TestBlock {
+  desktop: string;
+  mobile:  string;
 }
 
 /**
  * Compiles a complete `.spec.ts` file from an array of test cases.
  *
- * When `PomOptions.pageClassName` is provided the output uses the reference-repo
- * pattern: `testDesktop` fixture, module-level `let homePage`, POM created in
- * `beforeEach`, and `console.info` listener.
- *
- * Without `pageClassName` the legacy named-fixture pattern is used.
+ * Follows the enterprise pattern:
+ * - Both testDesktop and testMobile describe blocks in one file
+ * - Imports from support/fixtures/visitFixture and support/helper/interceptHelper
+ * - Default import of POM class
+ * - No data file import — data is either in POM or loaded via fileReader
+ * - Test names follow: 'TC-{id} @regression : [{describe}] {title}'
  */
 export class PlaywrightGenerator {
-  private ruleBasedClassifier: RuleBasedActionModelGenerator;
-  private readonly retriever = new SelectorRetriever();
-
-  constructor(
-    private actionModelGenerator: AIActionModelGenerator,
-    private renderer: PlaywrightRenderer,
-    private assertionGenerator: AssertionGenerator,
-    private concurrency = 8,
-  ) {
-    this.ruleBasedClassifier = new RuleBasedActionModelGenerator(actionModelGenerator);
-  }
+  constructor(private concurrency = 8) {}
 
   /**
-   * Generate a complete Playwright spec file as a string.
-   *
-   * @param testCases     - Array of structured test cases to render.
-   * @param testData      - Test input data written to a sidecar file.
-   * @param knowledgeBase - Page KB supplying URL, selectors, and describe name.
-   * @param pomOptions    - When provided, uses POM-based spec template.
+   * Generate a complete UI Playwright spec file as a string.
    */
   async generate(
-    testCases: TestCase[],
-    testData: TestData,
+    testCases:     TestCase[],
     knowledgeBase: KnowledgeBase,
-    pomOptions?: PomOptions,
   ): Promise<string> {
 
-    const pageUrl      = new URL(knowledgeBase.url);
-    const pagePath     = pageUrl.pathname;
     const describeName = knowledgeBase.describeName ?? knowledgeBase.pageName;
-    const prefixLines  = knowledgeBase.beforeEachPrefix ?? [];
-    const skipGoto     = knowledgeBase.skipGoto ?? false;
+    const pageKey      = (knowledgeBase as any).pageKey ?? '';
+    const className    = kbKeyToClassName(pageKey || describeName.replace(/\s+/g, '-').toLowerCase());
+    const camelName    = className.charAt(0).toLowerCase() + className.slice(1);
+    const pageFile     = `${camelName}.page.js`;
 
     const testBlocks = await pMap(
       testCases,
-      tc => this.generateTestBlock(tc, knowledgeBase, pomOptions),
+      tc => this.generateTestBlock(tc, describeName, camelName),
       this.concurrency,
     );
 
-    if (pomOptions?.pageClassName) {
-      // ── New pattern: testDesktop, module-level let, POM in beforeEach ─────────
-      if (!pomOptions.pageImportPath) {
-        throw new Error(
-          `PlaywrightGenerator: pageImportPath is required when pageClassName is set (className: ${pomOptions.pageClassName})`
-        );
-      }
-      const varName = this.toVarName(pomOptions.pageClassName);
-      return `import { testDesktop } from '${pomOptions.fixtureImportPath}';
-import { ${pomOptions.pageClassName} } from '${pomOptions.pageImportPath}';
-import { testData } from '${pomOptions.testDataImportPath}';
+    const desktopTests = testBlocks.map(b => b.desktop).join('\n\n');
+    const mobileTests  = testBlocks.map(b => b.mobile).join('\n\n');
 
-let ${varName}: ${pomOptions.pageClassName};
+    return `import { ConsoleMessage, Page } from '@playwright/test';
+import { testDesktop, testMobile } from '../../support/fixtures/visitFixture.js';
+import { verifyPageTitle, waitForSelector } from '../../support/helper/interceptHelper.js';
+import ${className} from '../../support/pages/${pageFile}';
 
-testDesktop.describe('${describeName}', () => {
-  testDesktop.beforeEach(async ({ page }) => {
-    ${varName} = new ${pomOptions.pageClassName}(page);
-    page.on('console', (msg) => console.info(\`[\${msg.type()}] \${msg.text()}\`));
-  });
+let ${camelName}: ${className};
 
-${testBlocks.join("\n\n")}
+testDesktop.describe('${describeName} - Desktop', () => {
+    testDesktop.beforeEach(async ({ page }: { page: Page }) => {
+        ${camelName} = new ${className}(page);
+        page.on('console', (msg: ConsoleMessage) => console.info(\`[Console][Desktop]: \${msg.text()}\`));
+    });
+
+${desktopTests}
 });
-`;
-    }
 
-    if (pomOptions?.noPageClass) {
-      // ── testDesktop fixture, sidecar data import, no POM class ───────────────
-      const beforeEachLines = prefixLines.map(l => `    ${l}`);
-      if (!skipGoto) {
-        beforeEachLines.push(`    await page.goto('${pagePath}');`);
-      }
-      const beforeEachBody = beforeEachLines.join("\n");
+testMobile.describe('${describeName} - Mobile Web', () => {
+    testMobile.beforeEach(async ({ page }: { page: Page }) => {
+        ${camelName} = new ${className}(page);
+        page.on('console', (msg: ConsoleMessage) => console.info(\`[Console][Mobile]: \${msg.text()}\`));
+    });
 
-      return `import { testDesktop } from '${pomOptions.fixtureImportPath}';
-import { testData } from '${pomOptions.testDataImportPath}';
-
-testDesktop.describe('${describeName}', () => {
-  testDesktop.beforeEach(async ({ page }) => {
-${beforeEachBody}
-  });
-
-${testBlocks.join("\n\n")}
-});
-`;
-    }
-
-    if (pomOptions) {
-      // ── Legacy named-fixture pattern ──────────────────────────────────────────
-      const beforeEachLines = prefixLines.map(l => `    ${l}`);
-      if (!skipGoto) {
-        beforeEachLines.push(`    await page.goto('${pagePath}');`);
-      }
-      const beforeEachBody = beforeEachLines.join("\n");
-
-      return `import { test, expect } from '${pomOptions.fixtureImportPath}';
-import { testData } from '${pomOptions.testDataImportPath}';
-
-test.describe('${describeName}', () => {
-  test.beforeEach(async ({ page }) => {
-${beforeEachBody}
-  });
-
-${testBlocks.join("\n\n")}
-});
-`;
-    }
-
-    // ── No POM — self-contained spec ──────────────────────────────────────────
-    const beforeEachLines = prefixLines.map(l => `    ${l}`);
-    if (!skipGoto) {
-      beforeEachLines.push(`    await page.goto('${pagePath}');`);
-    }
-    const beforeEachBody = beforeEachLines.join("\n");
-
-    return `import { test, expect } from '@playwright/test';
-
-const testData = ${JSON.stringify(testData, null, 2)};
-
-test.describe('${describeName}', () => {
-  test.beforeEach(async ({ page }) => {
-${beforeEachBody}
-  });
-
-${testBlocks.join("\n\n")}
+${mobileTests}
 });
 `;
   }
 
-  private toVarName(className: string): string {
-    return className.charAt(0).toLowerCase() + className.slice(1);
+  /**
+   * Generate a complete API spec file as a string.
+   */
+  async generateApiSpec(
+    testCases:     TestCase[],
+    knowledgeBase: KnowledgeBase,
+  ): Promise<string> {
+
+    const describeName = knowledgeBase.describeName ?? knowledgeBase.pageName;
+
+    const apiTestBlocks = await pMap(
+      testCases,
+      tc => this.generateApiTestBlock(tc, describeName),
+      this.concurrency,
+    );
+
+    return `import { expect, test } from '@playwright/test';
+import { getApiConfig, getUserCredentials } from '../../support/helper/apiHelper.js';
+
+const { loginURL } = getApiConfig();
+
+test.describe('${describeName} - API Tests', () => {
+    let authToken: string;
+
+    test.beforeAll(async ({ request }) => {
+        const { email, password } = getUserCredentials();
+        const response = await request.post(loginURL, {
+            data: { Username: email, Password: password },
+        });
+        expect(response.status()).toBe(200);
+        const body = await response.json();
+        authToken = body?.Result?.ApiToken ?? '';
+        expect(authToken).toBeTruthy();
+    });
+
+${apiTestBlocks.join('\n\n')}
+});
+`;
   }
 
   private escSingle(s: string): string {
@@ -184,63 +126,77 @@ ${testBlocks.join("\n\n")}
     return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
   }
 
+  private toMethodName(title: string): string {
+    // Convert test title to a camelCase method name guess
+    return title
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join('')
+      .replace(/^verify|^validate|^check/i, m => m.toLowerCase());
+  }
+
   private async generateTestBlock(
-    testCase: TestCase,
-    knowledgeBase: KnowledgeBase,
-    pomOptions?: PomOptions,
+    testCase:    TestCase,
+    describeName: string,
+    camelName:   string,
+  ): Promise<TestBlock> {
+
+    const methodName     = this.toMethodName(testCase.title);
+    const testTitle      = this.escSingle(testCase.title);
+    const testId         = testCase.id ?? 'TC-001';
+
+    // Build step comments for the test body
+    const stepLines = testCase.steps
+      .map(s => `        // ${s}`)
+      .join('\n');
+
+    const bodyLines = testCase.steps.length > 0
+      ? `${stepLines}\n        await ${camelName}.${methodName}();`
+      : `        await ${camelName}.${methodName}();`;
+
+    const desktopTest = `    testDesktop(
+        '${testId} @regression : [${describeName}] ${testTitle}',
+        async ({ page }: { page: Page }) => {
+${bodyLines}
+        },
+    );`;
+
+    const mobileTest = `    testMobile(
+        '${testId} @regression : [${describeName}][Mobile] ${testTitle}',
+        async ({ page }: { page: Page }) => {
+${bodyLines}
+        },
+    );`;
+
+    return { desktop: desktopTest, mobile: mobileTest };
+  }
+
+  private async generateApiTestBlock(
+    testCase:    TestCase,
+    describeName: string,
   ): Promise<string> {
-    // Derive a focused target list from this test case's content
-    const query          = [testCase.title, ...testCase.steps, testCase.expectedResult].join(' ');
-    const retrieved      = this.retriever.retrieve(query, knowledgeBase, 10);
-    const availableTargets = Object.keys(retrieved.selectors);
 
-    const renderResults = await pMap(
-      testCase.steps,
-      step => this.ruleBasedClassifier.generate(step, availableTargets).then(
-        actionModel => ({
-          action: actionModel.action,
-          code:   this.renderer.renderAction(actionModel, knowledgeBase, pomOptions?.fixtureKey, pomOptions),
-        }),
-      ),
-      this.concurrency,
-    );
+    const testTitle = this.escSingle(testCase.title);
+    const testId    = testCase.id ?? 'TC-001';
 
-    const actions = renderResults
-      .filter(r => r.action !== "goto")
-      .map(r => r.code)
-      .filter(code => code.trim() !== "");
+    const stepLines = testCase.steps
+      .map(s => `        // ${s}`)
+      .join('\n');
 
-    const assertion = await this.assertionGenerator.generateAssertion(
-      testCase.expectedResult,
-      knowledgeBase,
-    );
-
-    const indentedActions = actions
-      .map(a => a.trim().split("\n").map(l => `    ${l}`).join("\n"))
-      .join("\n");
-
-    const indentedAssertion = assertion
-      .trim()
-      .split("\n")
-      .map(l => `    ${l}`)
-      .join("\n");
-
-    if (pomOptions?.pageClassName || pomOptions?.noPageClass) {
-      // testDesktop pattern: POM is module-level variable (pageClassName) or raw page (noPageClass)
-      return `  testDesktop(
-    '${this.escSingle(testCase.title)} @regression',
-    async ({ page }) => {
-${indentedActions}
-${indentedAssertion}
-    },
-  );`;
-    }
-
-    const testArgs = pomOptions ? `{ page, ${pomOptions.fixtureKey} }` : `{ page }`;
-
-    return `  test("${this.escDouble(testCase.title)} @regression", async (${testArgs}) => {
-${indentedActions}
-${indentedAssertion}
-  });`;
+    return `    test(
+        '${testId} @regression : [${describeName}][API] ${testTitle}',
+        async ({ request }) => {
+${stepLines}
+            const { email, password } = getUserCredentials();
+            const response = await request.post(loginURL, {
+                data: { Username: email, Password: password },
+            });
+            expect(response.status()).toBe(200);
+            expect(response.ok()).toBeTruthy();
+            console.log('${this.escSingle(testCase.title)} verified');
+        },
+    );`;
   }
 }

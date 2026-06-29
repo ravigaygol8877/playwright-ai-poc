@@ -1,13 +1,26 @@
 import type { LLMProvider } from "../../providers/interfaces/LLMProvider.js";
 import type { TestData } from "../../models/TestData.js";
+import type { KnowledgeBase } from "../../models/KnowledgeBase.js";
 import { AIJsonParser }
     from "../../utils/AIJsonParser.js";
 export class TestDataGenerator {
     constructor(private llmProvider: LLMProvider) { }
 
     async generate(
-        requirement: string
+        requirement: string,
+        kb?: KnowledgeBase,
     ): Promise<TestData> {
+
+        const pageFields = kb
+          ? Object.keys(kb.selectors ?? {})
+              .filter(k => !/button|submit|link/i.test(k))
+              .map(k => `  "${k}": "<realistic value for the ${k} field>"`)
+              .join(',\n')
+          : '';
+
+        const kbSection = pageFields
+          ? `\nAlso include these page-specific fields with realistic values (replace the placeholder text):\n{\n${pageFields}\n}\n`
+          : '';
 
         const prompt = `
 You are a QA Test Data Generator.
@@ -34,7 +47,7 @@ Return ONLY valid JSON in this exact format:
   "invalidPostalCode": "a non-numeric string that fails postal code validation",
   "lockedOutUsername": "locked_out_user"
 }
-
+${kbSection}
 Requirement:
 ${requirement}
 `;

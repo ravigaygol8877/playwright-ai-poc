@@ -1,9 +1,12 @@
 /**
  * POMGenerator — generates a TypeScript Page Object Model from a KB JSON.
  *
- * Structure generation is fully template-based (reliable, zero compilation risk).
- * Action method generation uses the LLM (requires semantic understanding of
- * which element combinations form meaningful user actions).
+ * Follows the enterprise pattern:
+ * - default export class
+ * - no goto/navigate methods (navigation handled externally)
+ * - inline assertions inside action methods (no assertions object)
+ * - console.info() logging at end of each method
+ * - message strings as private readonly class properties (not Locators)
  */
 
 import type { LLMProvider } from "../../providers/interfaces/LLMProvider.js";
@@ -25,9 +28,6 @@ export interface POMResult {
 
 // ─── Naming helpers ────────────────────────────────────────────────────────────
 
-// Common app-prefix words that should be stripped when deriving class names.
-// e.g. "parabank-login" → "LoginPage",  "my-app-dashboard" → "DashboardPage"
-// Add your own app prefix here or in platform.config.json (prefix key).
 const APP_PREFIXES = new Set([
   'parabank', 'parasoft', 'sauce', 'saucedemo', 'demo', 'app', 'web',
 ]);
@@ -40,18 +40,19 @@ export function kbKeyToClassName(kbKey: string): string {
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join('');
 
-  // "Homepage" → "HomePage",  "LoginPage" → "LoginPage"
   const lower = pascal.toLowerCase();
   if (lower.endsWith('page')) {
-    const stem = pascal.slice(0, pascal.length - 4); // strip trailing "page" (any case)
+    const stem = pascal.slice(0, pascal.length - 4);
     return stem + 'Page';
   }
 
   return pascal + 'Page';
 }
 
+// Returns camelCase.page.ts  e.g. LoginPage → login.page.ts
 function kbKeyToFileName(className: string): string {
-  return className + '.ts';
+  const camel = className.charAt(0).toLowerCase() + className.slice(1);
+  return `${camel}.page.ts`;
 }
 
 // ─── Locator builder ───────────────────────────────────────────────────────────
@@ -68,58 +69,11 @@ function buildLocatorExpr(selectorStr: string, key: string): string {
 
   if (parts.length === 0) return `page.locator('')`;
 
-  // Use single-quoted outer string so attribute selectors like [attr="val"] don't break
   const first  = `page.locator('${parts[0]}')`;
   const chains = parts.slice(1).map(s => `.or(page.locator('${s}'))`).join('');
   const suffix = isCollection(key) ? '' : '.first()';
 
   return `${first}${chains}${suffix}`;
-}
-
-// ─── Assertion builder ─────────────────────────────────────────────────────────
-
-function buildAssertionType(
-  selectorKeys: string[],
-  messageKeys:  string[],
-): string {
-  const methods: string[] = [];
-
-  for (const key of selectorKeys) {
-    methods.push(`    ${key}Visible:   () => Promise<void>;`);
-    if (/input|select|textarea|field/i.test(key)) {
-      methods.push(`    ${key}Enabled:   () => Promise<void>;`);
-    }
-  }
-
-  for (const key of messageKeys) {
-    methods.push(`    ${key}Visible:   () => Promise<void>;`);
-  }
-
-  methods.push(`    urlMatches:        (pattern: RegExp | string) => Promise<void>;`);
-
-  return methods.join('\n');
-}
-
-function buildAssertionImpl(
-  selectorKeys: string[],
-  messageKeys:  string[],
-): string {
-  const methods: string[] = [];
-
-  for (const key of selectorKeys) {
-    methods.push(`      ${key}Visible:   () => expect(this.${key}).toBeVisible(),`);
-    if (/input|select|textarea|field/i.test(key)) {
-      methods.push(`      ${key}Enabled:   () => expect(this.${key}).toBeEnabled(),`);
-    }
-  }
-
-  for (const key of messageKeys) {
-    methods.push(`      ${key}Visible:   () => expect(this.${key}).toBeVisible(),`);
-  }
-
-  methods.push(`      urlMatches:        (pattern: RegExp | string) => expect(this.page).toHaveURL(pattern),`);
-
-  return methods.join('\n');
 }
 
 // ─── POMGenerator class ────────────────────────────────────────────────────────
@@ -143,7 +97,7 @@ export class POMGenerator {
     );
 
     const code = this.buildCode(
-      className, url, selectors, messages,
+      className, selectors, messages,
       selectorKeys, messageKeys, actionMethods
     );
 
@@ -162,11 +116,8 @@ export class POMGenerator {
       .join('\n');
 
     const messageList = Object.entries(messages)
-      .map(([k, v]) => `  - ${k}: "${v}"`)
+      .map(([k, v]) => `  - ${k}: "${v}"  (access via this.${k} as a string)`)
       .join('\n');
-
-    let promptPathname = url;
-    try { promptPathname = new URL(url).pathname; } catch { /* relative path — use as-is */ }
 
     const prompt = `
 You are a Senior Playwright Automation Engineer.
@@ -179,28 +130,24 @@ URL:  ${url}
 Available locator properties (use "this.propertyName" in the body):
 ${selectorList || '  (none)'}
 
-Known validation messages:
+Known validation message string properties (use "this.propertyName" as a string in toHaveText/toContainText):
 ${messageList || '  (none)'}
 
 Rules:
-- Always include "goto" as the first method.
-- Only generate methods for meaningful user actions (e.g., login, search, fill form, submit).
+- Do NOT generate a goto method. Navigation is handled externally by the fixture.
+- Only generate methods for meaningful user actions (e.g., loginWithValidData, loginWithInvalidData, submitForm, verifyPageElements).
 - Each method body uses "this.propertyName" — NOT page.locator(selector).
 - Use "await" for every locator interaction.
-- For goto: await this.navigate('${promptPathname}'); await this.waitForPageReady();
+- Inline assertions inside each method using expect(...).toBeVisible(), expect(...).toHaveText(this.msgProp), etc.
+- Each method must end with: console.info('Verified [brief description].');
 - Return ONLY JSON. No markdown. No explanation.
 
 JSON format:
 [
   {
-    "name": "goto",
-    "params": [],
-    "body": "await this.navigate('/path');\nawait this.waitForPageReady();"
-  },
-  {
-    "name": "submitForm",
-    "params": [{"name": "value", "type": "string"}],
-    "body": "await this.submitInput.fill(value);\nawait this.submitButton.click();"
+    "name": "loginWithValidData",
+    "params": [{"name": "email", "type": "string"}, {"name": "password", "type": "string"}],
+    "body": "await this.emailInput.fill(email);\nawait this.passwordInput.fill(password);\nawait this.loginButton.click();\nconsole.info('Verified login with valid data.');"
   }
 ]
 `;
@@ -208,26 +155,18 @@ JSON format:
     try {
       const response = await this.llmProvider.generateResponse(prompt);
       const methods  = AIJsonParser.parse<ActionMethod[]>(response);
-      return Array.isArray(methods) ? methods : this.fallbackMethods(url);
+      return Array.isArray(methods) ? methods : this.fallbackMethods();
     } catch {
-      return this.fallbackMethods(url);
+      return this.fallbackMethods();
     }
   }
 
-  private fallbackMethods(url: string): ActionMethod[] {
-    let pathname = '/';
-    try { pathname = new URL(url).pathname; } catch { /* use default */ }
-
-    return [{
-      name:   'goto',
-      params: [],
-      body:   `await this.navigate('${pathname}');\nawait this.waitForPageReady();`,
-    }];
+  private fallbackMethods(): ActionMethod[] {
+    return [];
   }
 
   private buildCode(
     className:    string,
-    url:          string,
     selectors:    Record<string, string>,
     messages:     Record<string, string>,
     selectorKeys: string[],
@@ -237,72 +176,40 @@ JSON format:
 
     // Locator property declarations
     const locatorDecls = selectorKeys
-      .map(k => `  private readonly ${k}: Locator;`)
+      .map(k => `    private readonly ${k}: Locator;`)
       .join('\n');
 
-    const msgDecls = messageKeys
-      .map(k => `  private readonly ${k}: Locator;`)
+    // Message string property declarations (private readonly strings, not Locators)
+    const msgConstDecls = messageKeys
+      .map(k => `    private readonly ${k} = '${(messages[k] ?? '').replace(/'/g, "\\'")}';`)
       .join('\n');
 
-    // Constructor wiring
+    // Constructor locator wiring
     const locatorInits = selectorKeys
-      .map(k => `    this.${k} = ${buildLocatorExpr(selectors[k] ?? '', k)};`)
+      .map(k => `        this.${k} = ${buildLocatorExpr(selectors[k] ?? '', k)};`)
       .join('\n');
-
-    const msgInits = messageKeys
-      .map(k => `    this.${k} = page.getByText('${messages[k]}');`)
-      .join('\n');
-
-    // Assertions
-    const assertionType = buildAssertionType(selectorKeys, messageKeys);
-    const assertionImpl = buildAssertionImpl(selectorKeys, messageKeys);
 
     // Action methods
     const methodBlocks = actionMethods.map(m => {
-      const paramStr = m.params.map(p => `${p.name}: ${p.type}`).join(', ');
-      const bodyLines = m.body.split('\n').map(l => `    ${l}`).join('\n');
-      return `  async ${m.name}(${paramStr}): Promise<void> {\n${bodyLines}\n  }`;
+      const paramStr   = m.params.map(p => `${p.name}: ${p.type}`).join(', ');
+      const bodyLines  = m.body.split('\n').map(l => `        ${l}`).join('\n');
+      return `    async ${m.name}(${paramStr}): Promise<void> {\n${bodyLines}\n    }`;
     }).join('\n\n');
 
-    return `import type { Page, Locator } from '@playwright/test';
-import { expect } from '@playwright/test';
+    const locatorSection  = locatorDecls  ? `\n${locatorDecls}\n`  : '';
+    const msgSection      = msgConstDecls ? `\n${msgConstDecls}\n` : '';
+    const initSection     = locatorInits  ? `\n${locatorInits}\n`  : '';
+    const methodSection   = methodBlocks  ? `\n${methodBlocks}\n`  : '';
 
-export class ${className} {
-  private readonly page: Page;
+    return `import { expect, Locator, Page } from '@playwright/test';
 
-  // Selectors (auto-generated from KB — validate each in Chrome DevTools)
-${locatorDecls}
-
-  // Validation messages
-${msgDecls}
-
-  // Assertion helpers
-  readonly assertions: {
-${assertionType}
-  };
-
-  constructor(page: Page) {
-    this.page = page;
-
-${locatorInits}
-
-${msgInits}
-
-    this.assertions = {
-${assertionImpl}
-    };
-  }
-
-${methodBlocks}
-
-  private async navigate(path: string): Promise<void> {
-    await this.page.goto(path);
-  }
-
-  private async waitForPageReady(): Promise<void> {
-    await this.page.waitForLoadState('load');
-  }
-}
+export default class ${className} {
+    private readonly page: Page;
+${locatorSection}${msgSection}
+    constructor(page: Page) {
+        this.page = page;
+${initSection}    }
+${methodSection}}
 `;
   }
 }
