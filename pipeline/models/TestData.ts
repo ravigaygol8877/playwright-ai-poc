@@ -1,4 +1,4 @@
-export interface TestData {
+export interface TestData extends Record<string, string> {
   validUsername: string;
   validPassword: string;
   invalidUsername: string;

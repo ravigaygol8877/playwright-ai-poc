@@ -30,13 +30,7 @@ import { ExcelReader }            from "../pipeline/readers/ExcelReader.js";
 import { RequirementExpander }    from "../pipeline/readers/RequirementExpander.js";
 import { POMGenerator, kbKeyToClassName } from "../pipeline/generators/pom/POMGenerator.js";
 import { DataFileGenerator }      from "../pipeline/generators/pom/DataFileGenerator.js";
-import { FixtureUpdater, classNameToFixtureKey } from "../pipeline/generators/pom/FixtureUpdater.js";
-import { TestDataGenerator }      from "../pipeline/generators/test-data/TestDataGenerator.js";
-import { AIActionModelGenerator } from "../pipeline/generators/action-model/AIActionModelGenerator.js";
-import { AssertionGenerator }     from "../pipeline/generators/assertions/AssertionGenerator.js";
-import { PlaywrightRenderer }     from "../pipeline/generators/playwright/PlaywrightRenderer.js";
 import { PlaywrightGenerator }    from "../pipeline/generators/playwright/PlaywrightGenerator.js";
-import type { PomOptions }        from "../pipeline/generators/playwright/PlaywrightGenerator.js";
 import { createRunContext }        from "../pipeline/reporting/RunContext.js";
 import { ExcelTestCaseWriter }    from "../pipeline/utils/ExcelTestCaseWriter.js";
 import { PageAnalyzer }           from "../pipeline/generators/discovery/PageAnalyzer.js";
@@ -44,15 +38,6 @@ import { ScenarioInferenceEngine } from "../pipeline/generators/discovery/Scenar
 import type { Requirement }       from "../pipeline/readers/ExcelReader.js";
 import { ArtifactManifest }       from "../pipeline/utils/ArtifactManifest.js";
 import type { KnowledgeBase }     from "../pipeline/models/KnowledgeBase.js";
-
-// ─── Method registry ──────────────────────────────────────────────────────────
-// Returns an empty registry — PlaywrightGenerator falls back to raw locator calls.
-// POMGenerator names its methods from the KB selectors; a future enhancement could
-// auto-derive this mapping from the generated POM instead of hardcoding it here.
-
-function buildMethodRegistry(_pageKey: string): Record<string, { click?: string; fill?: string }> {
-  return {};
-}
 
 // ─── CLI args ─────────────────────────────────────────────────────────────────
 
@@ -65,7 +50,7 @@ function getArg(flag: string, fallback: string): string {
 
 const EXCEL_FILE       = getArg("--file",  "requirements/requirements.xlsx");
 const SHEET_NAME       = getArg("--sheet", "");
-const OUTPUT_PATH      = "tests/e2e/";
+const OUTPUT_PATH      = "tests/UI/";
 // Cap per spec file — keeps each LLM call count manageable for local models.
 // Override with env var: SPEC_BATCH_SIZE=50 npm run ai:run
 const SPEC_BATCH_SIZE  = parseInt(process.env["SPEC_BATCH_SIZE"] ?? "20", 10);
@@ -135,12 +120,7 @@ async function main() {
   const expander   = new RequirementExpander(llm);
   const pomGen     = new POMGenerator(llm);
   const dataGen    = new DataFileGenerator(llm);
-  const fixtureUpd = new FixtureUpdater();
-  const pwGen      = new PlaywrightGenerator(
-    new AIActionModelGenerator(llm),
-    new PlaywrightRenderer(),
-    new AssertionGenerator(llm),
-  );
+  const pwGen      = new PlaywrightGenerator();
 
   // ── Step 1: Read Excel ──────────────────────────────────────────────────────
   section("Step 1 — Reading Requirements from Excel");
@@ -277,8 +257,9 @@ async function main() {
 
   for (const [pageKey] of pageGroups) {
     const className = kbKeyToClassName(pageKey);
-    const pomFile   = `tests/pages/${className}.ts`;
-    const dataFile  = `tests/data/${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
+    const camelName = className.charAt(0).toLowerCase() + className.slice(1);
+    const pomFile   = `support/pages/${camelName}.page.ts`;
+    const dataFile  = `support/data/${camelName}Data.json`;
 
     let kb: KnowledgeBase;
     try {
@@ -301,42 +282,18 @@ async function main() {
       process.stdout.write(`  ▸ Generating POM for ${className}... `);
       try {
         const pomResult = await pomGen.generate(kb, pageKey);
-        fs.mkdirSync("tests/pages", { recursive: true });
+        fs.mkdirSync("support/pages", { recursive: true });
         fs.writeFileSync(pomFile, pomResult.code, "utf-8");
         console.log("done");
         tick(pomFile);
         manifest.setPomGenerated(pageKey, pageUrl, kbFile);
         manifest.save();
 
-        let dataResult;
         if (!fs.existsSync(dataFile)) {
-          dataResult = await dataGen.generate(kb, pageKey);
-          fs.mkdirSync("tests/data", { recursive: true });
+          const dataResult = await dataGen.generate(kb, pageKey);
+          fs.mkdirSync("support/data", { recursive: true });
           fs.writeFileSync(dataFile, dataResult.code, "utf-8");
           tick(dataFile);
-        } else {
-          // Derive DataFileResult fields without regenerating (deterministic naming)
-          const iName = `${pomResult.className}Data`;
-          dataResult = {
-            interfaceName: iName,
-            fileName:      `${pomResult.className.charAt(0).toLowerCase()}${pomResult.className.slice(1)}.data.ts`,
-            code:          "",
-          };
-        }
-
-        // Register POM in tests/fixtures/base.ts (idempotent — skips if already registered)
-        try {
-          fixtureUpd.update("tests/fixtures/base.ts", {
-            className:     pomResult.className,
-            fileName:      pomResult.fileName,
-            fixtureKey:    classNameToFixtureKey(pomResult.className),
-            dataInterface: dataResult.interfaceName,
-            dataVarName:   dataResult.interfaceName.charAt(0).toLowerCase() + dataResult.interfaceName.slice(1),
-            dataFileName:  dataResult.fileName,
-          });
-          tick(`tests/fixtures/base.ts  (${pomResult.className} registered)`);
-        } catch (fixErr) {
-          warn(`fixtures update: ${fixErr instanceof Error ? fixErr.message : String(fixErr)}`);
         }
       } catch (err) {
         console.log("failed");
@@ -437,53 +394,6 @@ async function main() {
       : `${allTestCases.length} cases`;
     console.log(`  ▸ Generating script for ${pageKey} (${batchLabel})`);
 
-    // Generate test data once per page (shared across all batches)
-    let testData;
-    try {
-      testData = await new TestDataGenerator(llm).generate(
-        reqs.map(r => r.description).join("; ")
-      );
-    } catch (err) {
-      cross(`${pageKey}: test data generation failed — ${err instanceof Error ? err.message : String(err)}`);
-      specResults.push({ page: pageKey, file: "", status: "failed" });
-      continue;
-    }
-
-    // Derive POM fixture info (POM was generated/checked in Step 3)
-    const pomClassName = kbKeyToClassName(pageKey);
-    const fixtureKey   = classNameToFixtureKey(pomClassName);
-    const pomFile      = `tests/pages/${pomClassName}.ts`;
-    const pomExists    = fs.existsSync(pomFile);
-
-    // Write test data to a sidecar file — specs import from it instead of inlining
-    const testDataSidecarPath = path.join(OUTPUT_PATH, `${pageKey}.data.ts`);
-    fs.writeFileSync(
-      testDataSidecarPath,
-      `// Auto-generated — do not edit manually\n\nexport const testData = ${JSON.stringify(testData, null, 2)};\n`,
-      "utf-8",
-    );
-    tick(`${testDataSidecarPath}  (shared test data)`);
-
-    const pomOptions: PomOptions = pomExists ? {
-      fixtureKey,
-      fixtureImportPath:  "../fixtures/base.js",
-      testDataImportPath: `./${pageKey}.data.js`,
-      pageClassName:      pomClassName,
-      pageImportPath:     `../pages/${pomClassName}.js`,
-      methodRegistry:     buildMethodRegistry(pageKey),
-    } : {
-      fixtureKey,
-      fixtureImportPath:  "../fixtures/base.js",
-      testDataImportPath: `./${pageKey}.data.js`,
-      noPageClass:        true,
-    };
-
-    if (pomExists) {
-      info("POM fixture", fixtureKey);
-    } else {
-      warn(`No POM for "${pageKey}" — spec will use testDesktop with raw page.locator() calls`);
-    }
-
     const pageSpecFiles: string[] = [];
     let   pageHadError = false;
 
@@ -497,7 +407,7 @@ async function main() {
 
       process.stdout.write(label);
       try {
-        const script     = await pwGen.generate(batch, testData, kb, pomOptions);
+        const script     = await pwGen.generate(batch, kb);
         const outputPath = path.join(OUTPUT_PATH, fileName);
 
         fs.writeFileSync(outputPath, script, "utf-8");

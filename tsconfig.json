@@ -40,5 +40,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
+  "include": ["tests/**/*", "support/**/*", "pipeline/**/*", "scripts/**/*", "playwright.config.ts"],
   "exclude": ["sc-qa-automation-salesmanager", "node_modules"]
 }

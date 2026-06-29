@@ -1,8 +1,8 @@
 /**
- * DataFileGenerator — generates src/data/{ClassName}.data.ts from a KB JSON.
+ * DataFileGenerator — generates support/data/{className}Data.json from a KB JSON.
  *
- * Uses LLM to produce meaningful typed test data (valid/invalid values, error strings,
- * URL patterns) appropriate for the page described by the KB.
+ * Produces a plain JSON file (not TypeScript) following the enterprise pattern
+ * where test data lives in support/data/ as .json files.
  */
 
 import type { LLMProvider } from "../../providers/interfaces/LLMProvider.js";
@@ -40,15 +40,16 @@ export class DataFileGenerator {
     const success   = kb.success   ?? {};
     const selectors = kb.selectors ?? {};
 
-    const className    = kbKeyToClassName(kbKey);
+    const className     = kbKeyToClassName(kbKey);
     const interfaceName = `${className}Data`;
-    const fileName      = `${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
+    const camelName     = className.charAt(0).toLowerCase() + className.slice(1);
+    const fileName      = `${camelName}Data.json`;
 
     const fields = await this.generateFields(
       pageName, url, selectors, messages, success
     );
 
-    const code = this.buildCode(interfaceName, fields);
+    const code = this.buildCode(fields);
     return { interfaceName, fileName, code };
   }
 
@@ -65,7 +66,7 @@ export class DataFileGenerator {
     const successList  = Object.entries(success).map(([k, v]) => `  - ${k}: "${v}"`).join('\n');
 
     const prompt = `
-You are a Senior QA Engineer generating typed test data for a Playwright Page Object.
+You are a Senior QA Engineer generating test data for a Playwright Page Object.
 
 Page: ${pageName}
 URL:  ${url}
@@ -80,27 +81,20 @@ Success indicators:
 ${successList || '  (none)'}
 
 Generate test data fields. Rules:
-- Include "valid" and "invalid" variants for key inputs (drug names, usernames, zip codes, amounts).
+- Include "valid" and "invalid" variants for key inputs.
 - Include exact error message strings from the Known validation messages list (copy verbatim).
-- Include URL pattern strings for success checks (e.g. "/prescription/").
-- Use TypeScript types: "string", "RegExp", "number".
-- For RegExp values use: "/pattern/" format (no quotes) — these become RegExp literals in code.
-- Provide realistic default values (not "example" or "test123").
+- Include URL pattern strings for success checks.
+- All values must be plain strings (no TypeScript types, no RegExp syntax, no quotes around values).
+- Provide realistic default values.
 - Return ONLY JSON. No markdown.
 
 JSON format:
 [
   {
-    "name": "validDrugName",
+    "name": "validEmail",
     "type": "string",
-    "value": "'atorvastatin'",
-    "comment": "Common cholesterol medication"
-  },
-  {
-    "name": "successUrlPattern",
-    "type": "RegExp",
-    "value": "/\\/prescription\\//",
-    "comment": "URL after successful drug search"
+    "value": "user@example.com",
+    "comment": "Valid email for login"
   }
 ]
 `;
@@ -124,16 +118,16 @@ JSON format:
       fields.push({
         name:    key,
         type:    'string',
-        value:   `'${val}'`,
-        comment: 'Exact error message — copy verbatim',
+        value:   val,
+        comment: 'Exact error message',
       });
     }
 
     if (success['redirectUrl']) {
       fields.push({
         name:    'successUrlPattern',
-        type:    'RegExp',
-        value:   `/${success['redirectUrl']?.replace(/\//g, '\\/')}/`,
+        type:    'string',
+        value:   success['redirectUrl'] ?? '',
         comment: 'URL after successful action',
       });
     }
@@ -141,40 +135,22 @@ JSON format:
     return fields;
   }
 
-  private buildCode(interfaceName: string, fields: DataField[]): string {
-    const interfaceFields = fields
-      .map(f => `  ${f.name}: ${f.type};`)
-      .join('\n');
+  private buildCode(fields: DataField[]): string {
+    const obj: Record<string, string> = {};
 
-    const dataFields = fields
-      .map(f => {
-        const comment = f.comment ? `  // ${f.comment}` : '';
-        // Defensive: if the model returned a bare string value (no surrounding quotes/slashes),
-        // wrap it so the generated TypeScript is always valid.
-        let valueStr = f.value;
-        if (f.type === 'string') {
-          const trimmed = valueStr.trim();
-          const isQuoted = (trimmed.startsWith("'") && trimmed.endsWith("'"))
-                        || (trimmed.startsWith('"') && trimmed.endsWith('"'));
-          if (!isQuoted) valueStr = `'${trimmed.replace(/'/g, "\\'")}'`;
-        } else if (f.type === 'RegExp') {
-          const trimmed = valueStr.trim();
-          if (!trimmed.startsWith('/')) valueStr = `/${trimmed}/`;
-        }
-        return `${comment}\n  ${f.name}: ${valueStr},`;
-      })
-      .join('\n');
+    for (const f of fields) {
+      let val = f.value.trim();
+      // Strip TypeScript-specific wrappers
+      if ((val.startsWith("'") && val.endsWith("'")) ||
+          (val.startsWith('"') && val.endsWith('"'))) {
+        val = val.slice(1, -1);
+      } else if (val.startsWith('/') && val.lastIndexOf('/') > 0) {
+        // RegExp literal — store as plain string pattern
+        val = val.slice(1, val.lastIndexOf('/'));
+      }
+      obj[f.name] = val;
+    }
 
-    const varName =
-      interfaceName.charAt(0).toLowerCase() + interfaceName.slice(1);
-
-    return `export interface ${interfaceName} {
-${interfaceFields}
-}
-
-export const ${varName}: ${interfaceName} = {
-${dataFields}
-};
-`;
+    return JSON.stringify(obj, null, 2);
   }
 }

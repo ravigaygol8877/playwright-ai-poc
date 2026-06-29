@@ -2,7 +2,10 @@
   "projectName": "My Project",
   "defaultEnvironment": "qa",
   "llmModel": "gpt-4.1-mini",
-  "testOutputPath": "tests/e2e/",
+  "uiTestOutputPath": "tests/UI/",
+  "apiTestOutputPath": "tests/API/",
+  "pageOutputPath": "support/pages/",
+  "dataOutputPath": "support/data/",
   "reportOutputPath": "reports/",
   "suites": []
 }

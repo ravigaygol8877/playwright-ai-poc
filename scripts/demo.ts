@@ -6,10 +6,10 @@
  *   npm run demo
  *
  * Scenarios covered:
- *   1.  ParaBank Login          → tests/e2e/parabank-login.spec.ts
- *   2.  ParaBank Registration   → tests/e2e/parabank-register.spec.ts
- *   3.  ParaBank Transfer       → tests/e2e/parabank-transfer.spec.ts
- *   4.  ParaBank Bill Pay       → tests/e2e/parabank-billpay.spec.ts
+ *   1.  ParaBank Login          → tests/UI/parabank-login.spec.ts
+ *   2.  ParaBank Registration   → tests/UI/parabank-register.spec.ts
+ *   3.  ParaBank Transfer       → tests/UI/parabank-transfer.spec.ts
+ *   4.  ParaBank Bill Pay       → tests/UI/parabank-billpay.spec.ts
  *   5.  Self-Healing Locator    → heals a broken login button selector
  *   6.  Root Cause Analyzer     → diagnoses a CI timeout failure
  *   7.  Flaky Test Analyzer     → scores a suspected flaky test
@@ -29,12 +29,6 @@ import { TestCaseGenerator }
   from "../pipeline/generators/test-cases/TestCaseGenerator.js";
 import { TestDataGenerator }
   from "../pipeline/generators/test-data/TestDataGenerator.js";
-import { AIActionModelGenerator }
-  from "../pipeline/generators/action-model/AIActionModelGenerator.js";
-import { AssertionGenerator }
-  from "../pipeline/generators/assertions/AssertionGenerator.js";
-import { PlaywrightRenderer }
-  from "../pipeline/generators/playwright/PlaywrightRenderer.js";
 import { PlaywrightGenerator }
   from "../pipeline/generators/playwright/PlaywrightGenerator.js";
 import { KnowledgeBaseService }
@@ -113,31 +107,18 @@ async function generateSuite(
   testCases.forEach(tc => console.log(`         [${tc.id}] ${tc.title}`));
 
   step("Generating test data...");
-  const testData = await new TestDataGenerator(llm).generate(requirement);
+  const testData = await new TestDataGenerator(llm).generate(requirement, kb);
   ok("Test data ready");
 
   step(`Loading knowledge base (${kb.pageName})...`);
   ok(`URL: ${kb.url}`);
   field("selectors", Object.keys(kb.selectors as Record<string, unknown>).join(", "));
 
-  // Write sidecar .data.ts file alongside the spec
-  const specBaseName = path.basename(outputFile, ".spec.ts");
-  const dataFile = path.join(path.dirname(outputFile), `${specBaseName}.data.ts`);
-  fs.writeFileSync(dataFile, `export const testData = ${JSON.stringify(testData, null, 2)};\n`);
-  ok(`Test data → ${dataFile}`);
-
   step("Generating Playwright script...");
-  const script = await new PlaywrightGenerator(
-    new AIActionModelGenerator(llm),
-    new PlaywrightRenderer(),
-    new AssertionGenerator(llm)
-  ).generate(testCases, testData, kb, {
-    fixtureKey:         specBaseName,
-    fixtureImportPath:  "../fixtures/base.js",
-    testDataImportPath: `./${specBaseName}.data.js`,
-    noPageClass:        true,
-  });
+  (kb as any).pageKey = pageName;
+  const script = await new PlaywrightGenerator().generate(testCases, kb);
 
+  fs.mkdirSync(path.dirname(outputFile), { recursive: true });
   fs.writeFileSync(outputFile, script);
   ok(`Written → ${outputFile}  (${script.split("\n").length} lines)`);
 }
@@ -170,7 +151,7 @@ async function main() {
     "User should be able to log in to ParaBank with valid credentials. " +
     "Invalid credentials should show an error message. " +
     "Empty fields should trigger validation messages.",
-    "tests/e2e/parabank-login.spec.ts"
+    "tests/UI/parabank-login.spec.ts"
   );
 
   // ── Scenario 2: Registration ──────────────────────────────────────────────
@@ -182,7 +163,7 @@ async function main() {
     "User should be able to register a new ParaBank account by entering personal " +
     "details and choosing a username and password. Duplicate usernames must be rejected. " +
     "Password confirmation mismatch should show an error. All required fields must be validated.",
-    "tests/e2e/parabank-register.spec.ts"
+    "tests/UI/parabank-register.spec.ts"
   );
 
   // ── Scenario 3: Transfer Funds ────────────────────────────────────────────
@@ -194,7 +175,7 @@ async function main() {
     "User should be able to transfer funds between two ParaBank accounts. " +
     "An empty or invalid amount should be rejected. " +
     "A successful transfer should show the Transfer Complete message.",
-    "tests/e2e/parabank-transfer.spec.ts"
+    "tests/UI/parabank-transfer.spec.ts"
   );
 
   // ── Scenario 4: Bill Pay ──────────────────────────────────────────────────
@@ -206,7 +187,7 @@ async function main() {
     "User should be able to pay a bill on ParaBank by entering payee name, address, " +
     "account number, and amount. Account number confirmation mismatch should show an error. " +
     "A successful payment should show Bill Payment Complete.",
-    "tests/e2e/parabank-billpay.spec.ts"
+    "tests/UI/parabank-billpay.spec.ts"
   );
 
   // ── Scenario 5: Self-Healing Locator ──────────────────────────────────────
@@ -236,7 +217,7 @@ async function main() {
     failureMessage: "TimeoutError: waiting for selector '#showResult h1' exceeded 30000ms",
     stackTrace:
       "at PWTestRunner.waitForSelector (playwright/lib/server.js:38)\n" +
-      "  at Object.<anonymous> (tests/e2e/parabank-transfer.spec.ts:22)",
+      "  at Object.<anonymous> (tests/UI/parabank-transfer.spec.ts:22)",
     executionLog:
       "Navigated to /transfer.htm, selected from account 12345, " +
       "selected to account 67890, entered amount 500, clicked Transfer, " +
@@ -315,10 +296,10 @@ async function main() {
   console.log(SEP);
   console.log(`
   Generated test files:
-    ✅  tests/e2e/parabank-login.spec.ts
-    ✅  tests/e2e/parabank-register.spec.ts
-    ✅  tests/e2e/parabank-transfer.spec.ts
-    ✅  tests/e2e/parabank-billpay.spec.ts
+    ✅  tests/UI/parabank-login.spec.ts
+    ✅  tests/UI/parabank-register.spec.ts
+    ✅  tests/UI/parabank-transfer.spec.ts
+    ✅  tests/UI/parabank-billpay.spec.ts
 
   AI report files → ${runs.aiReports}/
     ✅  self-healing.json
@@ -328,7 +309,7 @@ async function main() {
     ✅  regression-recommendations.json
 
   Next steps:
-    npx playwright test tests/e2e/     ← run all generated tests
+    npx playwright test tests/UI/     ← run all generated tests
     npm run report:latest              ← open HTML report for this run
   `);
 }

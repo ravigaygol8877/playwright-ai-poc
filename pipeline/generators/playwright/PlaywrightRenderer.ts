@@ -9,6 +9,12 @@ export interface RendererPomOptions {
     methodRegistry?: Record<string, { click?: string; fill?: string }>;
 }
 
+function safeLocator(selector: string): string {
+  // Normalize attribute values from " to ' so they're safe inside a single-quoted outer string
+  const norm = selector.replace(/=\s*"([^"]*)"/g, "='$1'");
+  return `page.locator('${norm}')`;
+}
+
 /**
  * Converts a single `ActionModel` into a Playwright code string.
  *
@@ -56,11 +62,11 @@ export class PlaywrightRenderer {
                     // fallback — direct access (will only work if locator is public/protected)
                     const selector = knowledgeBase.selectors[action.target];
                     if (!selector) return "";
-                    return `await page.locator("${selector}").fill(${value});`;
+                    return `await ${safeLocator(selector)}.fill(${value});`;
                 }
                 const selector = knowledgeBase.selectors[action.target];
                 if (!selector) return "";
-                return `await page.locator("${selector}").fill(${value});`;
+                return `await ${safeLocator(selector)}.fill(${value});`;
             }
 
             case "click": {
@@ -75,7 +81,7 @@ export class PlaywrightRenderer {
                 }
                 const selector = knowledgeBase.selectors[action.target];
                 if (!selector) return "";
-                return `await page.locator("${selector}").click();`;
+                return `await ${safeLocator(selector)}.click();`;
             }
 
             default:
