@@ -5,11 +5,10 @@
  * and asks the AI to produce a knowledge-base JSON file automatically.
  *
  * Usage:
- *   npx tsx knowledge-base/test-kb-generator.ts <url> <page-name>
+ *   npm run kb:generate <url> <page-name>
  *
- * Or via npm scripts (loads the correct environment automatically):
- *   npm run kb:generate:homepage
- *   npm run kb:generate:drug-search
+ * Or with environment override:
+ *   ENVIRONMENT=qa npm run kb:generate <url> <page-name>
  */
 
 import "dotenv/config";
@@ -48,8 +47,8 @@ async function main() {
   const pageName = process.argv[3];
 
   if (!url || !pageName) {
-    console.error("Usage: npx tsx knowledge-base/test-kb-generator.ts <url> <page-name>");
-    console.error("Example: npx tsx knowledge-base/test-kb-generator.ts https://yourapp.com/login login-page");
+    console.error("Usage: npm run kb:generate <url> <page-name>");
+    console.error("Example: npm run kb:generate https://yourapp.com/login login-page");
     process.exit(1);
   }
 
@@ -76,8 +75,8 @@ async function main() {
   console.log("\n  Generated knowledge base:");
   console.log(JSON.stringify(kb, null, 2));
 
-  console.log(`\n  ✅ File saved → knowledge-base/${pageName}.json`);
-  console.log("  Review selectors, then run: npm run generate:all:qa");
+  console.log(`\n  ✅ File saved → pipeline/kb/pages/${pageName}.json`);
+  console.log("  Review selectors, then run: npm run generate:from-excel");
 }
 
 main().catch(console.error);

@@ -3,38 +3,33 @@
  *
  * Resets the framework for a brand-new project.
  *
- * REMOVES (project-specific artifacts):
- *   - src/pages/*.ts          (generated page objects, keeps BasePage.ts)
- *   - src/data/*.ts           (generated test data files)
- *   - tests/e2e/*.spec.ts     (generated Playwright spec files)
- *   - knowledge-base/*.json   (project KB files, keeps *.ts service files)
- *   - reports/                (all run reports and artefacts)
- *   - playwright-report/      (stale HTML reports)
- *   - test-results/           (stale run artifacts)
- *   - .current-run-id         (run ID linking file)
+ * REMOVES (project-generated artifacts):
+ *   tests/e2e/*.spec.ts              — generated Playwright specs
+ *   tests/e2e/*.data.ts              — generated test data co-located with specs
+ *   tests/pages/*.ts                 — generated Page Object Model classes
+ *   tests/data/*.data.ts             — generated data files from generate:pom
+ *   tests/helpers/interceptHelper.ts — project-specific login/logout helpers
+ *   tests/helpers/commonPattern.ts   — project-specific nav pattern class
+ *   pipeline/kb/pages/*.json         — project Knowledge Base + scenario cache files
+ *   ai-metadata/artifacts.json       — requirement/KB/POM content hash manifest
+ *   reports/                         — all run reports and artefacts
+ *   .llm-cache/                      — cached LLM responses (forces fresh AI calls)
+ *   playwright-report/               — stale Playwright HTML reports (if present)
+ *   test-results/                    — stale test run artefacts (if present)
  *
- * RESETS (framework files to blank templates):
- *   - src/fixtures/index.ts   (empty POM fixture registry)
- *   - platform.config.json    (blank project config)
+ * RESETS (to blank template):
+ *   config/platform.json       — project config with empty suites array
  *
- * PRESERVES (reusable framework):
- *   - All AI modules (ai/src/)
- *   - Automation layer (automation/src/)
- *   - LLM providers (llm/src/)
- *   - Knowledge base service (knowledge-base/KnowledgeBaseService.ts, etc.)
- *   - Reporting infrastructure (src/reporting/)
- *   - Requirements reader (src/requirements/)
- *   - Base page class (src/pages/BasePage.ts)
- *   - All configuration files
- *   - All scripts
- *
- * RECREATES (empty folder structure):
- *   - src/pages/              (for generated POMs)
- *   - src/data/               (for generated test data)
- *   - tests/e2e/              (for generated specs)
- *   - knowledge-base/         (for new project KB JSONs)
- *   - requirements/           (for requirements.xlsx)
- *   - reports/                (for run reports)
+ * PRESERVES (framework — never touched):
+ *   pipeline/                  — all AI modules, generators, providers
+ *   scripts/                   — all pipeline and demo scripts
+ *   tests/fixtures/base.ts           — core testDesktop / testMobile fixtures
+ *   tests/helpers/constants.ts       — viewport constants (used by base.ts)
+ *   tests/helpers/waitUtils.ts       — generic wait utilities
+ *   tests/data/example.ts            — data template (not generated)
+ *   requirements/*.xlsx        — Excel requirements files
+ *   .env                       — API keys and environment config
+ *   tsconfig.json, package.json, playwright.config.ts, etc.
  *
  * Usage:
  *   npm run project:reset
@@ -47,12 +42,12 @@ import path from "path";
 const SEP  = "═".repeat(58);
 const SEP2 = "─".repeat(58);
 
-function banner(msg: string)   { console.log(`\n${SEP}\n  ${msg}\n${SEP}`); }
-function section(msg: string)  { console.log(`\n${SEP2}\n  ${msg}\n${SEP2}`); }
-function removed(f: string)    { console.log(`  🗑   ${f}`); }
-function preserved(f: string)  { console.log(`  ✅  ${f}`); }
-function created(f: string)    { console.log(`  📁  ${f}`); }
-function reset(f: string)      { console.log(`  🔄  ${f}`); }
+function banner(msg: string)  { console.log(`\n${SEP}\n  ${msg}\n${SEP}`); }
+function section(msg: string) { console.log(`\n${SEP2}\n  ${msg}\n${SEP2}`); }
+function removed(f: string)   { console.log(`  🗑   ${f}`); }
+function preserved(f: string) { console.log(`  ✅  ${f}`); }
+function created(f: string)   { console.log(`  📁  ${f}`); }
+function resetted(f: string)  { console.log(`  🔄  ${f}`); }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,18 +63,22 @@ function removeFile(filePath: string): boolean {
 function removeDir(dirPath: string): boolean {
   if (fs.existsSync(dirPath)) {
     fs.rmSync(dirPath, { recursive: true, force: true });
-    removed(dirPath + '/');
+    removed(dirPath + "/");
     return true;
   }
   return false;
 }
 
-function removeGlob(dir: string, ext: string, keepFiles: string[] = []): number {
+/**
+ * Delete files matching one or more extensions from a directory.
+ * Files listed in `keepFiles` are skipped.
+ */
+function removeGlob(dir: string, exts: string[], keepFiles: string[] = []): number {
   if (!fs.existsSync(dir)) return 0;
   let count = 0;
   for (const file of fs.readdirSync(dir)) {
-    if (!file.endsWith(ext)) continue;
-    if (keepFiles.some(k => file === k || file.endsWith(k))) continue;
+    if (!exts.some(ext => file.endsWith(ext))) continue;
+    if (keepFiles.includes(file)) continue;
     fs.rmSync(path.join(dir, file));
     removed(path.join(dir, file));
     count++;
@@ -89,42 +88,12 @@ function removeGlob(dir: string, ext: string, keepFiles: string[] = []): number 
 
 function ensureDir(dirPath: string): void {
   fs.mkdirSync(dirPath, { recursive: true });
-  const keepFile = path.join(dirPath, '.gitkeep');
-  if (!fs.existsSync(keepFile)) fs.writeFileSync(keepFile, '');
-  created(dirPath + '/');
+  const keepFile = path.join(dirPath, ".gitkeep");
+  if (!fs.existsSync(keepFile)) fs.writeFileSync(keepFile, "");
+  created(dirPath + "/");
 }
 
-// ─── Reset fixtures to empty shell ────────────────────────────────────────────
-
-function resetFixtures(): void {
-  const content = `/**
- * fixtures/index.ts
- *
- * Central Playwright fixture registry. Managed automatically by the POM generator.
- * Run \`npm run generate:pom\` or \`npm run generate:from-excel\` to populate.
- */
-
-import { test as base, expect } from '@playwright/test';
-
-interface PageFixtures {
-  // generated page fixtures will be added here
-}
-
-interface DataFixtures {
-  // generated data fixtures will be added here
-}
-
-export const test = base.extend<PageFixtures & DataFixtures>({
-  // generated fixture implementations will be added here
-});
-
-export { expect };
-`;
-  fs.writeFileSync('src/fixtures/index.ts', content, 'utf-8');
-  reset('src/fixtures/index.ts');
-}
-
-// ─── Reset platform config ─────────────────────────────────────────────────────
+// ─── Reset platform config ────────────────────────────────────────────────────
 
 function resetPlatformConfig(): void {
   const config = {
@@ -135,70 +104,85 @@ function resetPlatformConfig(): void {
     reportOutputPath:   "reports/",
     suites:             [],
   };
-  fs.writeFileSync('platform.config.json', JSON.stringify(config, null, 2) + '\n', 'utf-8');
-  reset('platform.config.json');
+  fs.writeFileSync("config/platform.json", JSON.stringify(config, null, 2) + "\n", "utf-8");
+  resetted("config/platform.json");
 }
 
-// ─── Main ──────────────────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
   banner("Project Reset — AI Test Intelligence Platform");
 
-  let deletedCount  = 0;
-  let preservedCount = 0;
+  let deletedCount = 0;
 
-  // ── 1. Remove generated Page Objects (keep BasePage.ts) ──────────────────
-  section("Step 1 — Removing Generated Page Objects");
-  deletedCount += removeGlob('src/pages', '.ts', ['BasePage.ts']);
-  preserved('src/pages/BasePage.ts');
-  preservedCount++;
+  // ── 1. Remove generated Playwright specs and co-located data ─────────────
+  section("Step 1 — Removing Generated Playwright Specs");
+  deletedCount += removeGlob("tests/e2e", [".spec.ts", ".data.ts"]);
 
-  // ── 2. Remove generated test data files ──────────────────────────────────
-  section("Step 2 — Removing Generated Test Data");
-  deletedCount += removeGlob('src/data', '.ts');
+  // ── 2. Remove generated Page Object Models ────────────────────────────────
+  section("Step 2 — Removing Generated Page Object Models");
+  deletedCount += removeGlob("tests/pages", [".ts"]);
 
-  // ── 3. Remove generated Playwright spec files ─────────────────────────────
-  section("Step 3 — Removing Generated Playwright Specs");
-  deletedCount += removeGlob('tests/e2e', '.ts');
-  deletedCount += removeGlob('tests/e2e', '.spec.ts');
+  // ── 2b. Remove generated data files (tests/data/*.data.ts) ───────────────
+  deletedCount += removeGlob("tests/data", [".data.ts"]);
 
-  // ── 4. Remove project knowledge-base JSON files ───────────────────────────
+  // ── 3. Remove project-specific helper files ───────────────────────────────
+  section("Step 3 — Removing Project-Specific Helpers");
+  if (removeFile("tests/helpers/interceptHelper.ts")) deletedCount++;
+  if (removeFile("tests/helpers/commonPattern.ts"))   deletedCount++;
+
+  // ── 4. Remove project Knowledge Base files ────────────────────────────────
   section("Step 4 — Removing Project Knowledge-Base Files");
-  deletedCount += removeGlob('knowledge-base', '.json');
+  deletedCount += removeGlob("pipeline/kb/pages", [".json"]);
 
-  // ── 5. Remove all reports ─────────────────────────────────────────────────
-  section("Step 5 — Removing Reports and Artefacts");
-  if (removeDir('reports'))          deletedCount++;
-  if (removeDir('playwright-report')) deletedCount++;
-  if (removeDir('test-results'))      deletedCount++;
-  if (removeFile('.current-run-id'))  deletedCount++;
+  // ── 5. Clear artifact manifest (requirement/KB/POM content hashes) ────────
+  section("Step 5 — Clearing Artifact Manifest");
+  if (removeFile("ai-metadata/artifacts.json")) deletedCount++;
 
-  // ── 6. Reset framework files to template state ────────────────────────────
-  section("Step 6 — Resetting Framework Files to Template State");
-  resetFixtures();
+  // ── 6. Remove LLM cache ───────────────────────────────────────────────────
+  section("Step 6 — Clearing LLM Response Cache");
+  if (removeDir(".llm-cache")) deletedCount++;
+
+  // ── 7. Remove reports and stale artefacts ────────────────────────────────
+  section("Step 7 — Removing Reports and Artefacts");
+  if (removeDir("reports"))           deletedCount++;
+  if (removeDir("playwright-report")) deletedCount++;
+  if (removeDir("test-results"))      deletedCount++;
+
+  // ── 8. Reset config to blank template ────────────────────────────────────
+  section("Step 8 — Resetting Config to Blank Template");
   resetPlatformConfig();
 
-  // ── 7. Recreate empty folder structure ───────────────────────────────────
-  section("Step 7 — Recreating Empty Project Structure");
-  ensureDir('src/pages');
-  ensureDir('src/data');
-  ensureDir('tests/e2e');
-  ensureDir('knowledge-base');
-  ensureDir('requirements');
-  ensureDir('reports');
+  // ── 9. Recreate empty directory structure ────────────────────────────────
+  section("Step 9 — Recreating Empty Project Structure");
+  ensureDir("tests/e2e");
+  ensureDir("tests/pages");
+  ensureDir("pipeline/kb/pages");
+  ensureDir("reports");
 
-  // ── 8. Summary ────────────────────────────────────────────────────────────
+  // ── 10. Confirm preserved assets ─────────────────────────────────────────
+  section("Step 10 — Preserved (Framework + Requirements)");
+  preserved("pipeline/                    (all AI modules and providers)");
+  preserved("scripts/                     (all pipeline and demo scripts)");
+  preserved("tests/fixtures/base.ts       (testDesktop / testMobile)");
+  preserved("tests/helpers/constants.ts   (viewport constants)");
+  preserved("tests/helpers/waitUtils.ts   (generic wait utilities)");
+  preserved("tests/data/example.ts        (data file template)");
+  preserved("requirements/*.xlsx          (Excel requirements files)");
+  preserved(".env                         (API keys)");
+
+  // ── 11. Summary ──────────────────────────────────────────────────────────
   banner("Reset Complete");
 
-  console.log(`\n  ${deletedCount} project files removed`);
-  console.log(`  Framework components preserved\n`);
+  console.log(`\n  ${deletedCount} project artifact(s) removed`);
+  console.log(`  Framework components and Excel files preserved\n`);
 
   console.log(`  Next steps:`);
-  console.log(`    1. Update platform.config.json with your project name`);
-  console.log(`    2. Update config/environments/*.env with your app URLs`);
-  console.log(`    3. Generate knowledge base:  npm run kb:generate <url> <page-name>`);
-  console.log(`    4. Fill requirements Excel:  npm run requirements:template`);
-  console.log(`    5. Run everything:           npm run ai:run\n`);
+  console.log(`    1. Update config/platform.json with your project name`);
+  console.log(`    2. Generate Knowledge Base:  npm run kb:generate <url> <page-name>`);
+  console.log(`    3. Fill requirements Excel:  requirements/<file>.xlsx`);
+  console.log(`    4. Run the demo:             npm run demo`);
+  console.log(`    5. Run the full pipeline:    npm run ai:run\n`);
 }
 
 main().catch(err => {

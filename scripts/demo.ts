@@ -24,6 +24,7 @@ import path from "path";
 import type { LLMProvider } from "../pipeline/providers/interfaces/LLMProvider.js";
 import { createRunContext } from "../pipeline/reporting/RunContext.js";
 import { ProviderFactory }  from "../pipeline/providers/ProviderFactory.js";
+import { KnowledgeBaseGenerator } from "../pipeline/kb/KnowledgeBaseGenerator.js";
 import { TestCaseGenerator }
   from "../pipeline/generators/test-cases/TestCaseGenerator.js";
 import { TestDataGenerator }
@@ -49,6 +50,16 @@ import { CoverageAnalyzer }
 import { RegressionSelector }
   from "../pipeline/analyzers/regression/RegressionSelector.js";
 
+// ─── KB page registry — maps pageKey → canonical URL ──────────────────────────
+// Add an entry here whenever you add a new demo scenario so KB files
+// can be auto-generated on first run instead of failing.
+const PAGE_URLS: Record<string, string> = {
+  "parabank-login-page":    "https://parabank.parasoft.com/parabank/index.htm",
+  "parabank-register-page": "https://parabank.parasoft.com/parabank/register.htm",
+  "parabank-transfer-page": "https://parabank.parasoft.com/parabank/transfer.htm",
+  "parabank-billpay-page":  "https://parabank.parasoft.com/parabank/billpay.htm",
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const SEP = "═".repeat(60);
@@ -69,6 +80,22 @@ function ok(label: string) {
 
 function field(key: string, value: string) {
   console.log(`       ${key.padEnd(20)}: ${value}`);
+}
+
+async function ensureKb(pageName: string, llm: LLMProvider): Promise<void> {
+  const filePath = `pipeline/kb/pages/${pageName}.json`;
+  if (fs.existsSync(filePath)) return;
+
+  const url = PAGE_URLS[pageName];
+  if (!url) {
+    throw new Error(
+      `Knowledge base not found: "${pageName}" and no URL registered in PAGE_URLS.\n` +
+      `Add an entry to PAGE_URLS in scripts/demo.ts to enable auto-generation.`
+    );
+  }
+
+  console.log(`\n  ⚠  KB file missing for "${pageName}" — auto-generating from ${url}`);
+  await new KnowledgeBaseGenerator(llm).generate(url, pageName);
 }
 
 async function generateSuite(
@@ -127,6 +154,7 @@ async function main() {
 
   // ── Scenario 1: Login ─────────────────────────────────────────────────────
   header(1, "Login — Test Suite Generation");
+  await ensureKb("parabank-login-page", llm);
   await generateSuite(
     llm,
     "parabank-login-page",
@@ -138,6 +166,7 @@ async function main() {
 
   // ── Scenario 2: Registration ──────────────────────────────────────────────
   header(2, "Registration — Test Suite Generation");
+  await ensureKb("parabank-register-page", llm);
   await generateSuite(
     llm,
     "parabank-register-page",
@@ -149,6 +178,7 @@ async function main() {
 
   // ── Scenario 3: Transfer Funds ────────────────────────────────────────────
   header(3, "Transfer Funds — Test Suite Generation");
+  await ensureKb("parabank-transfer-page", llm);
   await generateSuite(
     llm,
     "parabank-transfer-page",
@@ -160,6 +190,7 @@ async function main() {
 
   // ── Scenario 4: Bill Pay ──────────────────────────────────────────────────
   header(4, "Bill Pay — Test Suite Generation");
+  await ensureKb("parabank-billpay-page", llm);
   await generateSuite(
     llm,
     "parabank-billpay-page",
@@ -174,6 +205,7 @@ async function main() {
   console.log("\n  Situation: ParaBank's login button was renamed after a UI redesign.");
   console.log(`  Broken selector : "#loginForm .btn-primary"\n`);
 
+  await ensureKb("parabank-login-page", llm);
   const loginKb = kbService.load("parabank-login-page");
   const healed = await new SelfHealingLocatorEngine(llm).heal(
     { failedLocator: "#loginForm .btn-primary", pageName: "Login Page" },

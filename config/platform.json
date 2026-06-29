@@ -4,12 +4,5 @@
   "llmModel": "gpt-4.1-mini",
   "testOutputPath": "tests/e2e/",
   "reportOutputPath": "reports/",
-
-  "suites": [
-    {
-      "name": "Home Page",
-      "page": "ae-home",
-      "outputFile": "ae-home.spec.ts"
-    }
-  ]
+  "suites": []
 }

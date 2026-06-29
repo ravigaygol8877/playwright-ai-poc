@@ -219,10 +219,12 @@ Rules:
     }
 
     // Step 5 — Write to file
-    const outputPath = `knowledge-base/${outputName}.json`;
+    const outputDir  = "pipeline/kb/pages";
+    const outputPath = `${outputDir}/${outputName}.json`;
+    fs.mkdirSync(outputDir, { recursive: true });
     fs.writeFileSync(outputPath, JSON.stringify(kb, null, 2));
 
-    console.log(`  ✅ Knowledge base written → ${outputPath}`);
+    console.log(`  ✅ Knowledge base written → ${outputPath} (auto-generated)`);
     console.log(`     Page     : ${kb.pageName}`);
     console.log(`     Selectors: ${Object.keys(kb.selectors).join(", ")}`);
 

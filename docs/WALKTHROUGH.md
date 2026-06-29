@@ -55,7 +55,7 @@
 
 ### What You Show
 
-Open `tests/generated/login.spec.ts`
+Open `tests/e2e/login.spec.ts`
 
 ```typescript
 import { test, expect } from '@playwright/test';
@@ -111,7 +111,7 @@ test('Login with invalid username and valid password', async ({ page }) => {
 ### What You Show
 
 ```bash
-npx tsx ai/src/index.ts
+npm run ai:run
 ```
 
 > "Watch the terminal. You will see the AI generating test cases, then test data, then each step is being converted to Playwright code one by one."
@@ -122,10 +122,10 @@ npx tsx ai/src/index.ts
 
 *When it finishes:*
 
-> "Done. The file is written to `tests/generated/login.spec.ts`. Let me run the tests."
+> "Done. The files are written to `tests/e2e/`. Let me run the tests."
 
 ```bash
-npx playwright test tests/generated/login.spec.ts --project=chromium
+npx playwright test tests/e2e/ --project=chromium
 ```
 
 ```bash
@@ -151,16 +151,16 @@ npx playwright show-report
 ```
 ┌─────────────────────────────────────────────┐
 │  LAYER 3: AI Modules                        │  ← The intelligence
-│  (ai/src/)                                  │
+│  (pipeline/generators/ + analyzers/)        │
 ├─────────────────────────────────────────────┤
 │  LAYER 4: Automation / Code Generation      │  ← Converts AI output to code
-│  (automation/src/)                          │
+│  (pipeline/generators/playwright/)          │
 ├─────────────────────────────────────────────┤
 │  LAYER 2: Knowledge Base                    │  ← Real application data
-│  (knowledge-base/)                          │
+│  (pipeline/kb/)                             │
 ├─────────────────────────────────────────────┤
 │  LAYER 1: LLM Provider                      │  ← Connection to the AI model
-│  (llm/src/)                                 │
+│  (pipeline/providers/)                      │
 └─────────────────────────────────────────────┘
 ```
 
@@ -170,7 +170,7 @@ npx playwright show-report
 
 > "Layer 2 is the Knowledge Base. This is where I store real application data — the actual HTML selectors, the real URLs, the actual error messages. The reason this layer exists is to prevent AI hallucination. If I just ask GPT to write a Playwright test for a login page, it will invent selectors that do not exist in my application. By giving the AI the knowledge base and saying 'use only what is in here', I eliminate that problem."
 
-> "Layer 3 is where all the AI intelligence lives. Nine independent modules — test case generation, test data generation, flaky test analysis, root cause analysis, locator healing, coverage analysis, regression selection. Each one is completely independent."
+> "Layer 3 is where all the AI intelligence lives. Ten independent modules — test case generation, test data generation, action model generation, assertion generation, requirement expansion, flaky test analysis, root cause analysis, locator healing, coverage analysis, regression selection. Each one is completely independent."
 
 > "Layer 4 is the automation layer. This converts the AI's structured output into actual Playwright code strings. No AI lives here — it is pure deterministic code."
 
@@ -184,12 +184,12 @@ npx playwright show-report
 
 ### What You Say
 
-> "Start at the bottom. Open `llm/src/interfaces/LLMProvider.ts`."
+> "Start at the bottom. Open `pipeline/providers/interfaces/LLMProvider.ts`."
 
 ### What You Show
 
 ```typescript
-// llm/src/interfaces/LLMProvider.ts
+// pipeline/providers/interfaces/LLMProvider.ts
 export interface LLMProvider {
   generateResponse(prompt: string): Promise<string>;
 }
@@ -199,7 +199,7 @@ export interface LLMProvider {
 
 > "That is the entire interface. One method. Takes a prompt string, returns a string. Every AI module in this project depends on this interface — not on OpenAI, not on GPT, not on any specific provider."
 
-> "Now look at the actual implementation. Open `llm/src/providers/OpenRouterProvider.ts`."
+> "Now look at the actual implementation. Open `pipeline/providers/OpenRouterProvider.ts`."
 
 ### What You Show
 
@@ -230,7 +230,7 @@ export class OpenRouterProvider implements LLMProvider {
 
 > "Notice `temperature: 0.3`. I deliberately set this low. High temperature means more creative, more varied. Low temperature means more deterministic, more consistent. When you are generating JSON that your code will parse, you want consistency, not creativity."
 
-> "Now here is the other provider. Open `llm/src/providers/MockLLMProvider.ts`."
+> "Now here is the other provider. Open `pipeline/providers/MockLLMProvider.ts`."
 
 ### What You Show
 
@@ -264,7 +264,7 @@ export class MockLLMProvider implements LLMProvider {
 
 ### What You Show
 
-Open `knowledge-base/login-page.json`
+Open `pipeline/kb/pages/login-page.json`
 
 ```json
 {
@@ -293,14 +293,14 @@ Open `knowledge-base/login-page.json`
 
 > "This file contains everything the AI needs to know about the login page. The real URL. The real selectors. The real error messages. When the AI generates an assertion, it is told: use only what is in this file. Do not invent anything."
 
-> "Now look at how this file is loaded. Open `knowledge-base/KnowledgeBaseService.ts`."
+> "Now look at how this file is loaded. Open `pipeline/kb/KnowledgeBaseService.ts`."
 
 ### What You Show
 
 ```typescript
 export class KnowledgeBaseService {
   load(pageName: string) {
-    const filePath = `knowledge-base/${pageName}.json`;
+    const filePath = `pipeline/kb/pages/${pageName}.json`;
     const content = fs.readFileSync(filePath, "utf-8");
     return JSON.parse(content);
   }
@@ -313,27 +313,7 @@ export class KnowledgeBaseService {
 
 > "And here is the maintenance benefit: when a developer renames `#login` to `#login-button`, you change one line in this JSON file. No test code changes. No selector hunting. The AI picks up the correct selector the next time it runs."
 
-> "There is also a test catalog. Open `knowledge-base/test-catalog.json`."
-
-### What You Show
-
-```json
-{
-  "testSuites": [
-    "Login Tests",
-    "Registration Tests",
-    "Password Reset Tests",
-    "User Profile Tests",
-    "Search Tests",
-    "Checkout Tests",
-    "Order Tests"
-  ]
-}
-```
-
-### What You Say
-
-> "This is the registry of test suites. The Regression Selector uses this — when it decides which tests to run, it can only recommend suites that exist in this list. If the AI tries to invent a suite name like 'Authentication Integration Tests', it gets filtered out. The AI is constrained to reality."
+> "The Regression Selector is constrained the same way. It receives the list of actually existing test suite names alongside the changed files, so the AI can only recommend suites that exist. If the AI tries to invent a suite name, it gets filtered out in code after the response. The AI is always constrained to reality."
 
 ---
 
@@ -351,7 +331,7 @@ export class KnowledgeBaseService {
 
 ### What You Show
 
-Open `ai/src/utils/AIJsonParser.ts`
+Open `pipeline/utils/AIJsonParser.ts`
 
 ```typescript
 export class AIJsonParser {
@@ -383,14 +363,14 @@ export class AIJsonParser {
 
 ### What You Say
 
-> "First module. Open `ai/src/test-case-generator/TestCaseGenerator.ts`."
+> "First module. Open `pipeline/generators/test-cases/TestCaseGenerator.ts`."
 
 > "This module takes a plain English requirement and returns a list of test cases. Let me show you the data model first."
 
 ### What You Show
 
 ```typescript
-// ai/src/models/TestCase.ts
+// pipeline/models/TestCase.ts
 export interface TestCase {
   id: string;           // "TC_001"
   title: string;        // "Login with valid credentials"
@@ -464,7 +444,7 @@ ${requirement}
 
 ### What You Say
 
-> "Now the test data generator. Open `ai/src/test-data-generator/TestDataGenerator.ts`."
+> "Now the test data generator. Open `pipeline/generators/test-data/TestDataGenerator.ts`."
 
 > "The data model first."
 
@@ -522,14 +502,14 @@ ${requirement}
 
 ### What You Say
 
-> "This is my favorite module in the whole project. Open `ai/src/action-model/ActionModel.ts` and `AIActionModelGenerator.ts`."
+> "This is my favorite module in the whole project. Open `pipeline/generators/action-model/AIActionModelGenerator.ts`."
 
 > "The challenge this module solves: a test case has steps written in natural language. Things like 'Navigate to login page' or 'Enter a valid username'. These need to become Playwright code. But Playwright code is precise — it needs exact selectors and exact data references. The Action Model is the intermediate format that bridges natural language and Playwright."
 
 ### What You Show
 
 ```typescript
-// ai/src/action-model/ActionModel.ts
+// pipeline/generators/action-model/ActionModel.ts
 export type TestDataKey =
   | "validUsername"
   | "invalidUsername"
@@ -623,7 +603,7 @@ Step: ${step}
 
 ### What You Say
 
-> "Now the renderer. Open `automation/src/renderers/PlaywrightRenderer.ts`."
+> "Now the renderer. Open `pipeline/generators/playwright/PlaywrightRenderer.ts`."
 
 > "This is the only module in the whole project that has zero AI in it. It is a pure deterministic function. It takes an ActionModel and a knowledge base, and it returns a Playwright code string."
 
@@ -668,7 +648,7 @@ renderAction(action: ActionModel, knowledgeBase: any): string {
 
 ### What You Say
 
-> "The assertion generator. Open `ai/src/assertion-generator/AssertionGenerator.ts`."
+> "The assertion generator. Open `pipeline/generators/assertions/AssertionGenerator.ts`."
 
 > "Each test case has an `expectedResult` written in plain English. This module converts that into an actual Playwright assertion line."
 
@@ -726,7 +706,7 @@ Output:   await expect(page.locator('text=Username is required')).toBeVisible();
 
 ### What You Say
 
-> "Now the orchestrator of the automation layer. Open `automation/src/generators/PlaywrightGenerator.ts`."
+> "Now the orchestrator of the automation layer. Open `pipeline/generators/playwright/PlaywrightGenerator.ts`."
 
 > "This class takes the test cases, test data, and knowledge base, and coordinates everything we just walked through to produce the complete test file."
 
@@ -788,7 +768,7 @@ test('${testCase.title}', async ({ page }) => {
 
 ### What You Say
 
-> "This is probably the most practical module for day-to-day QA work. Open `ai/src/self-healing-locator/SelfHealingLocatorEngine.ts`."
+> "This is probably the most practical module for day-to-day QA work. Open `pipeline/analyzers/self-healing/SelfHealingLocatorEngine.ts`."
 
 > "The problem: a developer renames `#loginBtn` to `#login`. Your test breaks. Traditionally, you open the test file, find the broken selector, figure out what the new correct selector is, fix it, commit. Now imagine that happening across 50 tests after a major UI refactor."
 
@@ -848,7 +828,7 @@ const result: LocatorHealingResult = {
 
 ### What You Say
 
-> "Open `ai/src/flaky-test-analyzer/FlakyTestAnalyzer.ts`."
+> "Open `pipeline/analyzers/flaky/FlakyTestAnalyzer.ts`."
 
 > "Flaky tests are tests that sometimes pass and sometimes fail for no obvious reason. They are one of the most frustrating problems in automation. When a test fails in CI, you don't know if it is a real bug or just flakiness. Teams start ignoring failures because they assume it is flakiness — and then they miss real bugs."
 
@@ -889,7 +869,7 @@ const analysis: FlakyTestAnalysis = {
 
 ### What You Say
 
-> "Open `ai/src/root-cause-analyzer/BugRootCauseAnalyzer.ts`."
+> "Open `pipeline/analyzers/root-cause/BugRootCauseAnalyzer.ts`."
 
 > "When a test fails in CI, someone has to read the stack trace and figure out why. For experienced engineers this takes minutes. For junior engineers it can take hours. And even experienced engineers sometimes miss the real cause."
 
@@ -944,7 +924,7 @@ if (!result.failureType || !result.probableCause || !result.impactedComponent ||
 
 ### What You Say
 
-> "Open `ai/src/coverage-analyzer/CoverageAnalyzer.ts`."
+> "Open `pipeline/analyzers/coverage/CoverageAnalyzer.ts`."
 
 > "How do you know which requirements actually have test coverage? Most teams assume. This module makes it explicit."
 
@@ -985,7 +965,7 @@ const result: CoverageAnalysisResult = {
 
 ### What You Say
 
-> "Last module. Open `ai/src/regression-selector/RegressionSelector.ts`."
+> "Last module. Open `pipeline/analyzers/regression/RegressionSelector.ts`."
 
 > "This solves a real CI/CD problem. Every PR triggers the full regression suite. If your suite takes 45 minutes, every PR takes 45 minutes to validate. That is extremely wasteful when a change only touched one module."
 
@@ -1037,9 +1017,9 @@ result.recommendedTests = result.recommendedTests.filter(
 
 ### What You Say
 
-> "Open `ai/src/orchestrator/TestIntelligenceOrchestrator.ts`."
+> "Open `scripts/run-pipeline.ts`. This is the main pipeline runner — it coordinates the full end-to-end generation sequence."
 
-> "The orchestrator is what you use when you want the full end-to-end pipeline in one call. It coordinates the test case generator, test data generator, and playwright generator."
+> "The pipeline runner is what you use when you want the full end-to-end flow in one command. It coordinates KB generation, scenario discovery, POM generation, test case expansion, and Playwright spec generation."
 
 ### What You Show
 
@@ -1078,7 +1058,7 @@ async generateTests(requirement: string): Promise<TestGenerationResult> {
 
 ### What You Say
 
-> "Now let me open the main file that ties everything together. Open `ai/src/index.ts`. This is what runs when you type `npx tsx ai/src/index.ts`."
+> "Now let me open the main file that ties everything together. Open `scripts/run-pipeline.ts`. This is what runs when you type `npm run ai:run`."
 
 ### What You Show
 
@@ -1115,9 +1095,9 @@ async function main() {
   const script    = await playwrightGen.generate(testCases, testData, knowledgeBase);
 
   // 7. Write the output file
-  fs.writeFileSync("tests/generated/login.spec.ts", script);
+  fs.writeFileSync("tests/e2e/login.spec.ts", script);
 
-  console.log("Generated: tests/generated/login.spec.ts");
+  console.log("Generated: tests/e2e/login.spec.ts");
 }
 
 main();
@@ -1149,7 +1129,7 @@ main();
 
 ### What You Show
 
-Create `knowledge-base/checkout-page.json`:
+Create `pipeline/kb/pages/checkout-page.json`:
 
 ```json
 {
@@ -1193,9 +1173,9 @@ const requirement = "User should be able to complete a checkout with a valid car
 ### What You Show
 
 ```typescript
-// llm/src/providers/ClaudeProvider.ts
+// pipeline/providers/ClaudeProvider.ts
 import Anthropic from "@anthropic-ai/sdk";
-import type { LLMProvider } from "../interfaces/LLMProvider.js";
+import type { LLMProvider } from "./interfaces/LLMProvider.js";
 
 export class ClaudeProvider implements LLMProvider {
   private client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
@@ -1236,13 +1216,13 @@ const llmProvider = new ClaudeProvider();
 
 Step 1 — Define the interfaces:
 ```typescript
-// ai/src/test-priority-scorer/PriorityScoringInput.ts
+// pipeline/analyzers/test-priority-scorer/PriorityScoringInput.ts
 export interface PriorityScoringInput {
   testCases: TestCase[];
   changedFiles: string[];
 }
 
-// ai/src/test-priority-scorer/PriorityScoredResult.ts
+// pipeline/analyzers/test-priority-scorer/PriorityScoredResult.ts
 export interface PriorityScoredResult {
   testCaseId: string;
   riskScore: number;       // 0-100
@@ -1252,7 +1232,7 @@ export interface PriorityScoredResult {
 
 Step 2 — Create the module:
 ```typescript
-// ai/src/test-priority-scorer/TestPriorityScorer.ts
+// pipeline/analyzers/test-priority-scorer/TestPriorityScorer.ts
 export class TestPriorityScorer {
   constructor(private llmProvider: LLMProvider) {}
 
@@ -1284,7 +1264,7 @@ export class TestPriorityScorer {
 
 > "Let me step back and summarize what we have built and why the design decisions matter."
 
-> "We have a four-layer architecture. The LLM layer gives us provider independence. The knowledge base layer grounds the AI in reality and prevents hallucination. The AI layer gives us nine independent, composable intelligence modules. The automation layer converts AI output to executable code."
+> "We have a four-layer architecture. The LLM layer gives us provider independence. The knowledge base layer grounds the AI in reality and prevents hallucination. The AI layer gives us ten independent, composable intelligence modules. The automation layer converts AI output to executable code."
 
 > "Every module follows the same pattern: structured input, engineered prompt, LLM call, parse, validate, typed output. Once you understand one module, you can write another in 30 minutes."
 

@@ -26,7 +26,7 @@ creates the page object models, and writes the full Playwright test suite — in
 And when selectors break because the UI changed, the self-healing engine detects the failure,
 proposes a fix using AI, and logs it so your team can review and approve it.
 
-The framework runs on multiple LLM providers — OpenAI, GitHub Models, Google Gemini —
+The framework runs on multiple LLM providers — Gemini, GitHub Models, OpenRouter, LM Studio —
 with automatic fallback and caching so you're not burning tokens on repeat work.
 
 Every generated spec follows enterprise Playwright best practices out of the box:
@@ -58,12 +58,12 @@ With this framework — let me show you what that looks like now."
 
 ### Step 1 — The Input: Requirements + URL (45 seconds)
 
-*[Show: `requirements/requirements.xlsx` and `platform.config.json`]*
+*[Show: `requirements/requirements.xlsx` and `config/platform.json`]*
 
 "Everything starts here. This is our requirements file — plain Excel, the same format
 your BA or PM already uses. No special format, no migration.
 
-And this is the platform config — think of it as the project brief. You tell it your project name,
+And this is the platform config (`config/platform.json`) — think of it as the project brief. You tell it your project name,
 the environment, the LLM model you want, and your test output path.
 
 One config file. One Excel sheet. That's all the human input this framework needs."
@@ -98,7 +98,7 @@ per feature is now done before you finish your coffee."
 
 ### Step 3 — The Output: Enterprise-Quality Tests (60 seconds)
 
-*[Show: `tests/e2e/ae-home-excel-1.spec.ts` and `support/pages/AeHomePage.ts`]*
+*[Show: `tests/e2e/ae-home-excel-1.spec.ts` and `tests/pages/AeHomePage.ts`]*
 
 "Here's what gets generated. Look at the spec file.
 
@@ -115,7 +115,7 @@ A new engineer can read this and understand it immediately."
 
 ### Step 4 — AI Features: Self-Healing + Regression Analysis (60 seconds)
 
-*[Show: `ai/src/self-healing-locator/` and `ai/src/regression-selector/`]*
+*[Show: `pipeline/analyzers/self-healing/` and `pipeline/analyzers/regression/`]*
 
 "Beyond generation, we've built two AI-powered quality engines.
 
@@ -133,13 +133,13 @@ Faster feedback, less wasted CI time."
 
 ### Step 5 — Reliability: Caching, Fallback, Circuit Breaker (30 seconds)
 
-*[Show: `llm/src/` structure briefly]*
+*[Show: `pipeline/providers/` structure briefly]*
 
 "This isn't a demo-only tool. It's built for production use.
 
 The LLM layer has three reliability mechanisms: a caching layer that skips API calls
 for unchanged requirements — so you only pay for what's new; a fallback provider that
-automatically switches from OpenAI to GitHub Models to Gemini if one provider is down;
+automatically switches from Gemini to GitHub Models to OpenRouter to LM Studio if one provider is down;
 and a circuit breaker that stops retry storms after five consecutive failures.
 
 Your pipeline keeps running even if one LLM provider has an outage."
@@ -191,19 +191,19 @@ Everything the framework generates is code you own."
 | Feature | Detail |
 |---|---|
 | Response Caching | Skips LLM calls for unchanged requirements — saves tokens on re-runs |
-| Multi-provider Fallback | Auto-switches: OpenAI → GitHub Models → Gemini on failure |
+| Multi-provider Fallback | Auto-switches: Gemini → GitHub Models → OpenRouter → LM Studio on failure |
 | Circuit Breaker | Stops after 5 consecutive provider failures — prevents retry storms |
 | Min/Max Enforcement | TestCaseGenerator throws if LLM returns < 4 cases; truncates at 10 |
 
 ### Developer Experience
 | Feature | Detail |
 |---|---|
-| `npm run generate:all` | One command generates everything for all suites in platform.config.json |
+| `npm run generate:all` | One command generates everything for all suites in `config/platform.json` |
 | `npm run test:smoke` | Runs only `@smoke` tagged tests |
 | `npm run test:regression` | Runs full `@regression` suite |
 | `npm run test:mobile` | Runs `@mobile` viewport tests |
 | `npm run format` | Prettier formats all source files |
-| `npm run test:unit` | Runs 69 unit + integration tests for the framework itself |
+| `npm run test:unit` | Runs 104 unit + integration tests for the framework itself |
 | Allure Reporting | Rich test reports with screenshots on failure, trace on retry |
 | Self-Healing Logs | Failed locators are logged with AI-suggested replacements |
 | Regression Selector | AI recommends minimum test suites to run per code change |

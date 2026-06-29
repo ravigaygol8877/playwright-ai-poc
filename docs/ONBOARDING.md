@@ -20,12 +20,13 @@ The framework is parameterised per page, not per project. Each page of your app 
 Run the KB generator against your page's live URL:
 
 ```bash
-npm run kb:generate
+npm run kb:generate <url> <page-name>
 ```
 
-When prompted, enter:
-- **URL** — the full page URL (e.g. `https://myapp.com/login`)
-- **Page name** — a short identifier in kebab-case (e.g. `myapp-login`)
+For example:
+```bash
+npm run kb:generate https://myapp.com/login myapp-login
+```
 
 The generator will:
 1. Open the URL in a headless browser
@@ -56,25 +57,14 @@ Review the generated file and add any custom helper methods your tests will need
 
 ---
 
-## Step 3 — Register the Fixture
+## Step 3 — Fixture Registration (automatic)
 
-Open `tests/fixtures/base.ts` and add your new page to the fixture so it's available in specs:
+The fixture is registered automatically when you run `npm run generate:pom`. The `FixtureUpdater` reads `pipeline/kb/pages/` and updates `tests/fixtures/base.ts` to import and expose each new POM — no manual edits needed.
 
-```typescript
-// tests/fixtures/base.ts
-import MyappLoginPage from '../pages/MyappLoginPage.js';
+If you need to run it standalone:
 
-type MyFixtures = {
-  myappLoginPage: MyappLoginPage;
-  // ... other pages
-};
-
-export const testDesktop = base.extend<MyFixtures>({
-  myappLoginPage: async ({ page }, use) => {
-    await use(new MyappLoginPage(page));
-  },
-  // ...
-});
+```bash
+npm run generate:pom
 ```
 
 ---

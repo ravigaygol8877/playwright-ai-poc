@@ -78,7 +78,7 @@ For generated specs, the heal call can be wired into a Playwright fixture so all
 1. **Sync with KB required** — if a page gains entirely new elements not yet in the KB, healing will fail. Re-run the pipeline (`npm run ai:run`) after UI changes to refresh the KB.
 2. **Confidence is self-reported** — the LLM assigns its own score; it is not validated against ground truth. Treat thresholds as heuristics.
 3. **One locator at a time** — there is no batch healing for multiple failures in a single test.
-4. **`knowledgeBase: any` typing** — the engine accepts an untyped object. A typed `KnowledgeBase` interface (planned) will catch mismatches at compile time.
+4. ~~**`knowledgeBase: any` typing**~~ — resolved. The engine now accepts a typed `KnowledgeBase` interface (`pipeline/models/KnowledgeBase.ts`), catching shape mismatches at compile time.
 
 ---
 
