@@ -276,3 +276,70 @@ LLM_PROVIDER=github-models npm run test:github-models
 ```
 
 Requires `GITHUB_TOKEN` in `.env`.
+
+---
+
+## Execution Time & Token Consumption Summary
+
+Token estimates are input + output combined, averaged across typical runs.  
+**Cached** = `CachingLLMProvider` returns a disk-cached response (`.llm-cache/`) — no API call, no tokens consumed.
+
+### AI Generation Commands (invoke the LLM)
+
+| Command | First Run | Cached Run | LLM Calls | ~Tokens (first run) | Cache mechanism |
+|---|---|---|---|---|---|
+| `npm run ai:run` | 15–25 min | 3–5 min | 20–50 | 80k–150k† | CachingLLMProvider + ArtifactManifest + spec manifest |
+| `npm run generate:from-excel` | 10–18 min | 30–60 sec | 20–50 | 80k–150k† | CachingLLMProvider + ArtifactManifest + spec manifest |
+| `npm run generate:all` | 5–15 min | 10–30 sec | 10–25 | 30k–70k† | CachingLLMProvider |
+| `npm run generate:pom` | 30–60 sec | 3–5 sec | 2 per page | 5k–8k per page | CachingLLMProvider + ArtifactManifest |
+| `npm run kb:generate` | 30–60 sec | 3–5 sec | 1 | 3k–5k | CachingLLMProvider |
+| `npm run demo` | 8–12 min | 15–30 sec | ~40 | 70k–100k | CachingLLMProvider |
+| `npm run demo:flaky` | 5–10 sec | 1–2 sec | 1 | 1.5k–2.5k | CachingLLMProvider |
+| `npm run demo:rootcause` | 5–10 sec | 1–2 sec | 1 | 1.5k–2.5k | CachingLLMProvider |
+| `npm run demo:healing` | 5–10 sec | 1–2 sec | 1 | 1.5k–2.5k | CachingLLMProvider |
+| `npm run demo:coverage` | 5–10 sec | 1–2 sec | 1 | 1.5k–2.5k | CachingLLMProvider |
+| `npm run demo:regression` | 5–10 sec | 1–2 sec | 1 | 1.5k–2.5k | CachingLLMProvider |
+| `npm run test:provider-switching` | 10–30 sec | 5–10 sec | 3–5 | 5k–10k | CachingLLMProvider |
+| `npm run test:github-models` | 5–15 sec | 3–5 sec | 2–3 | 3k–5k | CachingLLMProvider |
+
+> † Token count scales with project size. Estimate: ~15k–25k tokens per page (KB + POM + data file) and ~3k–5k tokens per requirement row (test case expansion + spec generation). A 10-row, 2-page project uses ~80k–100k tokens on first run.
+
+**What drives the most tokens in `ai:run` / `generate:from-excel`:**
+1. **Step 5 — Spec generation** — largest consumer: `AIActionModelGenerator` makes one call per test-case step (~3–5 steps each), plus one `AssertionGenerator` call per test case.
+2. **Step 4 — Test case expansion** — one LLM call per requirement row in Excel.
+3. **Step 2 — KB generation** — one call per new page (includes full DOM snapshot in the prompt).
+
+**What eliminates redundant token use:**
+- `ArtifactManifest` — unchanged requirement rows skip Step 4 and 5 entirely (zero LLM calls).
+- Spec manifest (`.llm-cache/spec-manifest.json`) — if generated test cases are identical to the last run, spec files are not regenerated.
+- Scenario cache (`pipeline/kb/pages/{page}-scenarios.json`) — Step 2.5 AI discovery runs only once per page; result is stored on disk.
+- `CachingLLMProvider` — every prompt is SHA-256 hashed; identical prompts always return the cached response.
+
+---
+
+### Execution & Reporting Commands (no LLM calls)
+
+| Command | Typical Duration | LLM Calls | Tokens |
+|---|---|---|---|
+| `npm test` | 1–3 min per spec file | 0 | 0 |
+| `npm run test:qa` / `test:uat` / `test:prod` | 1–3 min per spec file | 0 | 0 |
+| `npm run test:chromium` / `firefox` / `webkit` | 1–3 min per spec file | 0 | 0 |
+| `npm run test:smoke` / `regression` / `mobile` | 30 sec – 2 min | 0 | 0 |
+| `npm run report:latest` | 1–2 sec | 0 | 0 |
+| `npm run allure:generate` | 5–15 sec | 0 | 0 |
+| `npm run allure:serve` | 3–5 sec | 0 | 0 |
+| `npm run allure:full` | 2–5 min + test time | 0 | 0 |
+
+---
+
+### Utility Commands (no LLM calls)
+
+| Command | Typical Duration | LLM Calls | Tokens |
+|---|---|---|---|
+| `npm run project:reset` | 2–5 sec | 0 | 0 |
+| `npm run requirements:template` | 2–3 sec | 0 | 0 |
+| `npm run cache:clear` | 1–2 sec | 0 | 0 |
+| `npm run typecheck` | 10–20 sec | 0 | 0 |
+| `npm run test:unit` | 5–10 sec | 0 | 0 |
+| `npm run lint` / `lint:fix` | 5–10 sec | 0 | 0 |
+| `npm run format` / `format:check` | 3–8 sec | 0 | 0 |

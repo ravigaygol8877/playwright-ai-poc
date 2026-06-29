@@ -26,7 +26,8 @@
  *   tests/fixtures/base.ts           — core testDesktop / testMobile fixtures
  *   tests/helpers/constants.ts       — viewport constants (used by base.ts)
  *   tests/helpers/waitUtils.ts       — generic wait utilities
- *   tests/data/example.ts            — data template (not generated)
+ *   tests/pages/ExamplePage.ts       — scaffold POM (not generated)
+ *   tests/data/example.data.ts      — scaffold data file (not generated)
  *   requirements/*.xlsx        — Excel requirements files
  *   .env                       — API keys and environment config
  *   tsconfig.json, package.json, playwright.config.ts, etc.
@@ -121,10 +122,10 @@ async function main() {
 
   // ── 2. Remove generated Page Object Models ────────────────────────────────
   section("Step 2 — Removing Generated Page Object Models");
-  deletedCount += removeGlob("tests/pages", [".ts"]);
+  deletedCount += removeGlob("tests/pages", [".ts"], ["ExamplePage.ts"]);
 
   // ── 2b. Remove generated data files (tests/data/*.data.ts) ───────────────
-  deletedCount += removeGlob("tests/data", [".data.ts"]);
+  deletedCount += removeGlob("tests/data", [".data.ts"], ["example.data.ts"]);
 
   // ── 3. Remove project-specific helper files ───────────────────────────────
   section("Step 3 — Removing Project-Specific Helpers");
@@ -167,7 +168,8 @@ async function main() {
   preserved("tests/fixtures/base.ts       (testDesktop / testMobile)");
   preserved("tests/helpers/constants.ts   (viewport constants)");
   preserved("tests/helpers/waitUtils.ts   (generic wait utilities)");
-  preserved("tests/data/example.ts        (data file template)");
+  preserved("tests/pages/ExamplePage.ts     (scaffold POM — not generated)");
+  preserved("tests/data/example.data.ts    (scaffold data file — not generated)");
   preserved("requirements/*.xlsx          (Excel requirements files)");
   preserved(".env                         (API keys)");
 

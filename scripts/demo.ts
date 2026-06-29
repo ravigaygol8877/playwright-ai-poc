@@ -115,19 +115,28 @@ async function generateSuite(
   step("Generating test data...");
   const testData = await new TestDataGenerator(llm).generate(requirement);
   ok("Test data ready");
-  field("validUsername", testData.validUsername);
-  field("validPassword", testData.validPassword);
 
   step(`Loading knowledge base (${kb.pageName})...`);
   ok(`URL: ${kb.url}`);
   field("selectors", Object.keys(kb.selectors as Record<string, unknown>).join(", "));
+
+  // Write sidecar .data.ts file alongside the spec
+  const specBaseName = path.basename(outputFile, ".spec.ts");
+  const dataFile = path.join(path.dirname(outputFile), `${specBaseName}.data.ts`);
+  fs.writeFileSync(dataFile, `export const testData = ${JSON.stringify(testData, null, 2)};\n`);
+  ok(`Test data → ${dataFile}`);
 
   step("Generating Playwright script...");
   const script = await new PlaywrightGenerator(
     new AIActionModelGenerator(llm),
     new PlaywrightRenderer(),
     new AssertionGenerator(llm)
-  ).generate(testCases, testData, kb);
+  ).generate(testCases, testData, kb, {
+    fixtureKey:         specBaseName,
+    fixtureImportPath:  "../fixtures/base.js",
+    testDataImportPath: `./${specBaseName}.data.js`,
+    noPageClass:        true,
+  });
 
   fs.writeFileSync(outputFile, script);
   ok(`Written → ${outputFile}  (${script.split("\n").length} lines)`);

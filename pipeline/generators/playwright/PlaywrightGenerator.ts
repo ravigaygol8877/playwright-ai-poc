@@ -29,9 +29,10 @@ export interface PomOptions {
   fixtureKey:         string;  // e.g. "aeHomePage" (legacy fixture param name)
   fixtureImportPath:  string;  // e.g. "../../support/fixtures/base.js"
   testDataImportPath: string;  // e.g. "./ae-home.data.js"
-  pageClassName?:     string;  // e.g. "AeHomePage" — triggers testDesktop template
+  pageClassName?:     string;  // e.g. "AeHomePage" — triggers testDesktop + POM class template
   pageImportPath?:    string;  // e.g. "../../support/pages/AeHomePage.js"
   methodRegistry?:    Record<string, { click?: string; fill?: string }>;
+  noPageClass?:       boolean; // use testDesktop from fixtures without a POM class import
 }
 
 /**
@@ -85,9 +86,14 @@ export class PlaywrightGenerator {
 
     if (pomOptions?.pageClassName) {
       // ── New pattern: testDesktop, module-level let, POM in beforeEach ─────────
+      if (!pomOptions.pageImportPath) {
+        throw new Error(
+          `PlaywrightGenerator: pageImportPath is required when pageClassName is set (className: ${pomOptions.pageClassName})`
+        );
+      }
       const varName = this.toVarName(pomOptions.pageClassName);
       return `import { testDesktop } from '${pomOptions.fixtureImportPath}';
-import ${pomOptions.pageClassName} from '${pomOptions.pageImportPath ?? ""}';
+import { ${pomOptions.pageClassName} } from '${pomOptions.pageImportPath}';
 import { testData } from '${pomOptions.testDataImportPath}';
 
 let ${varName}: ${pomOptions.pageClassName};
@@ -96,6 +102,27 @@ testDesktop.describe('${describeName}', () => {
   testDesktop.beforeEach(async ({ page }) => {
     ${varName} = new ${pomOptions.pageClassName}(page);
     page.on('console', (msg) => console.info(\`[\${msg.type()}] \${msg.text()}\`));
+  });
+
+${testBlocks.join("\n\n")}
+});
+`;
+    }
+
+    if (pomOptions?.noPageClass) {
+      // ── testDesktop fixture, sidecar data import, no POM class ───────────────
+      const beforeEachLines = prefixLines.map(l => `    ${l}`);
+      if (!skipGoto) {
+        beforeEachLines.push(`    await page.goto('${pagePath}');`);
+      }
+      const beforeEachBody = beforeEachLines.join("\n");
+
+      return `import { testDesktop } from '${pomOptions.fixtureImportPath}';
+import { testData } from '${pomOptions.testDataImportPath}';
+
+testDesktop.describe('${describeName}', () => {
+  testDesktop.beforeEach(async ({ page }) => {
+${beforeEachBody}
   });
 
 ${testBlocks.join("\n\n")}
@@ -149,6 +176,14 @@ ${testBlocks.join("\n\n")}
     return className.charAt(0).toLowerCase() + className.slice(1);
   }
 
+  private escSingle(s: string): string {
+    return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  }
+
+  private escDouble(s: string): string {
+    return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
   private async generateTestBlock(
     testCase: TestCase,
     knowledgeBase: KnowledgeBase,
@@ -190,10 +225,10 @@ ${testBlocks.join("\n\n")}
       .map(l => `    ${l}`)
       .join("\n");
 
-    if (pomOptions?.pageClassName) {
-      // New pattern: async ({ page }) — POM is the module-level variable
+    if (pomOptions?.pageClassName || pomOptions?.noPageClass) {
+      // testDesktop pattern: POM is module-level variable (pageClassName) or raw page (noPageClass)
       return `  testDesktop(
-    '${testCase.title} @regression',
+    '${this.escSingle(testCase.title)} @regression',
     async ({ page }) => {
 ${indentedActions}
 ${indentedAssertion}
@@ -203,7 +238,7 @@ ${indentedAssertion}
 
     const testArgs = pomOptions ? `{ page, ${pomOptions.fixtureKey} }` : `{ page }`;
 
-    return `  test("${testCase.title}", async (${testArgs}) => {
+    return `  test("${this.escDouble(testCase.title)} @regression", async (${testArgs}) => {
 ${indentedActions}
 ${indentedAssertion}
   });`;

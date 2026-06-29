@@ -29,14 +29,14 @@ import { TestDataGenerator }        from "../pipeline/generators/test-data/TestD
 import { AIActionModelGenerator }   from "../pipeline/generators/action-model/AIActionModelGenerator.js";
 import { AssertionGenerator }       from "../pipeline/generators/assertions/AssertionGenerator.js";
 import { PlaywrightRenderer }       from "../pipeline/generators/playwright/PlaywrightRenderer.js";
-import { PlaywrightGenerator }      from "../pipeline/generators/playwright/PlaywrightGenerator.js";
+import { PlaywrightGenerator, type PomOptions } from "../pipeline/generators/playwright/PlaywrightGenerator.js";
 import { KnowledgeBaseService }     from "../pipeline/kb/KnowledgeBaseService.js";
 import type { TestCase }            from "../pipeline/models/TestCase.js";
 import { createRunContext }         from "../pipeline/reporting/RunContext.js";
 import type { RunPaths }            from "../pipeline/reporting/RunContext.js";
 import { POMGenerator, kbKeyToClassName } from "../pipeline/generators/pom/POMGenerator.js";
 import { DataFileGenerator }        from "../pipeline/generators/pom/DataFileGenerator.js";
-import { classNameToFixtureKey } from "../pipeline/generators/pom/FixtureUpdater.js";
+import { FixtureUpdater, classNameToFixtureKey } from "../pipeline/generators/pom/FixtureUpdater.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -240,9 +240,14 @@ async function generateSuite(
     console.log(`done  (${suite.page})`);
 
     // Auto-generate POM + data file if not yet present for this page
-    const className = kbKeyToClassName(suite.page);
-    const pomFile   = `tests/pages/${className}.ts`;
-    const dataFile  = `tests/data/${className.charAt(0).toLowerCase()}${className.slice(1)}.data.ts`;
+    const className  = kbKeyToClassName(suite.page);
+    const camelName  = className.charAt(0).toLowerCase() + className.slice(1);
+    const pomFile    = `tests/pages/${className}.ts`;
+    const dataFile   = `tests/data/${camelName}.data.ts`;
+    const baseName   = suite.outputFile.replace(/\.spec\.ts$/, "");
+    const fixtureKey = classNameToFixtureKey(className);
+    const fixtureUpd = new FixtureUpdater();
+    let dataResultInfo = { interfaceName: `${className}Data`, fileName: `${camelName}.data.ts` };
 
     if (!fs.existsSync(pomFile)) {
       fs.mkdirSync("tests/pages", { recursive: true });
@@ -260,15 +265,41 @@ async function generateSuite(
           fs.writeFileSync(dataFile, dataResult.code, "utf-8");
           console.log("done");
           tick(`Data → ${dataFile}`);
+          dataResultInfo = { interfaceName: dataResult.interfaceName, fileName: dataResult.fileName };
+        }
 
-          const fixtureKey = classNameToFixtureKey(className);
-          tick(`Fixture key: ${fixtureKey} (add to tests/fixtures/base.ts manually if needed)`);
+        try {
+          fixtureUpd.update("tests/fixtures/base.ts", {
+            className,
+            fileName:      `${className}.ts`,
+            fixtureKey,
+            dataInterface: dataResultInfo.interfaceName,
+            dataVarName:   dataResultInfo.interfaceName.charAt(0).toLowerCase() + dataResultInfo.interfaceName.slice(1),
+            dataFileName:  dataResultInfo.fileName,
+          });
+          tick(`tests/fixtures/base.ts  (${className} registered)`);
+        } catch (fixErr) {
+          console.warn(`  ⚠  fixtures update: ${fixErr instanceof Error ? fixErr.message : String(fixErr)}`);
         }
       } catch (pomErr) {
         const msg = pomErr instanceof Error ? pomErr.message : String(pomErr);
         console.log(`failed (${msg}) — continuing without POM`);
       }
     }
+
+    const pomExists = fs.existsSync(pomFile);
+    const pomOptions: PomOptions = pomExists ? {
+      fixtureKey,
+      fixtureImportPath:  "../fixtures/base.js",
+      testDataImportPath: `../data/${camelName}.data.js`,
+      pageClassName:      className,
+      pageImportPath:     `../pages/${className}.js`,
+    } : {
+      fixtureKey,
+      fixtureImportPath:  "../fixtures/base.js",
+      testDataImportPath: `./${baseName}.data.js`,
+      noPageClass:        true,
+    };
 
     // Resolve requirement: use manual value or auto-generate from KB
     let requirement = suite.requirement?.trim() ?? "";
@@ -291,14 +322,15 @@ async function generateSuite(
     process.stdout.write("\n  ▸ Generating test data... ");
     const testData = await new TestDataGenerator(llm).generate(requirement);
     console.log("done");
-    info("validUsername",   testData.validUsername);
-    info("validPassword",   testData.validPassword);
-    info("invalidUsername", testData.invalidUsername);
-    info("invalidPassword", testData.invalidPassword);
-
     // Playwright script
+    if (!pomExists) {
+      const sidecarDataPath = `${testOutputPath}${baseName}.data.ts`;
+      fs.writeFileSync(sidecarDataPath, `export const testData = ${JSON.stringify(testData, null, 2)};\n`);
+      tick(`Data → ${sidecarDataPath}`);
+    }
+
     process.stdout.write("\n  ▸ Generating Playwright script... ");
-    const script = await playwrightGen.generate(testCases, testData, kb);
+    const script = await playwrightGen.generate(testCases, testData, kb, pomOptions);
     console.log("done");
 
     // Write spec file to tests/e2e/
@@ -311,7 +343,6 @@ async function generateSuite(
     fs.copyFileSync(specPath, scriptCopy);
 
     // Export test cases to JSON under the run folder
-    const baseName     = suite.outputFile.replace(/\.spec\.ts$/, "");
     const jsonReport   = path.join(runs.generatedCases, `${baseName}-test-cases.json`);
     writeJsonReport(jsonReport, suite, requirement, testCases);
     tick(`Report  → ${jsonReport}`);
@@ -339,6 +370,11 @@ async function main() {
 
   if (!config.suites || config.suites.length === 0) {
     console.error("\n  ERROR: No suites defined in config/platform.json.");
+    process.exit(1);
+  }
+
+  if (!path.resolve(config.testOutputPath).startsWith(path.resolve(process.cwd()))) {
+    console.error(`\n  ERROR: testOutputPath "${config.testOutputPath}" is outside the project directory.`);
     process.exit(1);
   }
 

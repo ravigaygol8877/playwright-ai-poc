@@ -1,5 +1,5 @@
 /**
- * FixtureUpdater — registers a new POM class into src/fixtures/index.ts.
+ * FixtureUpdater — registers a new POM class into tests/fixtures/base.ts.
  *
  * Reads the existing fixture file, checks if the class is already registered,
  * and if not, appends the import + interface property + fixture entry.
@@ -27,7 +27,7 @@ export class FixtureUpdater {
 
     const content = fs.readFileSync(fixturesPath, 'utf-8');
 
-    // Skip if class already imported
+    // Skip if class already imported (idempotent)
     if (content.includes(`import { ${entry.className} }`)) {
       return false;
     }
@@ -49,7 +49,7 @@ export class FixtureUpdater {
       pomImportLine,
     );
 
-    // 2. Add data import after the last existing data import line
+    // 2. Add data value import after the last existing data import line
     const dataVarExport = entry.dataVarName;
     const dataImportLine =
       `import { ${dataVarExport} } from '../data/${entry.dataFileName.replace('.ts', '.js')}';`;
@@ -82,19 +82,21 @@ export class FixtureUpdater {
       dataFixtureProp,
     );
 
-    // 5. Add page fixture impl before the closing of the extend({ block
+    // 5. Add page fixture impl before the last data fixture impl line
     const fixtureImpl = `
   ${entry.fixtureKey}: async ({ page }, use) => {
     await use(new ${entry.className}(page));
   },`;
     result = this.insertBeforeLastMatch(result, /^  \w+Data: async/, fixtureImpl);
 
-    // 6. Add data fixture impl before the closing '});'
+    // 6. Add data fixture impl before the testFixtures-end sentinel
+    // The sentinel `}); // testFixtures-end` is unique to the shared fixture block,
+    // so this correctly targets only that block (not testDesktop or testMobile).
     const dataFixtureImpl = `
   ${entry.fixtureKey}Data: async ({}, use) => {
     await use(${dataVarExport});
   },`;
-    result = this.insertBeforeLastMatch(result, /^\}\);$/, dataFixtureImpl);
+    result = this.insertBeforeLastMatch(result, /^\}\); \/\/ testFixtures-end$/, dataFixtureImpl);
 
     return result;
   }
@@ -108,8 +110,10 @@ export class FixtureUpdater {
     }
 
     if (lastIdx === -1) {
-      // Pattern not found — prepend at top after existing imports
-      return line + '\n' + content;
+      throw new Error(
+        `FixtureUpdater: anchor pattern not found: ${pattern}\n` +
+        `Ensure tests/fixtures/base.ts has been seeded with the expected scaffold.`
+      );
     }
 
     lines.splice(lastIdx + 1, 0, line);

@@ -30,7 +30,7 @@ import { ExcelReader }            from "../pipeline/readers/ExcelReader.js";
 import { RequirementExpander }    from "../pipeline/readers/RequirementExpander.js";
 import { POMGenerator, kbKeyToClassName } from "../pipeline/generators/pom/POMGenerator.js";
 import { DataFileGenerator }      from "../pipeline/generators/pom/DataFileGenerator.js";
-import { classNameToFixtureKey } from "../pipeline/generators/pom/FixtureUpdater.js";
+import { FixtureUpdater, classNameToFixtureKey } from "../pipeline/generators/pom/FixtureUpdater.js";
 import { TestDataGenerator }      from "../pipeline/generators/test-data/TestDataGenerator.js";
 import { AIActionModelGenerator } from "../pipeline/generators/action-model/AIActionModelGenerator.js";
 import { AssertionGenerator }     from "../pipeline/generators/assertions/AssertionGenerator.js";
@@ -135,6 +135,7 @@ async function main() {
   const expander   = new RequirementExpander(llm);
   const pomGen     = new POMGenerator(llm);
   const dataGen    = new DataFileGenerator(llm);
+  const fixtureUpd = new FixtureUpdater();
   const pwGen      = new PlaywrightGenerator(
     new AIActionModelGenerator(llm),
     new PlaywrightRenderer(),
@@ -307,11 +308,35 @@ async function main() {
         manifest.setPomGenerated(pageKey, pageUrl, kbFile);
         manifest.save();
 
+        let dataResult;
         if (!fs.existsSync(dataFile)) {
-          const dataResult = await dataGen.generate(kb, pageKey);
+          dataResult = await dataGen.generate(kb, pageKey);
           fs.mkdirSync("tests/data", { recursive: true });
           fs.writeFileSync(dataFile, dataResult.code, "utf-8");
           tick(dataFile);
+        } else {
+          // Derive DataFileResult fields without regenerating (deterministic naming)
+          const iName = `${pomResult.className}Data`;
+          dataResult = {
+            interfaceName: iName,
+            fileName:      `${pomResult.className.charAt(0).toLowerCase()}${pomResult.className.slice(1)}.data.ts`,
+            code:          "",
+          };
+        }
+
+        // Register POM in tests/fixtures/base.ts (idempotent — skips if already registered)
+        try {
+          fixtureUpd.update("tests/fixtures/base.ts", {
+            className:     pomResult.className,
+            fileName:      pomResult.fileName,
+            fixtureKey:    classNameToFixtureKey(pomResult.className),
+            dataInterface: dataResult.interfaceName,
+            dataVarName:   dataResult.interfaceName.charAt(0).toLowerCase() + dataResult.interfaceName.slice(1),
+            dataFileName:  dataResult.fileName,
+          });
+          tick(`tests/fixtures/base.ts  (${pomResult.className} registered)`);
+        } catch (fixErr) {
+          warn(`fixtures update: ${fixErr instanceof Error ? fixErr.message : String(fixErr)}`);
         }
       } catch (err) {
         console.log("failed");
@@ -439,19 +464,24 @@ async function main() {
     );
     tick(`${testDataSidecarPath}  (shared test data)`);
 
-    const pomOptions: PomOptions | undefined = pomExists ? {
+    const pomOptions: PomOptions = pomExists ? {
       fixtureKey,
       fixtureImportPath:  "../fixtures/base.js",
       testDataImportPath: `./${pageKey}.data.js`,
       pageClassName:      pomClassName,
       pageImportPath:     `../pages/${pomClassName}.js`,
       methodRegistry:     buildMethodRegistry(pageKey),
-    } : undefined;
+    } : {
+      fixtureKey,
+      fixtureImportPath:  "../fixtures/base.js",
+      testDataImportPath: `./${pageKey}.data.js`,
+      noPageClass:        true,
+    };
 
     if (pomExists) {
       info("POM fixture", fixtureKey);
     } else {
-      warn(`No POM for "${pageKey}" — spec will use raw page.locator() calls`);
+      warn(`No POM for "${pageKey}" — spec will use testDesktop with raw page.locator() calls`);
     }
 
     const pageSpecFiles: string[] = [];

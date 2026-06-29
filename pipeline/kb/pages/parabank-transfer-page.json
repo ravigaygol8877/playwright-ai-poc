@@ -1,0 +1,25 @@
+{
+  "pageName": "Transfer Funds",
+  "describeName": "transferFunds",
+  "url": "https://parabank.parasoft.com/parabank/transfer.htm",
+  "selectors": {
+    "fromAccount": "select[id='fromAccountId']",
+    "toAccount": "select[id='toAccountId']",
+    "amount": "input[id='amount']",
+    "transferButton": "input[type='submit'].button",
+    "transferCompleteHeader": "h1.title",
+    "transferCompleteAmount": "#showResult .ng-binding",
+    "homeLink": "a:has-text('Home')",
+    "accountsOverviewLink": "a:has-text('Accounts Overview')"
+  },
+  "messages": {
+    "transferComplete": "Transfer Complete!",
+    "amountRequired": "The amount cannot be empty.",
+    "invalidAmount": "Please enter a valid amount.",
+    "insufficientFunds": "Insufficient funds"
+  },
+  "success": {
+    "redirectUrl": "",
+    "landmarkText": "Transfer Complete!"
+  }
+}

@@ -44,6 +44,10 @@ export class AssertionGenerator {
     const redirectUrl  = knowledgeBase.success?.redirectUrl ?? "";
     const landmarkText = knowledgeBase.success?.landmarkText ?? knowledgeBase.success?.completionText ?? "";
 
+    const redirectRule = redirectUrl
+      ? `5. For successful redirect: await expect(page).toHaveURL(/${redirectUrl}/);`
+      : `5. (no redirect URL configured — omit toHaveURL assertions)`;
+
     const prompt = `
 You are a Senior Playwright Automation Engineer writing ONLY the assertion part of a test.
 
@@ -54,14 +58,14 @@ AVAILABLE SELECTORS (format: "name → css-selector"):
 Use the css-selector string on the right in page.locator("..."). NEVER use the name on the left as a variable.
 ${selectorLines}
 
-SUCCESS: redirectUrl=${redirectUrl}, landmarkText=${landmarkText}
+SUCCESS: redirectUrl=${redirectUrl || "(none)"}, landmarkText=${landmarkText || "(none)"}
 
 RULES — follow exactly:
 1. Return ONLY \`await expect(...)\` lines — NOTHING ELSE.
 2. NEVER generate page.fill(), page.click(), page.goto(), page.waitForURL() or any non-expect line.
 3. NEVER reference any variable name like SELECTORS, MESSAGES, KB, or knowledgeBase. Always inline the literal string.
 4. For error messages: await expect(page.getByText('exact message from the list above')).toBeVisible();
-5. For successful redirect: await expect(page).toHaveURL(/${redirectUrl}/);
+${redirectRule}
 6. For a landmark text after success: await expect(page.getByText('${landmarkText}')).toBeVisible();
 7. For element text: await expect(page.locator("css-selector-from-list")).toHaveText('exact text');
 8. Return at most 2 assertions — pick the single most meaningful one unless two are essential.
