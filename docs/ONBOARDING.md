@@ -59,7 +59,7 @@ Review the generated file and add any custom helper methods your tests will need
 
 ## Step 3 — Fixture Registration (automatic)
 
-The fixture is registered automatically when you run `npm run generate:pom`. The `FixtureUpdater` reads `pipeline/kb/pages/` and updates `tests/fixtures/base.ts` to import and expose each new POM — no manual edits needed.
+The fixture is registered automatically when you run `npm run generate:pom`. The `FixtureUpdater` reads `pipeline/kb/pages/` and updates `support/fixtures/visitFixture.ts` to import and expose each new POM — no manual edits needed.
 
 If you need to run it standalone:
 

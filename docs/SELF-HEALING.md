@@ -327,6 +327,43 @@ Suggest a replacement selector.
 
 ---
 
+## Direct Engine Integration
+
+The `ai:heal` command runs the full pipeline (analyze → map → heal → update POMs). You can also call `SelfHealingLocatorEngine` directly in a Playwright fixture to heal failures inline during a test run:
+
+```typescript
+import { SelfHealingLocatorEngine } from './pipeline/analyzers/self-healing/SelfHealingLocatorEngine.js';
+
+// In a Playwright fixture or base page class:
+const engine = new SelfHealingLocatorEngine(llmProvider);
+
+try {
+  await page.locator(selector).click();
+} catch (e) {
+  const result = await engine.heal(
+    { failedLocator: selector, pageName: 'parabank-login-page' },
+    loginPageKnowledgeBase,
+  );
+  if (result.confidence >= 85) {
+    await page.locator(result.healedLocator).click();
+  } else {
+    throw new Error(`Healing confidence too low (${result.confidence}): ${result.reasoning}`);
+  }
+}
+```
+
+**Confidence thresholds for direct integration:**
+
+| Score | Recommended action |
+|---|---|
+| ≥ 85 | Auto-accept — update selector in place |
+| 60–84 | Flag for review — proceed with healed selector this run |
+| < 60 | Stop run — require manual fix |
+
+> **Note:** The engine requires a KB for the page. If the page has no KB or the KB is stale, healing will fail. Run `npm run kb:generate <url> <page-name>` to refresh.
+
+---
+
 ## Backup & Version Control
 
 ### Backup Directory Structure

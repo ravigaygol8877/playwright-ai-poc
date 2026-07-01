@@ -207,7 +207,11 @@ ${bodyLines}
     const testId    = testCase.id ?? 'TC-001';
 
     const stepLines = testCase.steps
-      .map(s => `        // ${s}`)
+      .map(s => {
+        const text = typeof s === 'string' ? s
+          : (s as any).step ?? (s as any).description ?? (s as any).action ?? JSON.stringify(s);
+        return `        // ${text}`;
+      })
       .join('\n');
 
     return `    test(

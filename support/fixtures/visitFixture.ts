@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import type { Browser, Page } from '@playwright/test';
 import { DESKTOP_VIEW_PORT, MOBILE_VIEW_PORT } from '../utils/constants.js';
 
 type TestFixture = {
@@ -11,10 +11,9 @@ if (!baseURL) {
     console.warn('WARNING: BASE_URL is not set. Check your .env or config/environments/*.env');
 }
 
-async function setupPage(browser: any, viewportSize: { width: number; height: number }) {
-    const context = await browser.newContext();
+async function setupPage(browser: Browser, viewportSize: { width: number; height: number }) {
+    const context = await browser.newContext({ viewport: viewportSize });
     const page    = await context.newPage();
-    await page.setViewportSize(viewportSize);
     if (baseURL) {
         await page.goto(baseURL);
         await page.waitForLoadState('load');
@@ -24,14 +23,16 @@ async function setupPage(browser: any, viewportSize: { width: number; height: nu
 
 export const testDesktop = base.extend<TestFixture>({
     page: async ({ browser }, use) => {
-        const { page } = await setupPage(browser, DESKTOP_VIEW_PORT);
+        const { page, context } = await setupPage(browser, DESKTOP_VIEW_PORT);
         await use(page);
+        await context.close();
     },
 });
 
 export const testMobile = base.extend<TestFixture>({
     page: async ({ browser }, use) => {
-        const { page } = await setupPage(browser, MOBILE_VIEW_PORT);
+        const { page, context } = await setupPage(browser, MOBILE_VIEW_PORT);
         await use(page);
+        await context.close();
     },
 });
