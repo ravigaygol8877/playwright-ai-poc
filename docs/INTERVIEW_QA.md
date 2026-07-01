@@ -85,9 +85,9 @@ pipeline/reporting/RunContext.ts                         ← Timestamped run fol
 
 OUTPUT
 ─────────────────────────────────────────────────────────────────
-tests/e2e/parabank-login.spec.ts       ← Ready-to-run Playwright file
-tests/e2e/parabank-transfer.spec.ts
-tests/pages/ParabankLoginPage.ts       ← Generated Page Object Model
+tests/UI/parabank-login.spec.ts        ← Ready-to-run Playwright file
+tests/UI/parabank-transfer.spec.ts
+support/pages/loginPage.page.ts        ← Generated Page Object Model
 playwright.config.ts                   ← Controls browser, reporter, retry config
 reports/{runId}/                       ← All artefacts for this run
 ```
@@ -122,7 +122,7 @@ You                    run-pipeline.ts   TestCaseGen    TestDataGen    KB Servic
  │                        │                      → LLM call → "await expect(page).toHaveURL()"
  │                        │◄── complete .spec.ts string ────────────────────
  │                        │
- │                        │── fs.writeFileSync("tests/e2e/login.spec.ts")
+ │                        │── fs.writeFileSync("tests/UI/login.spec.ts")
  │◄── done ─────────────── │
  │
  │── npm test ──────────────────────────────────────────────────────────────►
@@ -173,7 +173,7 @@ If any step fails, an error is thrown immediately. The framework never silently 
 
 ### Demo-Ready Answer
 
-> "There are two outputs. The first is the Playwright spec file in `tests/e2e/` — that is the executable code. The second is the structured `TestCase[]` object that the AI returns before the code is generated. Right now that structured data is used internally to build the script and is also written to a JSON report file in `reports/{runId}/`. A further enhancement would be a human-readable HTML export that non-technical stakeholders can review without opening any code."
+> "There are two outputs. The first is the Playwright spec file in `tests/UI/` — that is the executable code. The second is the structured `TestCase[]` object that the AI returns before the code is generated. Right now that structured data is used internally to build the script and is also written to a JSON report file in `reports/{runId}/`. A further enhancement would be a human-readable HTML export that non-technical stakeholders can review without opening any code."
 
 ---
 
@@ -181,7 +181,7 @@ If any step fails, an error is thrown immediately. The framework never silently 
 
 | What | Where | Format | Who reads it |
 |---|---|---|---|
-| Generated Playwright scripts | `tests/e2e/*.spec.ts` | TypeScript | Developers, QA |
+| Generated Playwright scripts | `tests/UI/*.spec.ts` | TypeScript | Developers, QA |
 | Test case objects (JSON) | `reports/{runId}/generated-cases/*.json` | JSON | QA, stakeholders |
 | AI analysis outputs | `reports/{runId}/ai-reports/*.json` | JSON | Developer, QA |
 | Playwright HTML report | `reports/{runId}/playwright/` | HTML | Anyone |
@@ -239,7 +239,7 @@ Feed the `TestCase[]` array directly into the Atlassian MCP tools. One command p
 
 ### Honest Answer
 
-**Yes, with conditions.** The framework can generate and run Playwright tests against any publicly accessible URL. It has already been demonstrated against two real public applications — SauceDemo (`saucedemo.com`) and ParaBank (`parabank.parasoft.com`).
+**Yes, with conditions.** The framework can generate and run Playwright tests against any publicly accessible URL. It has already been demonstrated against ParaBank (`parabank.parasoft.com`) — a fully-featured banking demo application.
 
 What it cannot do today without additional work:
 
@@ -294,7 +294,7 @@ The AI modules, the LLM layer, the renderer, and the orchestrator are completely
 
 ### Demo Answer (say this in the room)
 
-> "It is running against SauceDemo and ParaBank right now — both real, publicly accessible applications. For your internal applications, the `KnowledgeBaseGenerator` works against any URL your machine can reach. For authentication, Playwright has a built-in `storageState` mechanism where you log in once, save the session, and reuse it across all generated tests — that is a one-hour addition."
+> "It is running against ParaBank right now — a real, publicly accessible banking demo. For your internal applications, the `KnowledgeBaseGenerator` works against any URL your machine can reach. For authentication, Playwright has a built-in `storageState` mechanism where you log in once, save the session, and reuse it across all generated tests — that is a one-hour addition."
 
 ---
 
@@ -642,7 +642,7 @@ To add a new rule — for example, "always include an accessibility scenario" �
 │  1. KnowledgeBaseGenerator re-runs for changed pages            │
 │  2. TestCaseGenerator re-runs for changed requirements          │
 │  3. New tests are reviewed and approved by QA lead              │
-│  4. Approved tests committed to tests/e2e/                      │
+│  4. Approved tests committed to tests/UI/                       │
 │  5. Next nightly run picks them up automatically                │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -852,7 +852,7 @@ renderAction(action: ActionModel, apiKb: any): string {
 ### Example Generated API Test
 
 ```typescript
-// tests/e2e/parabank-api-login.spec.ts
+// tests/UI/parabank-api-login.spec.ts
 import { test, expect } from '@playwright/test';
 import axios from 'axios';
 

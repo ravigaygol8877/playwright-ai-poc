@@ -76,8 +76,8 @@ npm run test:mobile      # @mobile — mobile viewport tests
 
 1. Add a KB JSON to `pipeline/kb/pages/`
 2. Run: `npm run ai:run`
-3. The pipeline auto-generates: `tests/pages/PageName.ts`, `tests/e2e/` specs
-4. Enrich the POM with behavior/assertion methods following `tests/pages/AeHomePage.ts`
+3. The pipeline auto-generates: `support/pages/<pageName>.page.ts`, `tests/UI/` specs
+4. Enrich the POM with behavior/assertion methods following `support/pages/example.page.ts`
 5. Register the new page in `tests/fixtures/base.ts` if you need a custom fixture
 
 ## PR checklist

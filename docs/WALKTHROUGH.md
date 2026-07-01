@@ -55,7 +55,7 @@
 
 ### What You Show
 
-Open `tests/e2e/login.spec.ts`
+Open `tests/UI/login.spec.ts`
 
 ```typescript
 import { test, expect } from '@playwright/test';
@@ -122,14 +122,14 @@ npm run ai:run
 
 *When it finishes:*
 
-> "Done. The files are written to `tests/e2e/`. Let me run the tests."
+> "Done. The files are written to `tests/UI/`. Let me run the tests."
 
 ```bash
-npx playwright test tests/e2e/ --project=chromium
+npm run test:ui
 ```
 
 ```bash
-npx playwright show-report
+npm run report:latest
 ```
 
 > "Real Playwright execution. HTML report. All from one sentence."
@@ -1095,9 +1095,9 @@ async function main() {
   const script    = await playwrightGen.generate(testCases, testData, knowledgeBase);
 
   // 7. Write the output file
-  fs.writeFileSync("tests/e2e/login.spec.ts", script);
+  fs.writeFileSync("tests/UI/login.spec.ts", script);
 
-  console.log("Generated: tests/e2e/login.spec.ts");
+  console.log("Generated: tests/UI/login.spec.ts");
 }
 
 main();

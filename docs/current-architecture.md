@@ -42,7 +42,7 @@ A modular, AI-powered Playwright test automation framework. The only manual step
 │  Layer 4 — Automation & Code Generation                        │
 │  PlaywrightGenerator · PlaywrightRenderer                     │
 │  DataFileGenerator · FixtureUpdater                           │
-│  Output: tests/e2e/*.spec.ts · tests/pages/*.ts               │
+│  Output: tests/UI/*.spec.ts · support/pages/*.page.ts          │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -99,15 +99,16 @@ playwright-ai-poc/
 │   └── test-*.ts
 │
 ├── tests/
-│   ├── e2e/                               # Generated specs + .data.ts files
-│   ├── pages/                             # Generated POMs
-│   ├── data/                              # Generated data files + example.ts
+│   ├── UI/                                # Generated .spec.ts files
+│   ├── API/                               # API-level test specs
 │   ├── fixtures/base.ts                   # Framework: testDesktop + testMobile
-│   └── helpers/
+│   └── unit/                              # Vitest unit tests for pipeline modules
+│
+├── support/
+│   ├── pages/                             # Generated POMs (.page.ts suffix)
+│   └── helper/
 │       ├── constants.ts                   # Framework: viewport sizes
-│       ├── waitUtils.ts                   # Framework: generic wait utilities
-│       ├── interceptHelper.ts             # Project-specific (deleted on reset)
-│       └── commonPattern.ts              # Project-specific (deleted on reset)
+│       └── waitUtils.ts                   # Framework: generic wait utilities
 │
 ├── config/
 │   ├── platform.json                      # projectName, suites[], llmModel
@@ -173,15 +174,14 @@ requirements.xlsx
    Additional scenarios discovered from live pages
    Cached to pipeline/kb/pages/{page}-scenarios.json
        │
-       ▼ Step 3 — POMGenerator + DataFileGenerator
-   tests/pages/{Page}.ts
-   tests/data/{page}.data.ts
+       ▼ Step 3 — POMGenerator
+   support/pages/{pageName}.page.ts
        │
        ▼ Step 4 — RequirementExpander
    TestCase[] per requirement (written back to Excel Sheet 2)
        │
        ▼ Step 5 — PlaywrightGenerator
-   tests/e2e/{page}-excel-{n}.spec.ts
+   tests/UI/{page}.spec.ts
 ```
 
 ---
@@ -236,10 +236,8 @@ This ensures robust parsing even when the LLM wraps output in markdown or trunca
 `npm run project:reset` prepares the framework for a new target application.
 
 **Deleted (project artifacts):**
-- `tests/e2e/*.spec.ts` and `*.data.ts`
-- `tests/pages/*.ts` (generated POMs)
-- `tests/data/*.data.ts` (generated data files)
-- `tests/helpers/interceptHelper.ts` and `commonPattern.ts`
+- `tests/UI/*.spec.ts` (generated specs)
+- `support/pages/*.page.ts` (generated POMs)
 - `pipeline/kb/pages/*.json` (KB files and scenario cache)
 - `ai-metadata/artifacts.json`
 - `reports/`, `.llm-cache/`, `playwright-report/`, `test-results/`

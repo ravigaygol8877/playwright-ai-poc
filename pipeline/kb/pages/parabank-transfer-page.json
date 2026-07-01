@@ -21,5 +21,6 @@
   "success": {
     "redirectUrl": "",
     "landmarkText": "Transfer Complete!"
-  }
+  },
+  "authRequired": true
 }

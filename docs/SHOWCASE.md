@@ -92,7 +92,7 @@ After deploying this platform, a team can:
     └─────────────────────────────────────────────────────────┘
            │
     ┌──────▼──────────────────────────────────────────────────┐
-    │             tests/e2e/login.spec.ts                     │
+    │             tests/UI/login.spec.ts                      │
     │                  (Playwright output)                    │
     └─────────────────────────────────────────────────────────┘
 ```
@@ -171,7 +171,7 @@ Plain English Requirement
  AI generates assertion for each expected result                │
          │                                                      │
          ▼                                                      │
- Complete .spec.ts file written to tests/e2e/ ◄─────────────────┘
+ Complete .spec.ts file written to tests/UI/ ◄──────────────────┘
          │
          ▼
  npx playwright test runs the generated file
@@ -237,11 +237,14 @@ playwright-ai-poc/
 │   └── demo.ts                  ← npm run demo
 │
 ├── tests/
-│   ├── e2e/                     ← Output: AI-generated .spec.ts files land here
-│   ├── pages/                   ← Generated Page Object Models
-│   ├── data/                    ← Generated test data files
+│   ├── UI/                      ← Output: AI-generated .spec.ts files land here
+│   ├── API/                     ← API-level test specs
 │   ├── fixtures/base.ts         ← Framework: testDesktop + testMobile fixtures
-│   └── helpers/                 ← constants.ts, waitUtils.ts
+│   └── unit/                    ← Vitest unit tests for pipeline modules
+│
+├── support/
+│   ├── pages/                   ← Generated Page Object Models (.page.ts suffix)
+│   └── helper/                  ← constants.ts, waitUtils.ts
 │
 ├── config/
 │   ├── platform.json            ← Project config: projectName, suites[], llmModel
@@ -348,11 +351,11 @@ scripts/run-pipeline.ts  (npm run ai:run)
     │       ├── Step 2.5: PageAnalyzer + ScenarioInferenceEngine
     │       │           └── Discovers additional scenarios from live pages
     │       ├── Step 3: POMGenerator.generate(kb, pageKey)
-    │       │           └── KB JSON → TypeScript POM → tests/pages/{Page}.ts
+    │       │           └── KB JSON → TypeScript POM → support/pages/{pageName}.page.ts
     │       ├── Step 4: RequirementExpander.expandAll()
     │       │           └── Blank Excel rows → TestCase[] → writes back to Excel Sheet 2
     │       └── Step 5: PlaywrightGenerator.generate(testCases, testData, kb)
-    │                   └── ActionModel per step → rendered code → tests/e2e/{page}.spec.ts
+    │                   └── ActionModel per step → rendered code → tests/UI/{page}.spec.ts
     │
     ├── Step 5: playwright test --project=chromium
     │
@@ -1088,8 +1091,7 @@ User Input (requirements.xlsx)
 ┌────────────────────────────────────────────────────────────┐
 │  Step 3: POMGenerator                                      │
 │  KB JSON → TypeScript Page Object Model                    │
-│  → tests/pages/LoginPage.ts                                │
-│  → tests/data/loginPage.data.ts                            │
+│  → support/pages/loginPage.page.ts                         │
 └────────────────────────────┬───────────────────────────────┘
                              │
                              ▼
@@ -1120,8 +1122,7 @@ User Input (requirements.xlsx)
                              ▼
 ┌────────────────────────────────────────────────────────────┐
 │  File Write                                                │
-│  → tests/e2e/login-page-excel.spec.ts                      │
-│  → tests/e2e/login-page.data.ts (shared test data)         │
+│  → tests/UI/login-page-excel.spec.ts                       │
 └────────────────────────────┬───────────────────────────────┘
                              │
                              ▼
@@ -1151,7 +1152,7 @@ run-pipeline.ts  ExcelReader    KBGenerator    POMGenerator   PlaywrightGen  LLM
     │                                              │               │               │
     │─── generate(kb) ─────────────────────────────►               │               │
     │◄─ POM code ──────────────────────────────────│               │               │
-    │── write ──► tests/pages/LoginPage.ts          │               │               │
+    │── write ──► support/pages/loginPage.page.ts     │               │               │
     │                                                              │               │
     │─── generate(testCases, testData, kb) ─────────────────────►  │               │
     │               │               │              │               │               │
@@ -1163,7 +1164,7 @@ run-pipeline.ts  ExcelReader    KBGenerator    POMGenerator   PlaywrightGen  LLM
     │               │               │              │  ◄── assertion string ──────── │
     │◄─ script ─────────────────────────────────────│               │               │
     │                                                              │               │
-    │─── write ──► tests/e2e/login-page-excel.spec.ts ─────────────►               │
+    │─── write ──► tests/UI/login-page-excel.spec.ts ───────────────►               │
 ```
 
 ---
@@ -1303,7 +1304,7 @@ npm run demo
 
 *The whole thing takes about two minutes and produces this…"*
 
-[Show `tests/e2e/parabank-login-page-excel.spec.ts`]
+[Show `tests/UI/parabank-login.spec.ts`]
 
 *"This is a real, runnable Playwright test file. Let me run it…"*
 
@@ -1349,7 +1350,7 @@ npm run requirements:template
 npm run ai:run
 
 # 5. Look at the output
-ls tests/e2e/
+ls tests/UI/
 
 # 6. Run the generated tests
 npm run test:qa

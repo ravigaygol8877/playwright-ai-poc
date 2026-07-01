@@ -18,7 +18,7 @@ SKIP_REPORT=true npm run ai:run        # skip Allure report generation
 EXCEL_FILE=custom.xlsx npm run ai:run  # use a different requirements file
 ```
 
-**Output:** spec files in `tests/e2e/`, Allure results in `reports/latest/allure/`.
+**Output:** spec files in `tests/UI/`, HTML report in `reports/latest/playwright/`.
 
 ---
 
@@ -106,6 +106,85 @@ Demonstrates the Coverage Gap Analyzer on a sample requirement set.
 
 ### `npm run demo:regression`
 Demonstrates the Regression Selector for a sample PR diff.
+
+---
+
+## AI Self-Healing
+
+### `npm run ai:heal`
+Reads the latest Playwright JSON results, identifies locator failures, heals broken selectors using AI + Knowledge Base, and updates POM files.
+
+```bash
+npm run ai:heal                              # default — 70% min confidence
+npm run ai:heal -- --min-confidence 85       # stricter threshold
+npm run ai:heal -- --max-heals 5             # limit heals per run
+npm run ai:heal -- --enable-rerun            # re-run failed tests after healing
+NO_OPEN=true npm run ai:heal                 # suppress auto-opening HTML report
+```
+
+---
+
+### `npm run ai:heal:dry`
+Runs the healing pipeline but skips all AI calls — only applies knowledge-base direct matches. Useful for quick, zero-cost triage.
+
+```bash
+npm run ai:heal:dry
+```
+
+---
+
+### `npm run ai:heal:rerun`
+Runs healing with `--enable-rerun` pre-set, automatically re-running the healed tests to validate fixes.
+
+```bash
+npm run ai:heal:rerun
+```
+
+---
+
+## AI Analytics
+
+### `npm run ai:flaky`
+Analyzes Playwright test results to identify flaky tests and generates AI-powered recommendations.
+
+```bash
+npm run ai:flaky
+```
+
+**Output:** JSON + HTML report in `reports/analysis/`.
+
+---
+
+### `npm run ai:rootcause`
+Parses test failure messages and stack traces to classify root causes and recommend fixes.
+
+```bash
+npm run ai:rootcause
+```
+
+**Output:** JSON + HTML report in `reports/analysis/`.
+
+---
+
+### `npm run ai:coverage`
+Maps requirements against existing test names to calculate coverage percentage and surface gaps.
+
+```bash
+npm run ai:coverage
+```
+
+**Output:** JSON + HTML report in `reports/analysis/`.
+
+---
+
+### `npm run ai:regression`
+Assesses regression risk from recent test failures and produces a risk matrix.
+
+```bash
+npm run ai:regression
+```
+
+**Output:** JSON + HTML report in `reports/analysis/`.
 
 ---
 
@@ -299,6 +378,12 @@ Token estimates are input + output combined, averaged across typical runs.
 | `npm run demo:healing` | 5–10 sec | 1–2 sec | 1 | 1.5k–2.5k | CachingLLMProvider |
 | `npm run demo:coverage` | 5–10 sec | 1–2 sec | 1 | 1.5k–2.5k | CachingLLMProvider |
 | `npm run demo:regression` | 5–10 sec | 1–2 sec | 1 | 1.5k–2.5k | CachingLLMProvider |
+| `npm run ai:heal` | 15–45 sec | 5–10 sec | 0–3 | 0–8k | CachingLLMProvider (KB matches skip AI) |
+| `npm run ai:heal:dry` | 5–10 sec | 1–3 sec | 0 | 0 | KB-only, no AI |
+| `npm run ai:flaky` | 15–30 sec | 3–8 sec | 0–3 | 0–5k | CachingLLMProvider |
+| `npm run ai:rootcause` | 20–40 sec | 5–10 sec | 0–5 | 0–8k | CachingLLMProvider |
+| `npm run ai:coverage` | 10–20 sec | 3–5 sec | 0–2 | 0–4k | CachingLLMProvider |
+| `npm run ai:regression` | 15–30 sec | 3–8 sec | 0–3 | 0–5k | CachingLLMProvider |
 | `npm run test:provider-switching` | 10–30 sec | 5–10 sec | 3–5 | 5k–10k | CachingLLMProvider |
 | `npm run test:github-models` | 5–15 sec | 3–5 sec | 2–3 | 3k–5k | CachingLLMProvider |
 

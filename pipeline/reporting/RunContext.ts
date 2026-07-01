@@ -57,6 +57,20 @@ function createDirs(runPaths: RunPaths): void {
   }
 }
 
+function pruneOldRuns(base: string, keepRunId: string): void {
+  const RUN_PATTERN = /^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/;
+  try {
+    const entries = fs.readdirSync(base, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory() && RUN_PATTERN.test(entry.name) && entry.name !== keepRunId) {
+        fs.rmSync(path.join(base, entry.name), { recursive: true, force: true });
+      }
+    }
+  } catch {
+    // best-effort — don't fail the run if cleanup fails
+  }
+}
+
 function updateLatestSymlink(base: string, runId: string): void {
   const linkPath = path.join(base, 'latest');
   try {
@@ -85,6 +99,7 @@ export function createRunContext(base = 'reports'): RunPaths {
   createDirs(runPaths);
   fs.writeFileSync(RUN_ID_FILE, runId, 'utf-8');
   updateLatestSymlink(base, runId);
+  pruneOldRuns(base, runId);
 
   process.env['REPORT_RUN_ID'] = runId;
   return runPaths;

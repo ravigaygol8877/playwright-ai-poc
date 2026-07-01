@@ -19,7 +19,9 @@ import { AIJsonParser } from "../utils/AIJsonParser.js";
 
 interface GeneratedKnowledgeBase {
   pageName: string;
+  describeName?: string;
   url: string;
+  authRequired?: boolean;
   selectors: Record<string, string>;
   messages: Record<string, string>;
   success: {
@@ -82,6 +84,7 @@ export class KnowledgeBaseGenerator {
         type?: string;
         id?: string;
         name?: string;
+        value?: string;
         placeholder?: string;
         dataTest?: string;
         ariaLabel?: string;
@@ -104,6 +107,7 @@ export class KnowledgeBaseGenerator {
           type?: string;
           id?: string;
           name?: string;
+          value?: string;
           placeholder?: string;
           dataTest?: string;
           ariaLabel?: string;
@@ -115,6 +119,9 @@ export class KnowledgeBaseGenerator {
         if (inputEl.type)        entry.type        = inputEl.type;
         if (el.id)               entry.id          = el.id;
         if (inputEl.name)        entry.name        = inputEl.name;
+        // Capture value for button/submit inputs — the exact value is required for selectors
+        if ((inputEl.type === 'button' || inputEl.type === 'submit') && inputEl.value)
+          entry.value = inputEl.value;
         if (inputEl.placeholder) entry.placeholder = inputEl.placeholder;
         const dt = el.getAttribute("data-test") ?? el.getAttribute("data-testid");
         if (dt) entry.dataTest = dt;
@@ -151,7 +158,18 @@ export class KnowledgeBaseGenerator {
     await context.close();
     await browser.close();
 
+    // Auto-detect authRequired: if browser redirected from the requested URL to a
+    // different path (e.g., /login), the page requires authentication.
+    const requestedPath    = new URL(url).pathname;
+    const finalPath        = new URL(pageUrl).pathname;
+    const wasRedirected    = requestedPath !== finalPath;
+    const hasPasswordField = domSnapshot.elements.some(el => el.type === 'password');
+    const detectedAuth     = wasRedirected && hasPasswordField;
+
     console.log(`  ✅ DOM snapshot captured: ${domSnapshot.elements.length} elements found`);
+    if (detectedAuth) {
+      console.log(`  🔐 Auth required — browser redirected from ${requestedPath} → ${finalPath}`);
+    }
 
     // Step 3 — Send DOM snapshot to AI and ask it to build the KB
     const prompt = `
@@ -217,6 +235,9 @@ Rules:
         "AI returned an incomplete knowledge base. Missing pageName, url, or selectors."
       );
     }
+
+    // Inject auto-detected fields (override any AI-guessed value)
+    kb.authRequired = detectedAuth;
 
     // Step 5 — Write to file
     const outputDir  = "pipeline/kb/pages";

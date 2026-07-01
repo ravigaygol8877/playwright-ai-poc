@@ -7,6 +7,16 @@ import type { KnowledgeBase }
 import { kbKeyToClassName }
   from "../pom/POMGenerator.js";
 
+export function toMethodName(title: string): string {
+  return title
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join('')
+    .replace(/^verify|^validate|^check/i, m => m.toLowerCase());
+}
+
 import { pMap }
   from "../../utils/concurrency.js";
 
@@ -51,17 +61,36 @@ export class PlaywrightGenerator {
     const desktopTests = testBlocks.map(b => b.desktop).join('\n\n');
     const mobileTests  = testBlocks.map(b => b.mobile).join('\n\n');
 
-    return `import { ConsoleMessage, Page } from '@playwright/test';
+    const authRequired   = knowledgeBase.authRequired ?? false;
+    const skipGoto       = knowledgeBase.skipGoto ?? false;
+    const pageUrl        = knowledgeBase.url ?? '';
+    const extraLines     = (knowledgeBase.beforeEachPrefix ?? []).map(l => `        ${l}`).join('\n');
+
+    const loginImport    = authRequired
+      ? `import { loginToParaBank, navigateTo } from '../../support/helper/loginHelper.js';`
+      : `import { navigateTo } from '../../support/helper/loginHelper.js';`;
+
+    const beforeEachBody = [
+      authRequired     ? `        await loginToParaBank(page);` : '',
+      !skipGoto && pageUrl ? `        await navigateTo(page, '${new URL(pageUrl).pathname.replace(/^\/[^/]+\//, '')}');` : '',
+      extraLines,
+      `        ${camelName} = new ${className}(page);`,
+      `        page.on('console', (msg: ConsoleMessage) => console.info(\`[Console][#LABEL#]: \${msg.text()}\`));`,
+    ].filter(Boolean).join('\n');
+
+    const desktopBeforeEach = beforeEachBody.replace('[#LABEL#]', 'Desktop');
+    const mobileBeforeEach  = beforeEachBody.replace('[#LABEL#]', 'Mobile');
+
+    return `import type { ConsoleMessage, Page } from '@playwright/test';
 import { testDesktop, testMobile } from '../../support/fixtures/visitFixture.js';
-import { verifyPageTitle, waitForSelector } from '../../support/helper/interceptHelper.js';
+${loginImport}
 import ${className} from '../../support/pages/${pageFile}';
 
 let ${camelName}: ${className};
 
 testDesktop.describe('${describeName} - Desktop', () => {
     testDesktop.beforeEach(async ({ page }: { page: Page }) => {
-        ${camelName} = new ${className}(page);
-        page.on('console', (msg: ConsoleMessage) => console.info(\`[Console][Desktop]: \${msg.text()}\`));
+${desktopBeforeEach}
     });
 
 ${desktopTests}
@@ -69,8 +98,7 @@ ${desktopTests}
 
 testMobile.describe('${describeName} - Mobile Web', () => {
     testMobile.beforeEach(async ({ page }: { page: Page }) => {
-        ${camelName} = new ${className}(page);
-        page.on('console', (msg: ConsoleMessage) => console.info(\`[Console][Mobile]: \${msg.text()}\`));
+${mobileBeforeEach}
     });
 
 ${mobileTests}
@@ -127,14 +155,7 @@ ${apiTestBlocks.join('\n\n')}
   }
 
   private toMethodName(title: string): string {
-    // Convert test title to a camelCase method name guess
-    return title
-      .replace(/[^a-zA-Z0-9\s]/g, '')
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-      .join('')
-      .replace(/^verify|^validate|^check/i, m => m.toLowerCase());
+    return toMethodName(title);
   }
 
   private async generateTestBlock(
@@ -149,7 +170,11 @@ ${apiTestBlocks.join('\n\n')}
 
     // Build step comments for the test body
     const stepLines = testCase.steps
-      .map(s => `        // ${s}`)
+      .map(s => {
+        const text = typeof s === 'string' ? s
+          : (s as any).step ?? (s as any).description ?? (s as any).action ?? JSON.stringify(s);
+        return `        // ${text}`;
+      })
       .join('\n');
 
     const bodyLines = testCase.steps.length > 0

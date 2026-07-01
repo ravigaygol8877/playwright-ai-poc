@@ -5,8 +5,14 @@
  * that do not yet have a corresponding support/pages/*.page.ts file.
  *
  * Usage:
- *   npm run generate:pom
- *   npm run generate:pom -- --page parabank-login
+ *   npm run generate:pom                                   ← generate missing POMs
+ *   npm run generate:pom -- --page parabank-billpay-page   ← one page only
+ *   npm run generate:pom -- --force                        ← overwrite all existing POMs
+ *   npm run generate:pom -- --force --page parabank-billpay-page  ← overwrite one page
+ *
+ * When --force is used and a spec file already exists for the page, the script
+ * extracts test case titles from the spec so the regenerated POM method names
+ * stay aligned with what the spec calls.
  */
 
 import "dotenv/config";
@@ -21,12 +27,34 @@ import { DataFileGenerator }   from "../pipeline/generators/pom/DataFileGenerato
 
 const PAGES_DIR = "support/pages";
 const DATA_DIR  = "support/data";
+const SPECS_DIR = "tests/UI";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function tick(msg: string)  { console.log(`  ✅  ${msg}`); }
 function skip(msg: string)  { console.log(`  ⏭   ${msg}`); }
 function cross(msg: string) { console.log(`  ❌  ${msg}`); }
+
+/**
+ * When a spec file already exists for the page, extract the test case titles
+ * from the describe block so POMGenerator can produce matching method names.
+ * Looks for:  'TC_nnn @regression : [Describe] Title here'
+ */
+function extractTitlesFromSpec(specFile: string): string[] {
+  try {
+    const content = fs.readFileSync(specFile, "utf-8");
+    const regex   = /@regression\s*:\s*\[.*?\]\s*(.*?)'/g;
+    const titles: string[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(content)) !== null) {
+      const title = m[1]?.trim();
+      if (title && !titles.includes(title)) titles.push(title);
+    }
+    return titles;
+  } catch {
+    return [];
+  }
+}
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
@@ -45,6 +73,7 @@ async function main() {
 
   const pageArg = process.argv.find(a => a.startsWith("--page="))?.split("=")[1]
                 ?? process.argv[process.argv.indexOf("--page") + 1];
+  const force   = process.argv.includes("--force");
 
   const kbKeys = pageArg ? allKbKeys.filter(k => k === pageArg) : allKbKeys;
 
@@ -65,16 +94,29 @@ async function main() {
 
     console.log(`  ─── ${kbKey} → ${className} ───`);
 
-    if (fs.existsSync(pomFile)) {
-      skip(`POM already exists: ${pomFile}`);
+    if (fs.existsSync(pomFile) && !force) {
+      skip(`POM already exists: ${pomFile} (use --force to overwrite)`);
       continue;
     }
 
     try {
       const kb = kbService.load(kbKey);
 
+      // If spec already exists, reuse its test titles so method names stay aligned.
+      // Try both the camelCase name and the kebab kbKey (without -page suffix).
+      const specNameFromKey = kbKey.replace(/-page$/, '');
+      const specFile = [
+        path.join(SPECS_DIR, `${camelName}.spec.ts`),
+        path.join(SPECS_DIR, `${specNameFromKey}.spec.ts`),
+        path.join(SPECS_DIR, `${kbKey}.spec.ts`),
+      ].find(f => fs.existsSync(f)) ?? path.join(SPECS_DIR, `${camelName}.spec.ts`);
+      const titles   = extractTitlesFromSpec(specFile);
+      if (titles.length > 0) {
+        console.log(`  ▸ Found ${titles.length} test titles in existing spec — method names locked`);
+      }
+
       process.stdout.write("  ▸ Generating POM... ");
-      const pomResult = await pomGen.generate(kb, kbKey);
+      const pomResult = await pomGen.generate(kb, kbKey, titles.length > 0 ? titles : undefined);
       fs.writeFileSync(pomFile, pomResult.code, "utf-8");
       console.log(`done`);
       tick(`${pomFile}`);

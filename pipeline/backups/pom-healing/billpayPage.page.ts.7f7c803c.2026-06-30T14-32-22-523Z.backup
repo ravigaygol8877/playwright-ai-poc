@@ -1,0 +1,274 @@
+import { expect } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+
+export default class BillpayPage {
+    private readonly page: Page;
+
+    private readonly payeeName: Locator;
+    private readonly payeeStreet: Locator;
+    private readonly payeeCity: Locator;
+    private readonly payeeState: Locator;
+    private readonly payeeZip: Locator;
+    private readonly payeePhone: Locator;
+    private readonly payeeAccount: Locator;
+    private readonly verifyAccount: Locator;
+    private readonly amount: Locator;
+    private readonly fromAccount: Locator;
+    private readonly sendPaymentButton: Locator;
+
+    private readonly paymentComplete = 'Bill Payment Complete';
+    private readonly accountMismatch = 'Account number confirmation mismatch.';
+    private readonly payeeNameRequired = 'Payee name is required.';
+    private readonly addressRequired = 'Address is required.';
+    private readonly cityRequired = 'City is required.';
+    private readonly stateRequired = 'State is required.';
+    private readonly zipRequired = 'Zip Code is required.';
+    private readonly phoneRequired = 'Phone number is required.';
+    private readonly accountRequired = 'Account number is required.';
+    private readonly amountRequired = 'The amount cannot be empty.';
+    private readonly invalidAmount = 'Please enter a valid amount.';
+
+    constructor(page: Page) {
+        this.page = page;
+
+        this.payeeName = page.locator("input[name='payee.name']").first();
+        this.payeeStreet = page.locator("input[name='payee.address.street']").first();
+        this.payeeCity = page.locator("input[name='payee.address.city']").first();
+        this.payeeState = page.locator("input[name='payee.address.state']").first();
+        this.payeeZip = page.locator("input[name='payee.address.zipCode']").first();
+        this.payeePhone = page.locator("input[name='payee.phoneNumber']").first();
+        this.payeeAccount = page.locator("input[name='payee.accountNumber']").first();
+        this.verifyAccount = page.locator("input[name='verifyAccount']").first();
+        this.amount = page.locator("input[name='amount']").first();
+        this.fromAccount = page.locator("select[name='fromAccountId']").first();
+        this.sendPaymentButton = page.locator("input[type='button'][value='Send Payment']").first();
+    }
+
+    async successfulPaymentWithValidDataInputs(): Promise<void> {
+        await this.payeeName.fill('John Doe');
+        await this.payeeStreet.fill('123 Main St');
+        await this.payeeCity.fill('Springfield');
+        await this.payeeState.fill('IL');
+        await this.payeeZip.fill('62704');
+        await this.payeePhone.fill('5551234567');
+        await this.payeeAccount.fill('123456789');
+        await this.verifyAccount.fill('123456789');
+        await this.amount.fill('100');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.sendPaymentButton).not.toBeVisible();
+        await expect(this.page.locator('text=' + this.paymentComplete)).toBeVisible();
+        console.info('Verified successful payment with valid data inputs.');
+    }
+
+    async attemptPaymentWithAccountNumberConfirmationMismatch(): Promise<void> {
+        await this.payeeName.fill('Jane Smith');
+        await this.payeeStreet.fill('456 Oak Ave');
+        await this.payeeCity.fill('Metropolis');
+        await this.payeeState.fill('NY');
+        await this.payeeZip.fill('10001');
+        await this.payeePhone.fill('5559876543');
+        await this.payeeAccount.fill('987654321');
+        await this.verifyAccount.fill('123456789');
+        await this.amount.fill('50');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.accountMismatch)).toBeVisible();
+        console.info('Verified payment attempt with account number confirmation mismatch.');
+    }
+
+    async attemptPaymentWithZeroAmount(): Promise<void> {
+        await this.payeeName.fill('Alice Johnson');
+        await this.payeeStreet.fill('789 Pine Rd');
+        await this.payeeCity.fill('Smallville');
+        await this.payeeState.fill('KS');
+        await this.payeeZip.fill('66002');
+        await this.payeePhone.fill('5552223333');
+        await this.payeeAccount.fill('1122334455');
+        await this.verifyAccount.fill('1122334455');
+        await this.amount.fill('0');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.invalidAmount)).toBeVisible();
+        console.info('Verified payment attempt with zero amount input.');
+    }
+
+    async attemptPaymentWithMissingRequiredFieldAccountNumber(): Promise<void> {
+        await this.payeeName.fill('Bob Williams');
+        await this.payeeStreet.fill('321 Elm St');
+        await this.payeeCity.fill('Riverdale');
+        await this.payeeState.fill('CA');
+        await this.payeeZip.fill('90210');
+        await this.payeePhone.fill('5554445555');
+        await this.payeeAccount.fill('');
+        await this.verifyAccount.fill('');
+        await this.amount.fill('25');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.accountRequired)).toBeVisible();
+        console.info('Verified payment attempt with missing required field: account number.');
+    }
+
+    async attemptPaymentWithNegativeAmountInput(): Promise<void> {
+        await this.payeeName.fill('Carol King');
+        await this.payeeStreet.fill('654 Maple Ave');
+        await this.payeeCity.fill('Gotham');
+        await this.payeeState.fill('NJ');
+        await this.payeeZip.fill('07097');
+        await this.payeePhone.fill('5556667777');
+        await this.payeeAccount.fill('9988776655');
+        await this.verifyAccount.fill('9988776655');
+        await this.amount.fill('-50');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.invalidAmount)).toBeVisible();
+        console.info('Verified payment attempt with negative amount input.');
+    }
+
+    async securityTestEnteringSqlInjectionPayloadInPayeeName(): Promise<void> {
+        await this.payeeName.fill("' OR '1'='1");
+        await this.payeeStreet.fill('987 Cedar Blvd');
+        await this.payeeCity.fill('Star City');
+        await this.payeeState.fill('WA');
+        await this.payeeZip.fill('98001');
+        await this.payeePhone.fill('5558889999');
+        await this.payeeAccount.fill('4455667788');
+        await this.verifyAccount.fill('4455667788');
+        await this.amount.fill('10');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.paymentComplete)).toBeVisible();
+        console.info('Verified security test entering SQL injection payload in payee name.');
+    }
+
+    async boundaryTestEnteringMaximumAllowedCharactersInPayeeName(): Promise<void> {
+        const maxChars = 'A'.repeat(50);
+        await this.payeeName.fill(maxChars);
+        await this.payeeStreet.fill('1234 Boundary St');
+        await this.payeeCity.fill('Edgeville');
+        await this.payeeState.fill('TX');
+        await this.payeeZip.fill('75001');
+        await this.payeePhone.fill('5551112222');
+        await this.payeeAccount.fill('123123123');
+        await this.verifyAccount.fill('123123123');
+        await this.amount.fill('75');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.paymentComplete)).toBeVisible();
+        console.info('Verified boundary test entering maximum allowed characters in payee name.');
+    }
+
+    async mobileSuccessfulPaymentWithValidDataInputs(): Promise<void> {
+        await this.payeeName.fill('John Doe');
+        await this.payeeStreet.fill('123 Main St');
+        await this.payeeCity.fill('Springfield');
+        await this.payeeState.fill('IL');
+        await this.payeeZip.fill('62704');
+        await this.payeePhone.fill('5551234567');
+        await this.payeeAccount.fill('123456789');
+        await this.verifyAccount.fill('123456789');
+        await this.amount.fill('100');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.sendPaymentButton).not.toBeVisible();
+        await expect(this.page.locator('text=' + this.paymentComplete)).toBeVisible();
+        console.info('Verified mobile successful payment with valid data inputs.');
+    }
+
+    async mobileAttemptPaymentWithAccountNumberConfirmationMismatch(): Promise<void> {
+        await this.payeeName.fill('Jane Smith');
+        await this.payeeStreet.fill('456 Oak Ave');
+        await this.payeeCity.fill('Metropolis');
+        await this.payeeState.fill('NY');
+        await this.payeeZip.fill('10001');
+        await this.payeePhone.fill('5559876543');
+        await this.payeeAccount.fill('987654321');
+        await this.verifyAccount.fill('123456789');
+        await this.amount.fill('50');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.accountMismatch)).toBeVisible();
+        console.info('Verified mobile payment attempt with account number confirmation mismatch.');
+    }
+
+    async mobileAttemptPaymentWithZeroAmount(): Promise<void> {
+        await this.payeeName.fill('Alice Johnson');
+        await this.payeeStreet.fill('789 Pine Rd');
+        await this.payeeCity.fill('Smallville');
+        await this.payeeState.fill('KS');
+        await this.payeeZip.fill('66002');
+        await this.payeePhone.fill('5552223333');
+        await this.payeeAccount.fill('1122334455');
+        await this.verifyAccount.fill('1122334455');
+        await this.amount.fill('0');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.invalidAmount)).toBeVisible();
+        console.info('Verified mobile payment attempt with zero amount input.');
+    }
+
+    async mobileAttemptPaymentWithMissingRequiredFieldAccountNumber(): Promise<void> {
+        await this.payeeName.fill('Bob Williams');
+        await this.payeeStreet.fill('321 Elm St');
+        await this.payeeCity.fill('Riverdale');
+        await this.payeeState.fill('CA');
+        await this.payeeZip.fill('90210');
+        await this.payeePhone.fill('5554445555');
+        await this.payeeAccount.fill('');
+        await this.verifyAccount.fill('');
+        await this.amount.fill('25');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.accountRequired)).toBeVisible();
+        console.info('Verified mobile payment attempt with missing required field: account number.');
+    }
+
+    async mobileAttemptPaymentWithNegativeAmountInput(): Promise<void> {
+        await this.payeeName.fill('Carol King');
+        await this.payeeStreet.fill('654 Maple Ave');
+        await this.payeeCity.fill('Gotham');
+        await this.payeeState.fill('NJ');
+        await this.payeeZip.fill('07097');
+        await this.payeePhone.fill('5556667777');
+        await this.payeeAccount.fill('9988776655');
+        await this.verifyAccount.fill('9988776655');
+        await this.amount.fill('-50');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.invalidAmount)).toBeVisible();
+        console.info('Verified mobile payment attempt with negative amount input.');
+    }
+
+    async mobileSecurityTestEnteringSqlInjectionPayloadInPayeeName(): Promise<void> {
+        await this.payeeName.fill("' OR '1'='1");
+        await this.payeeStreet.fill('987 Cedar Blvd');
+        await this.payeeCity.fill('Star City');
+        await this.payeeState.fill('WA');
+        await this.payeeZip.fill('98001');
+        await this.payeePhone.fill('5558889999');
+        await this.payeeAccount.fill('4455667788');
+        await this.verifyAccount.fill('4455667788');
+        await this.amount.fill('10');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.paymentComplete)).toBeVisible();
+        console.info('Verified mobile security test entering SQL injection payload in payee name.');
+    }
+
+    async mobileBoundaryTestEnteringMaximumAllowedCharactersInPayeeName(): Promise<void> {
+        const maxChars = 'A'.repeat(50);
+        await this.payeeName.fill(maxChars);
+        await this.payeeStreet.fill('1234 Boundary St');
+        await this.payeeCity.fill('Edgeville');
+        await this.payeeState.fill('TX');
+        await this.payeeZip.fill('75001');
+        await this.payeePhone.fill('5551112222');
+        await this.payeeAccount.fill('123123123');
+        await this.verifyAccount.fill('123123123');
+        await this.amount.fill('75');
+        await this.fromAccount.selectOption('12345');
+        await this.sendPaymentButton.click();
+        await expect(this.page.locator('text=' + this.paymentComplete)).toBeVisible();
+        console.info('Verified mobile boundary test entering maximum allowed characters in payee name.');
+    }
+}

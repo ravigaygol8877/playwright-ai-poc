@@ -98,7 +98,7 @@ per feature is now done before you finish your coffee."
 
 ### Step 3 — The Output: Enterprise-Quality Tests (60 seconds)
 
-*[Show: `tests/e2e/ae-home-excel-1.spec.ts` and `tests/pages/AeHomePage.ts`]*
+*[Show: `tests/UI/parabank-login.spec.ts` and `support/pages/loginPage.page.ts`]*
 
 "Here's what gets generated. Look at the spec file.
 
