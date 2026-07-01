@@ -23,5 +23,6 @@
   "success": {
     "redirectUrl": "",
     "landmarkText": ""
-  }
+  },
+  "authRequired": false
 }

@@ -59,7 +59,7 @@ This downloads Chromium, Firefox, and WebKit (one-time, ~300 MB).
 
 ## Step 4 — Explore the Example Requirements
 
-Open `requirements/requirements.xlsx`. It contains pre-filled rows for the [Automation Exercise](https://automationexercise.com) site — a free public test site. No edits needed for a first run.
+Open `requirements/requirements.xlsx`. It contains pre-filled rows for the [ParaBank](https://parabank.parasoft.com) banking demo — a free public test site. No edits needed for a first run.
 
 ---
 
@@ -72,22 +72,21 @@ npm run ai:run
 The pipeline does 7 things automatically:
 
 1. Reads `requirements/requirements.xlsx`
-2. Generates or updates Page Object Models in `tests/pages/`
+2. Generates or updates Page Object Models in `support/pages/`
 3. Expands blank "test cases" columns using AI
-4. Writes `.spec.ts` files to `tests/e2e/`
+4. Writes `.spec.ts` files to `tests/UI/`
 5. Runs Playwright tests
-6. Generates an Allure HTML report
+6. Generates a Playwright HTML report
 7. Opens the report in your browser
 
-On a first run with no cache expect 2–5 minutes depending on your provider and network. Subsequent runs are fast because LLM responses are cached in `.llm-cache/`.
+On a first run with no cache expect 12–18 minutes depending on your provider and network. Subsequent runs are fast (2–4 min) because LLM responses are cached in `.llm-cache/`.
 
 ---
 
 ## Step 6 — View the Results
 
 - **Playwright HTML report:** `npm run report:latest`
-- **Allure report:** `npm run allure:serve`
-- **Raw spec files:** browse `tests/e2e/`
+- **Raw spec files:** browse `tests/UI/`
 
 ---
 

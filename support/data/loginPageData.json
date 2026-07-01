@@ -1,0 +1,10 @@
+{
+  "validUsername": "john123",
+  "invalidUsername": "!!invalid_user!!",
+  "validPassword": "SecurePass1",
+  "invalidPassword": "123",
+  "experienceBannerMessage": "Experience the difference",
+  "customerLoginTitleMessage": "Customer Login",
+  "successRedirectUrl": "https://parabank.parasoft.com/parabank/overview.htm",
+  "successLandmarkText": "Accounts Overview"
+}

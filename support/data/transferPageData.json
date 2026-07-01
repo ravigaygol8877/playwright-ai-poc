@@ -1,0 +1,16 @@
+{
+  "validFromAccount": "12345",
+  "validToAccount": "67890",
+  "validAmount": "100.00",
+  "invalidAmountEmpty": "",
+  "invalidAmountNonNumeric": "abc",
+  "invalidAmountNegative": "-50",
+  "invalidAmountZero": "0",
+  "insufficientFundsAmount": "1000000",
+  "transferCompleteMessage": "Transfer Complete!",
+  "amountRequiredMessage": "The amount cannot be empty.",
+  "invalidAmountMessage": "Please enter a valid amount.",
+  "insufficientFundsMessage": "Insufficient funds",
+  "successRedirectUrl": "parabank/transfer.htm",
+  "successLandmarkText": "Transfer Complete!"
+}

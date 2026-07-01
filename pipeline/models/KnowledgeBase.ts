@@ -16,10 +16,13 @@ export interface KnowledgeBase {
   /** Optional override for the describe() label in generated specs. */
   describeName?: string;
 
-  /** Lines injected into beforeEach() before page.goto (e.g. authentication steps). */
+  /** When true, the generated spec adds a login step in beforeEach before navigating. */
+  authRequired?: boolean;
+
+  /** Lines injected into beforeEach() before page.goto (e.g. custom setup steps). */
   beforeEachPrefix?: string[];
 
-  /** When true, suppresses the page.goto(pagePath) line in beforeEach. */
+  /** When true, suppresses the page.goto(url) line in beforeEach. */
   skipGoto?: boolean;
 
   /** CSS-selector map: logical element name → CSS selector string. */

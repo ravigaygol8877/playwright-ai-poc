@@ -19,7 +19,7 @@ async function main() {
     new KnowledgeBaseService();
 
   const knowledgeBase =
-    kbService.load("login-page");
+    kbService.load("parabank-login-page");
 
   const engine =
     new SelfHealingLocatorEngine(
@@ -29,8 +29,8 @@ async function main() {
   const result =
     await engine.heal(
       {
-        failedLocator: "#loginBtn",
-        pageName: "login-page"
+        failedLocator: "input[type='submit'][value='Log In']",
+        pageName: "parabank-login-page"
       },
       knowledgeBase
     );

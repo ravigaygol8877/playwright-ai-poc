@@ -32,6 +32,10 @@ import { TestDataGenerator }
   from "../pipeline/generators/test-data/TestDataGenerator.js";
 import { PlaywrightGenerator }
   from "../pipeline/generators/playwright/PlaywrightGenerator.js";
+import { POMGenerator, kbKeyToClassName }
+  from "../pipeline/generators/pom/POMGenerator.js";
+import { DataFileGenerator }
+  from "../pipeline/generators/pom/DataFileGenerator.js";
 import { KnowledgeBaseService }
   from "../pipeline/kb/KnowledgeBaseService.js";
 import { SelfHealingLocatorEngine }
@@ -102,13 +106,36 @@ async function generateSuite(
   const kbService = new KnowledgeBaseService();
   const kb = kbService.load(pageName);
 
+  const className = kbKeyToClassName(pageName);
+  const camelName = className.charAt(0).toLowerCase() + className.slice(1);
+  const pomFile   = path.join("support/pages", `${camelName}.page.ts`);
+  const dataFile  = path.join("support/data",  `${camelName}Data.json`);
+
+  // Generate test cases first so POM methods match spec calls
   step("Generating test cases...");
   const testCases = await new TestCaseGenerator(llm).generate(requirement);
   ok(`${testCases.length} test cases`);
   testCases.forEach(tc => console.log(`         [${tc.id}] ${tc.title}`));
 
+  // Generate POM + data file using test case titles to align method names
+  if (!fs.existsSync(pomFile)) {
+    step(`Generating POM (${className})...`);
+    const pomResult = await new POMGenerator(llm).generate(kb, pageName, testCases.map(tc => tc.title));
+    fs.mkdirSync("support/pages", { recursive: true });
+    fs.writeFileSync(pomFile, pomResult.code, "utf-8");
+    ok(`POM → ${pomFile}`);
+  }
+
+  if (!fs.existsSync(dataFile)) {
+    step("Generating data file...");
+    const dataResult = await new DataFileGenerator(llm).generate(kb, pageName);
+    fs.mkdirSync("support/data", { recursive: true });
+    fs.writeFileSync(dataFile, dataResult.code, "utf-8");
+    ok(`Data → ${dataFile}`);
+  }
+
   step("Generating test data...");
-  const testData = await new TestDataGenerator(llm).generate(requirement, kb);
+  await new TestDataGenerator(llm).generate(requirement, kb);
   ok("Test data ready");
 
   step(`Loading knowledge base (${kb.pageName})...`);

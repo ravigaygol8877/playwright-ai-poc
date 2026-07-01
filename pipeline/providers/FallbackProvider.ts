@@ -48,6 +48,9 @@ function isFatalForProvider(message: string): boolean {
 /** Open the circuit after this many consecutive failures on one provider. */
 const CIRCUIT_BREAKER_THRESHOLD = 5;
 
+/** Maximum ms to wait for a single provider before treating it as a fatal hang. */
+const PROVIDER_TIMEOUT_MS = 30_000;
+
 export class FallbackProvider implements LLMProvider {
   /**
    * Persists across calls — once we advance to a working provider we stay there,
@@ -80,7 +83,15 @@ export class FallbackProvider implements LLMProvider {
       const { name, provider } = this.chain[i]!;
 
       try {
-        const result = await provider.generateResponse(prompt);
+        const result = await Promise.race([
+          provider.generateResponse(prompt),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error(`timeout after ${PROVIDER_TIMEOUT_MS}ms`)),
+              PROVIDER_TIMEOUT_MS,
+            )
+          ),
+        ]);
 
         // Permanently advance the cursor if we moved forward this call.
         if (i > this.activeIndex) {

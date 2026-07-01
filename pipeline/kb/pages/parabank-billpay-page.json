@@ -13,7 +13,7 @@
     "verifyAccount": "input[name='verifyAccount']",
     "amount": "input[name='amount']",
     "fromAccount": "select[name='fromAccountId']",
-    "sendPaymentButton": "input[type='submit'][value='Send Payment']"
+    "sendPaymentButton": "input[type='button'][value='Send Payment']"
   },
   "messages": {
     "paymentComplete": "Bill Payment Complete",
@@ -31,5 +31,6 @@
   "success": {
     "redirectUrl": "",
     "landmarkText": "Bill Payment Complete"
-  }
+  },
+  "authRequired": true
 }

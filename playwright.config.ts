@@ -53,7 +53,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video:      'retain-on-failure',
 
-    headless: !!CI,
+    headless: process.env['HEADED'] !== 'true',
 
     actionTimeout:     10_000,
     navigationTimeout: 30_000,

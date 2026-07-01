@@ -134,14 +134,30 @@ async function generateSuite(
     const pomFile   = path.join(config.pageOutputPath, `${camelName}.page.ts`);
     const dataFile  = path.join(config.dataOutputPath, `${camelName}Data.json`);
 
-    // Auto-generate POM if not yet present
+    // Resolve requirement
+    let requirement = suite.requirement?.trim() ?? "";
+    if (!requirement) {
+      process.stdout.write("  ▸ Generating requirement from KB... ");
+      requirement = await reqGen.generate(kb);
+      console.log("done");
+      console.log(`\n  Requirement (AI-generated):\n  "${requirement.slice(0, 200)}${requirement.length > 200 ? "..." : ""}"\n`);
+    } else {
+      console.log(`\n  Requirement (manual):\n  "${requirement}"\n`);
+    }
+
+    // Test cases — generated first so POM methods align with spec calls
+    process.stdout.write("  ▸ Generating test cases (KB-aware)... ");
+    const testCases = await new TestCaseGenerator(llm).generate(requirement, kb);
+    console.log(`done  (${testCases.length} cases)`);
+
+    // Auto-generate POM if not yet present, passing test case titles for aligned method names
     if (!fs.existsSync(pomFile)) {
       fs.mkdirSync(config.pageOutputPath, { recursive: true });
       fs.mkdirSync(config.dataOutputPath,  { recursive: true });
 
       process.stdout.write(`  ▸ Generating POM (${className})... `);
       try {
-        const pomResult = await pomGen.generate(kb, suite.page);
+        const pomResult = await pomGen.generate(kb, suite.page, testCases.map(tc => tc.title));
         fs.writeFileSync(pomFile, pomResult.code, "utf-8");
         console.log("done");
         tick(`POM → ${pomFile}`);
@@ -158,22 +174,6 @@ async function generateSuite(
         console.log(`failed (${msg}) — continuing without POM`);
       }
     }
-
-    // Resolve requirement
-    let requirement = suite.requirement?.trim() ?? "";
-    if (!requirement) {
-      process.stdout.write("  ▸ Generating requirement from KB... ");
-      requirement = await reqGen.generate(kb);
-      console.log("done");
-      console.log(`\n  Requirement (AI-generated):\n  "${requirement.slice(0, 200)}${requirement.length > 200 ? "..." : ""}"\n`);
-    } else {
-      console.log(`\n  Requirement (manual):\n  "${requirement}"\n`);
-    }
-
-    // Test cases
-    process.stdout.write("  ▸ Generating test cases (KB-aware)... ");
-    const testCases = await new TestCaseGenerator(llm).generate(requirement, kb);
-    console.log(`done  (${testCases.length} cases)`);
     testCases.forEach(tc => console.log(`       [${tc.id}] ${tc.title}`));
 
     // Test data (for reference / KB enrichment — not imported in spec)

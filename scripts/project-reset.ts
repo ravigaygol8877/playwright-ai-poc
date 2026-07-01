@@ -4,16 +4,17 @@
  * Resets the framework for a brand-new project.
  *
  * REMOVES (project-generated artifacts):
- *   tests/e2e/*.spec.ts              — generated Playwright specs
- *   tests/e2e/*.data.ts              — generated test data co-located with specs
- *   tests/pages/*.ts                 — generated Page Object Model classes
- *   tests/data/*.data.ts             — generated data files from generate:pom
- *   tests/helpers/interceptHelper.ts — project-specific login/logout helpers
- *   tests/helpers/commonPattern.ts   — project-specific nav pattern class
+ *   tests/UI/*.spec.ts               — generated Playwright UI specs
+ *   tests/API/*.spec.ts              — generated Playwright API specs
+ *   support/pages/*.page.ts          — generated Page Object Model classes
+ *   support/helper/loginHelper.ts    — project-specific login helper
+ *   support/helper/interceptHelper.ts — project-specific intercept helper
+ *   support/helper/commonPattern.ts  — project-specific nav pattern class
  *   pipeline/kb/pages/*.json         — project Knowledge Base + scenario cache files
  *   ai-metadata/artifacts.json       — requirement/KB/POM content hash manifest
  *   reports/                         — all run reports and artefacts
  *   .llm-cache/                      — cached LLM responses (forces fresh AI calls)
+ *   .healing-cache/                  — self-healing selector cache
  *   playwright-report/               — stale Playwright HTML reports (if present)
  *   test-results/                    — stale test run artefacts (if present)
  *
@@ -24,10 +25,9 @@
  *   pipeline/                  — all AI modules, generators, providers
  *   scripts/                   — all pipeline and demo scripts
  *   tests/fixtures/base.ts           — core testDesktop / testMobile fixtures
- *   tests/helpers/constants.ts       — viewport constants (used by base.ts)
- *   tests/helpers/waitUtils.ts       — generic wait utilities
- *   tests/pages/ExamplePage.ts       — scaffold POM (not generated)
- *   tests/data/example.data.ts      — scaffold data file (not generated)
+ *   support/helper/apiHelper.ts      — generic API helper (framework)
+ *   support/helper/fileReader.ts     — generic file reader (framework)
+ *   support/pages/example.page.ts   — scaffold POM (not generated)
  *   requirements/*.xlsx        — Excel requirements files
  *   .env                       — API keys and environment config
  *   tsconfig.json, package.json, playwright.config.ts, etc.
@@ -101,7 +101,7 @@ function resetPlatformConfig(): void {
     projectName:        "My Project",
     defaultEnvironment: "qa",
     llmModel:           "gpt-4.1-mini",
-    testOutputPath:     "tests/e2e/",
+    testOutputPath:     "tests/UI/",
     reportOutputPath:   "reports/",
     suites:             [],
   };
@@ -116,21 +116,20 @@ async function main() {
 
   let deletedCount = 0;
 
-  // ── 1. Remove generated Playwright specs and co-located data ─────────────
+  // ── 1. Remove generated Playwright specs ──────────────────────────────────
   section("Step 1 — Removing Generated Playwright Specs");
-  deletedCount += removeGlob("tests/e2e", [".spec.ts", ".data.ts"]);
+  deletedCount += removeGlob("tests/UI",  [".spec.ts"]);
+  deletedCount += removeGlob("tests/API", [".spec.ts"]);
 
   // ── 2. Remove generated Page Object Models ────────────────────────────────
   section("Step 2 — Removing Generated Page Object Models");
-  deletedCount += removeGlob("tests/pages", [".ts"], ["ExamplePage.ts"]);
-
-  // ── 2b. Remove generated data files (tests/data/*.data.ts) ───────────────
-  deletedCount += removeGlob("tests/data", [".data.ts"], ["example.data.ts"]);
+  deletedCount += removeGlob("support/pages", [".page.ts"], ["example.page.ts"]);
 
   // ── 3. Remove project-specific helper files ───────────────────────────────
   section("Step 3 — Removing Project-Specific Helpers");
-  if (removeFile("tests/helpers/interceptHelper.ts")) deletedCount++;
-  if (removeFile("tests/helpers/commonPattern.ts"))   deletedCount++;
+  if (removeFile("support/helper/loginHelper.ts"))     deletedCount++;
+  if (removeFile("support/helper/interceptHelper.ts")) deletedCount++;
+  if (removeFile("support/helper/commonPattern.ts"))   deletedCount++;
 
   // ── 4. Remove project Knowledge Base files ────────────────────────────────
   section("Step 4 — Removing Project Knowledge-Base Files");
@@ -147,6 +146,7 @@ async function main() {
   // ── 7. Remove reports and stale artefacts ────────────────────────────────
   section("Step 7 — Removing Reports and Artefacts");
   if (removeDir("reports"))           deletedCount++;
+  if (removeDir(".healing-cache"))    deletedCount++;
   if (removeDir("playwright-report")) deletedCount++;
   if (removeDir("test-results"))      deletedCount++;
 
@@ -156,22 +156,22 @@ async function main() {
 
   // ── 9. Recreate empty directory structure ────────────────────────────────
   section("Step 9 — Recreating Empty Project Structure");
-  ensureDir("tests/e2e");
-  ensureDir("tests/pages");
+  ensureDir("tests/UI");
+  ensureDir("tests/API");
+  ensureDir("support/pages");
   ensureDir("pipeline/kb/pages");
   ensureDir("reports");
 
   // ── 10. Confirm preserved assets ─────────────────────────────────────────
   section("Step 10 — Preserved (Framework + Requirements)");
-  preserved("pipeline/                    (all AI modules and providers)");
-  preserved("scripts/                     (all pipeline and demo scripts)");
-  preserved("tests/fixtures/base.ts       (testDesktop / testMobile)");
-  preserved("tests/helpers/constants.ts   (viewport constants)");
-  preserved("tests/helpers/waitUtils.ts   (generic wait utilities)");
-  preserved("tests/pages/ExamplePage.ts     (scaffold POM — not generated)");
-  preserved("tests/data/example.data.ts    (scaffold data file — not generated)");
-  preserved("requirements/*.xlsx          (Excel requirements files)");
-  preserved(".env                         (API keys)");
+  preserved("pipeline/                      (all AI modules and providers)");
+  preserved("scripts/                       (all pipeline and demo scripts)");
+  preserved("tests/fixtures/base.ts         (testDesktop / testMobile)");
+  preserved("support/helper/apiHelper.ts    (generic API helper)");
+  preserved("support/helper/fileReader.ts   (generic file reader)");
+  preserved("support/pages/example.page.ts (scaffold POM — not generated)");
+  preserved("requirements/*.xlsx            (Excel requirements files)");
+  preserved(".env                           (API keys)");
 
   // ── 11. Summary ──────────────────────────────────────────────────────────
   banner("Reset Complete");

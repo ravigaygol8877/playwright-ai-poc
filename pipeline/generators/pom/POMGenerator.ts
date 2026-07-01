@@ -11,6 +11,7 @@
 
 import type { LLMProvider } from "../../providers/interfaces/LLMProvider.js";
 import { AIJsonParser } from "../../utils/AIJsonParser.js";
+import { toMethodName } from "../playwright/PlaywrightGenerator.js";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -61,6 +62,12 @@ function isCollection(key: string): boolean {
   return /cards|items|rows|list|results|elements$/i.test(key);
 }
 
+function quoteSelector(s: string): string {
+  if (!s.includes("'")) return `'${s}'`;
+  if (!s.includes('"')) return `"${s}"`;
+  return `'${s.replace(/'/g, "\\'")}'`;
+}
+
 function buildLocatorExpr(selectorStr: string, key: string): string {
   const parts = selectorStr
     .split(',')
@@ -69,8 +76,8 @@ function buildLocatorExpr(selectorStr: string, key: string): string {
 
   if (parts.length === 0) return `page.locator('')`;
 
-  const first  = `page.locator('${parts[0]}')`;
-  const chains = parts.slice(1).map(s => `.or(page.locator('${s}'))`).join('');
+  const first  = `page.locator(${quoteSelector(parts[0]!)})`;
+  const chains = parts.slice(1).map(s => `.or(page.locator(${quoteSelector(s)}))`).join('');
   const suffix = isCollection(key) ? '' : '.first()';
 
   return `${first}${chains}${suffix}`;
@@ -81,7 +88,11 @@ function buildLocatorExpr(selectorStr: string, key: string): string {
 export class POMGenerator {
   constructor(private llmProvider: LLMProvider) {}
 
-  async generate(kb: import("../../models/KnowledgeBase.js").KnowledgeBase, kbKey: string): Promise<POMResult> {
+  async generate(
+    kb:               import("../../models/KnowledgeBase.js").KnowledgeBase,
+    kbKey:            string,
+    testCaseTitles?:  string[],
+  ): Promise<POMResult> {
     const pageName  = kb.pageName ?? kbKey;
     const url       = kb.url      ?? '/';
     const selectors = kb.selectors ?? {};
@@ -92,8 +103,10 @@ export class POMGenerator {
     const selectorKeys = Object.keys(selectors);
     const messageKeys  = Object.keys(messages);
 
+    const methodNames  = testCaseTitles?.map(t => toMethodName(t));
+
     const actionMethods = await this.generateActionMethods(
-      pageName, url, selectors, messages
+      pageName, url, selectors, messages, methodNames
     );
 
     const code = this.buildCode(
@@ -105,10 +118,11 @@ export class POMGenerator {
   }
 
   private async generateActionMethods(
-    pageName:  string,
-    url:       string,
-    selectors: Record<string, string>,
-    messages:  Record<string, string>,
+    pageName:     string,
+    url:          string,
+    selectors:    Record<string, string>,
+    messages:     Record<string, string>,
+    methodNames?: string[],
   ): Promise<ActionMethod[]> {
 
     const selectorList = Object.entries(selectors)
@@ -119,35 +133,41 @@ export class POMGenerator {
       .map(([k, v]) => `  - ${k}: "${v}"  (access via this.${k} as a string)`)
       .join('\n');
 
+    const methodConstraint = methodNames && methodNames.length > 0
+      ? `You MUST generate exactly these methods (one per entry, in this order):\n${methodNames.map(n => `  - ${n}`).join('\n')}\n\nDo NOT add extra methods or rename them.`
+      : `Generate methods for meaningful user actions on this page.`;
+
     const prompt = `
 You are a Senior Playwright Automation Engineer.
 
-Given this Page Object Model context, generate TypeScript action methods for the class.
+Generate TypeScript action methods for a Playwright Page Object Model class.
 
 Page: ${pageName}
 URL:  ${url}
 
-Available locator properties (use "this.propertyName" in the body):
+Available locator properties (use "this.propertyName" in method bodies):
 ${selectorList || '  (none)'}
 
 Known validation message string properties (use "this.propertyName" as a string in toHaveText/toContainText):
 ${messageList || '  (none)'}
 
+${methodConstraint}
+
 Rules:
-- Do NOT generate a goto method. Navigation is handled externally by the fixture.
-- Only generate methods for meaningful user actions (e.g., loginWithValidData, loginWithInvalidData, submitForm, verifyPageElements).
+- Do NOT generate a goto method.
+- Methods must have NO parameters — use locator properties directly.
 - Each method body uses "this.propertyName" — NOT page.locator(selector).
 - Use "await" for every locator interaction.
-- Inline assertions inside each method using expect(...).toBeVisible(), expect(...).toHaveText(this.msgProp), etc.
+- Inline assertions using expect(...).toBeVisible(), expect(...).toContainText(this.msgProp), etc.
 - Each method must end with: console.info('Verified [brief description].');
-- Return ONLY JSON. No markdown. No explanation.
+- Return ONLY a JSON array. No markdown, no explanation.
 
 JSON format:
 [
   {
     "name": "loginWithValidData",
-    "params": [{"name": "email", "type": "string"}, {"name": "password", "type": "string"}],
-    "body": "await this.emailInput.fill(email);\nawait this.passwordInput.fill(password);\nawait this.loginButton.click();\nconsole.info('Verified login with valid data.');"
+    "params": [],
+    "body": "await this.usernameField.fill('testuser');\nawait this.passwordField.fill('secret');\nawait this.loginButton.click();\nconsole.info('Verified login with valid data.');"
   }
 ]
 `;
@@ -201,7 +221,8 @@ JSON format:
     const initSection     = locatorInits  ? `\n${locatorInits}\n`  : '';
     const methodSection   = methodBlocks  ? `\n${methodBlocks}\n`  : '';
 
-    return `import { expect, Locator, Page } from '@playwright/test';
+    return `import { expect } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export default class ${className} {
     private readonly page: Page;

@@ -79,12 +79,13 @@ export class ReportingService {
   }
 
   private persist(report: AIAnalysisReport): void {
-    const dateDir = report.generatedAt.split("T")[0]!;
-    const dirPath = path.join(this.outputPath, dateDir);
+    const dirPath = path.join(this.outputPath, 'latest-ai-analysis');
 
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
+    // Always write to a fixed folder name, removing previous content first
+    if (fs.existsSync(dirPath)) {
+      fs.rmSync(dirPath, { recursive: true, force: true });
     }
+    fs.mkdirSync(dirPath, { recursive: true });
 
     const jsonPath = path.join(dirPath, "ai-analysis-report.json");
     const mdPath = path.join(dirPath, "release-risk-summary.md");

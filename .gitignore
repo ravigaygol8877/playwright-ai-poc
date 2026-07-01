@@ -55,6 +55,9 @@ test-results/
 reports/**
 !reports/.gitkeep
 
+# allure-results
+allure-results/**
+
 # Playwright
 /playwright-report/
 /blob-report/

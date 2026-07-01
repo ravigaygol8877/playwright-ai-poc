@@ -9,9 +9,9 @@ A step-by-step guide for onboarding the framework to test a new web application.
 The framework is parameterised per page, not per project. Each page of your app gets:
 
 1. A **knowledge-base JSON** (`pipeline/kb/pages/<page-name>.json`) — selectors, URLs, messages
-2. A **Page Object Model** (`tests/pages/<PageName>.ts`) — typed wrappers around those selectors
+2. A **Page Object Model** (`support/pages/<pageName>.page.ts`) — typed wrappers around those selectors
 3. A **requirements row** in `requirements/requirements.xlsx` — what to test
-4. **Generated spec files** (`tests/e2e/<page-name>-*.spec.ts`) — the actual Playwright tests
+4. **Generated spec files** (`tests/UI/<page-name>-*.spec.ts`) — the actual Playwright tests
 
 ---
 
@@ -48,7 +48,7 @@ The generator will:
 npm run generate:pom
 ```
 
-This reads `pipeline/kb/pages/myapp-login.json` and produces `tests/pages/MyappLoginPage.ts` with:
+This reads `pipeline/kb/pages/myapp-login.json` and produces `support/pages/myappLoginPage.page.ts` with:
 - A constructor taking `page: Page`
 - One getter per selector key
 - A `goto()` method
@@ -94,7 +94,7 @@ The pipeline will:
 1. Pick up your new requirements row
 2. Call your KB JSON for selectors
 3. Generate 4–10 test cases per scenario
-4. Write spec files to `tests/e2e/`
+4. Write spec files to `tests/UI/`
 5. Execute them and report
 
 ---
