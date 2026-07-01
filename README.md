@@ -76,10 +76,11 @@ Everything generated follows the same patterns as hand-written tests — so gene
                        │
        ┌───────────────▼──────────────────┐
        │          Test Layer              │
-       │  tests/fixtures/base.ts        │  ← testDesktop / testMobile
-       │  tests/pages/[PageName].ts     │  ← private locators + methods
-       │  tests/helpers/               │  ← interceptHelper, CorePattern
-       │  tests/e2e/[page].spec.ts        │  ← generated + maintained specs
+       │  support/fixtures/              │  ← testDesktop / testMobile
+       │    visitFixture.ts              │
+       │  support/pages/[page].page.ts  │  ← private locators + methods
+       │  support/helper/               │  ← loginHelper, apiHelper
+       │  tests/UI/[page].spec.ts        │  ← generated + maintained specs
        └──────────────────────────────────┘
 ```
 
@@ -134,18 +135,17 @@ playwright-ai-poc/
 │   └── utils/                        # AIJsonParser, ArtifactManifest, concurrency
 │
 ├── tests/                            # Playwright test suite
-│   ├── e2e/                          # Spec files — generated + hand-written
-│   │   ├── ae-home-excel-{1,2,3,4}.spec.ts  # AE-TC-001–080 @regression @smoke
-│   │   ├── ae-home-mobile.spec.ts    # AE-MOB-001–004 @mobile
-│   │   └── ae-home.data.ts           # Shared test data
+│   ├── UI/                           # Generated + hand-written spec files
+│   │   └── parabank-login.spec.ts    # TC-001 @regression
+│   ├── API/                          # API-level test specs
+│   └── unit/                         # Vitest unit tests for pipeline modules
+│
+├── support/
 │   ├── fixtures/
-│   │   └── base.ts                   # testDesktop + testMobile custom fixtures
-│   ├── pages/                        # Page Object Models
-│   │   ├── AeHomePage.ts             # private readonly locators + public methods
-│   │   └── AeLoginPage.ts
-│   ├── helpers/                      # interceptHelper, commonPattern, constants, waitUtils
-│   └── data/
-│       └── example.ts                # Template for page data interfaces
+│   │   └── visitFixture.ts           # testDesktop + testMobile custom fixtures
+│   ├── pages/                        # Page Object Models (.page.ts suffix)
+│   │   └── loginPage.page.ts         # private readonly locators + public methods
+│   └── helper/                       # loginHelper, apiHelper, fileReader, constants
 │
 ├── scripts/                          # CLI entry points
 │   ├── run-pipeline.ts               # npm run ai:run
@@ -165,8 +165,11 @@ playwright-ai-poc/
 │
 ├── docs/
 │   ├── GETTING-STARTED.md            # Clone → first run in 10 minutes
+│   ├── FRAMEWORK_OVERVIEW.md         # Developer KT guide — full walkthrough
 │   ├── COMMANDS.md                   # Every npm script explained
 │   ├── ONBOARDING.md                 # Add a new target application
+│   ├── SELF-HEALING.md               # ai:heal command guide
+│   ├── AI-ANALYTICS.md               # ai:flaky / ai:rootcause / ai:coverage / ai:regression
 │   └── CONTRIBUTING.md               # Add providers, extend the pipeline
 │
 ├── playwright.config.ts              # Multi-browser, Allure, baseURL
@@ -217,10 +220,10 @@ GITHUB_TOKEN=your-token       # for github-models
 OPENROUTER_API_KEY=your-key   # for openrouter
 
 # Target application
-BASE_URL=https://automationexercise.com   # defaults to this if omitted
+BASE_URL=https://parabank.parasoft.com   # defaults to this if omitted
 ```
 
-> Tests run against `BASE_URL` directly. You can run `npx playwright test` without a `.env` file — it defaults to `https://automationexercise.com`.
+> Tests run against `BASE_URL` directly. You can run `npx playwright test` without a `.env` file — it defaults to `https://parabank.parasoft.com`.
 
 ### 2. Platform config (for AI pipeline)
 
@@ -231,7 +234,7 @@ BASE_URL=https://automationexercise.com   # defaults to this if omitted
   "projectName": "My Project",
   "defaultEnvironment": "qa",
   "llmModel": "gpt-4.1-mini",
-  "testOutputPath": "tests/e2e/",
+  "testOutputPath": "tests/UI/",
   "reportOutputPath": "reports/",
   "suites": [
     {
@@ -331,9 +334,9 @@ For the full command reference see **[docs/COMMANDS.md](docs/COMMANDS.md)**.
    { "name": "My Page", "page": "my-page", "outputFile": "my-page.spec.ts" }
    ```
 3. **Run the pipeline**: `npm run generate:all`
-   - This creates `tests/pages/MyPage.ts` and `tests/e2e/my-page.spec.ts`
-4. **Enrich the POM** — add behavior/assertion methods following the pattern in `tests/pages/AeHomePage.ts`
-5. **Update `tests/fixtures/base.ts`** if you need a custom fixture for the new page
+   - This creates `support/pages/myPage.page.ts` and `tests/UI/my-page.spec.ts`
+4. **Enrich the POM** — add behavior/assertion methods following the pattern in `support/pages/loginPage.page.ts`
+5. **Update `support/fixtures/visitFixture.ts`** if you need a custom fixture for the new page
 
 ---
 

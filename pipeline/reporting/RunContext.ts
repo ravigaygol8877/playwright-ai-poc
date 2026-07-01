@@ -1,5 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Resolve project root from this file's location (pipeline/reporting/RunContext.ts → ../../..)
+// This ensures reports/ always lands inside the project regardless of the shell's CWD.
+const PROJECT_ROOT = path.resolve(fileURLToPath(import.meta.url), '../../..');
+const REPORTS_BASE = path.join(PROJECT_ROOT, 'reports');
 
 export interface RunPaths {
   runId:            string;
@@ -14,7 +20,7 @@ export interface RunPaths {
   testArtifacts:    string;
 }
 
-const RUN_ID_FILE  = path.join('reports', '.current-run-id');
+const RUN_ID_FILE  = path.join(REPORTS_BASE, '.current-run-id');
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
 function makeRunId(): string {
@@ -91,7 +97,7 @@ function isFreshRunId(): boolean {
 }
 
 /** Create a brand-new timestamped run context and persist the run ID. */
-export function createRunContext(base = 'reports'): RunPaths {
+export function createRunContext(base = REPORTS_BASE): RunPaths {
   const runId    = makeRunId();
   const runPaths = buildPaths(base, runId);
 
@@ -113,7 +119,7 @@ export function createRunContext(base = 'reports'): RunPaths {
  *   2. .current-run-id file written within the last 2 hours — same generation cycle
  *   3. Fresh run context — standalone test execution with no prior generation step
  */
-export function resolveRunContext(base = 'reports'): RunPaths {
+export function resolveRunContext(base = REPORTS_BASE): RunPaths {
   const envRunId = process.env['REPORT_RUN_ID'];
   if (envRunId) {
     const runPaths = buildPaths(base, envRunId);

@@ -379,6 +379,7 @@ All scripts are invoked by `npm run` commands. They wire together pipeline modul
 | `COMMANDS.md` | Every npm script with flags and examples |
 | `ONBOARDING.md` | How to add a new target application (KB → POM → fixture → requirements → pipeline) |
 | `FRAMEWORK_STRUCTURE.md` | ← This file |
+| `FRAMEWORK_OVERVIEW.md` | Developer KT guide — 15-min end-to-end walkthrough of the entire framework |
 | `CONTRIBUTING.md` | How to add providers, extend generators |
 | `DEMO_PITCH.md` | 2-min pitch deck + 5-min live demo script |
 | `SHOWCASE.md` | Feature showcase with screenshots and output examples |

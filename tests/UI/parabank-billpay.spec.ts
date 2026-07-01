@@ -16,11 +16,6 @@ testDesktop.describe('billPay - Desktop', () => {
     testDesktop(
         'TC_001 @regression : [billPay] Successful payment with valid data inputs',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.successfulPaymentWithValidDataInputs();
         },
     );
@@ -28,11 +23,6 @@ testDesktop.describe('billPay - Desktop', () => {
     testDesktop(
         'TC_002 @regression : [billPay] Attempt payment with account number confirmation mismatch',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.attemptPaymentWithAccountNumberConfirmationMismatch();
         },
     );
@@ -40,11 +30,6 @@ testDesktop.describe('billPay - Desktop', () => {
     testDesktop(
         'TC_003 @regression : [billPay] Attempt payment with zero amount',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.attemptPaymentWithZeroAmount();
         },
     );
@@ -52,11 +37,6 @@ testDesktop.describe('billPay - Desktop', () => {
     testDesktop(
         'TC_004 @regression : [billPay] Attempt payment with missing required field (Account Number)',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.attemptPaymentWithMissingRequiredFieldAccountNumber();
         },
     );
@@ -64,11 +44,6 @@ testDesktop.describe('billPay - Desktop', () => {
     testDesktop(
         'TC_005 @regression : [billPay] Attempt payment with negative amount input',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.attemptPaymentWithNegativeAmountInput();
         },
     );
@@ -76,9 +51,6 @@ testDesktop.describe('billPay - Desktop', () => {
     testDesktop(
         'TC_006 @regression : [billPay] Security test: Entering SQL injection payload in Payee Name',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.securityTestEnteringSqlInjectionPayloadInPayeeName();
         },
     );
@@ -86,9 +58,6 @@ testDesktop.describe('billPay - Desktop', () => {
     testDesktop(
         'TC_007 @regression : [billPay] Boundary test: Entering maximum allowed characters in Payee Name',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.boundaryTestEnteringMaximumAllowedCharactersInPayeeName();
         },
     );
@@ -105,11 +74,6 @@ testMobile.describe('billPay - Mobile Web', () => {
     testMobile(
         'TC_001 @regression : [billPay][Mobile] Successful payment with valid data inputs',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.successfulPaymentWithValidDataInputs();
         },
     );
@@ -117,11 +81,6 @@ testMobile.describe('billPay - Mobile Web', () => {
     testMobile(
         'TC_002 @regression : [billPay][Mobile] Attempt payment with account number confirmation mismatch',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.attemptPaymentWithAccountNumberConfirmationMismatch();
         },
     );
@@ -129,11 +88,6 @@ testMobile.describe('billPay - Mobile Web', () => {
     testMobile(
         'TC_003 @regression : [billPay][Mobile] Attempt payment with zero amount',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.attemptPaymentWithZeroAmount();
         },
     );
@@ -141,11 +95,6 @@ testMobile.describe('billPay - Mobile Web', () => {
     testMobile(
         'TC_004 @regression : [billPay][Mobile] Attempt payment with missing required field (Account Number)',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.attemptPaymentWithMissingRequiredFieldAccountNumber();
         },
     );
@@ -153,11 +102,6 @@ testMobile.describe('billPay - Mobile Web', () => {
     testMobile(
         'TC_005 @regression : [billPay][Mobile] Attempt payment with negative amount input',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.attemptPaymentWithNegativeAmountInput();
         },
     );
@@ -165,9 +109,6 @@ testMobile.describe('billPay - Mobile Web', () => {
     testMobile(
         'TC_006 @regression : [billPay][Mobile] Security test: Entering SQL injection payload in Payee Name',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.securityTestEnteringSqlInjectionPayloadInPayeeName();
         },
     );
@@ -175,9 +116,6 @@ testMobile.describe('billPay - Mobile Web', () => {
     testMobile(
         'TC_007 @regression : [billPay][Mobile] Boundary test: Entering maximum allowed characters in Payee Name',
         async ({ page }: { page: Page }) => {
-        // [object Object]
-        // [object Object]
-        // [object Object]
         await billpayPage.boundaryTestEnteringMaximumAllowedCharactersInPayeeName();
         },
     );

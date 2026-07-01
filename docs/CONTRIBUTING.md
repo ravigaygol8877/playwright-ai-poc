@@ -78,7 +78,7 @@ npm run test:mobile      # @mobile — mobile viewport tests
 2. Run: `npm run ai:run`
 3. The pipeline auto-generates: `support/pages/<pageName>.page.ts`, `tests/UI/` specs
 4. Enrich the POM with behavior/assertion methods following `support/pages/example.page.ts`
-5. Register the new page in `tests/fixtures/base.ts` if you need a custom fixture
+5. Register the new page in `support/fixtures/visitFixture.ts` if you need a custom fixture
 
 ## PR checklist
 
