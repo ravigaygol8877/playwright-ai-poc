@@ -465,7 +465,6 @@ Here is a real generated UI spec file, `tests/UI/parabank-login.spec.ts`, trimme
 ```typescript
 import type { ConsoleMessage, Page } from '@playwright/test';
 import { testDesktop, testMobile } from '../../support/fixtures/visitFixture.js';
-import { verifyPageTitle, waitForSelector } from '../../support/helper/interceptHelper.js';
 import LoginPage from '../../support/pages/loginPage.page.js';
 
 let loginPage: LoginPage;

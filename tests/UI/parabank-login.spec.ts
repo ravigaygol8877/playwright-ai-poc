@@ -1,6 +1,5 @@
 import type { ConsoleMessage, Page } from '@playwright/test';
 import { testDesktop, testMobile } from '../../support/fixtures/visitFixture.js';
-import { verifyPageTitle, waitForSelector } from '../../support/helper/interceptHelper.js';
 import LoginPage from '../../support/pages/loginPage.page.js';
 
 let loginPage: LoginPage;

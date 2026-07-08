@@ -7,8 +7,8 @@
     "toAccount": "select[id='toAccountId']",
     "amount": "input[id='amount']",
     "transferButton": "input[type='submit'].button",
-    "transferCompleteHeader": "h1.title",
-    "transferCompleteAmount": "#showResult .ng-binding",
+    "transferCompleteHeader": "#showResult h1.title",
+    "transferCompleteAmount": "#amountResult",
     "homeLink": "a:has-text('Home')",
     "accountsOverviewLink": "a:has-text('Accounts Overview')"
   },
