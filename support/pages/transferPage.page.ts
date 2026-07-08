@@ -25,8 +25,8 @@ export default class TransferPage {
         this.toAccount = page.locator("select[id='toAccountId']").first();
         this.amount = page.locator("input[id='amount']").first();
         this.transferButton = page.locator("input[type='submit'].button").first();
-        this.transferCompleteHeader = page.locator('h1.title').first();
-        this.transferCompleteAmount = page.locator('#showResult .ng-binding').first();
+        this.transferCompleteHeader = page.locator('#showResult h1.title').first();
+        this.transferCompleteAmount = page.locator('#amountResult').first();
         this.homeLink = page.locator("a:has-text('Home')").first();
         this.accountsOverviewLink = page.locator("a:has-text('Accounts Overview')").first();
     }

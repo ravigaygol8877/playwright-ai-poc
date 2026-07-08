@@ -4,7 +4,8 @@ import { ProviderFactory } from "../pipeline/providers/ProviderFactory.js";
 import { RegressionExtractor } from "../pipeline/analyzers/extractors/RegressionExtractor.js";
 import { RegressionSelector } from "../pipeline/analyzers/regression/RegressionSelector.js";
 import { AnalysisReporter } from "../pipeline/analyzers/shared/AnalysisReporter.js";
-import type { AnalysisReport } from "../pipeline/analyzers/shared/models/AnalysisReport.js";
+import type { AnalysisReport, AnalysisInsight } from "../pipeline/analyzers/shared/models/AnalysisReport.js";
+import type { RegressionSelection } from "../pipeline/analyzers/regression/RegressionSelection.js";
 
 /**
  * Production-ready regression analysis command
@@ -41,7 +42,7 @@ async function main(): Promise<void> {
 
     console.log(`  Analyzing affected components...\n`);
 
-    let analysis: any = { recommendations: [] };
+    let analysis: RegressionSelection | null = null;
     if (affectedFiles.length > 0) {
       try {
         analysis = await selector.analyze(affectedFiles);
@@ -50,7 +51,7 @@ async function main(): Promise<void> {
       }
     }
 
-    const insights: any[] = [];
+    const insights: AnalysisInsight[] = [];
 
     // Create insights for critical/high priority tests
     const critical = regressionData.affectedTests.filter(t => t.riskLevel === 'critical');
@@ -89,6 +90,19 @@ async function main(): Promise<void> {
         affectedItems: affectedFiles,
         recommendation: 'Review changes in these components for breaking changes',
         confidence: 85
+      });
+    }
+
+    // Add AI-recommended suites to re-run, grounded against the real test catalog
+    if (analysis && analysis.recommendedTests.length > 0) {
+      insights.push({
+        severity: 'medium',
+        category: 'Suggested Re-runs',
+        title: `${analysis.recommendedTests.length} test suite(s) recommended for re-run`,
+        description: analysis.reasoning || 'These suites are likely impacted by the recent changes.',
+        affectedItems: analysis.recommendedTests,
+        recommendation: `Re-run: ${analysis.recommendedTests.join(', ')}`,
+        confidence: 80
       });
     }
 

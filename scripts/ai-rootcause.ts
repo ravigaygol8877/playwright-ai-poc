@@ -4,7 +4,7 @@ import { ProviderFactory } from "../pipeline/providers/ProviderFactory.js";
 import { RootCauseExtractor } from "../pipeline/analyzers/extractors/RootCauseExtractor.js";
 import { BugRootCauseAnalyzer } from "../pipeline/analyzers/root-cause/BugRootCauseAnalyzer.js";
 import { AnalysisReporter } from "../pipeline/analyzers/shared/AnalysisReporter.js";
-import type { AnalysisReport } from "../pipeline/analyzers/shared/models/AnalysisReport.js";
+import type { AnalysisReport, AnalysisInsight } from "../pipeline/analyzers/shared/models/AnalysisReport.js";
 
 /**
  * Production-ready root cause analysis command
@@ -32,7 +32,7 @@ async function main(): Promise<void> {
     const provider = ProviderFactory.create();
     const analyzer = new BugRootCauseAnalyzer(provider);
 
-    const insights: any[] = [];
+    const insights: AnalysisInsight[] = [];
     let tokensUsed = 0;
 
     for (const failure of failureData.failures.slice(0, 3)) {
@@ -45,7 +45,7 @@ async function main(): Promise<void> {
         executionLog: failure.executionLog
       });
 
-      const severityMap = {
+      const severityMap: Record<string, AnalysisInsight['severity']> = {
         'timeout': 'high',
         'connection_error': 'critical',
         'locator_not_found': 'high',

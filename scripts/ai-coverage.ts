@@ -4,7 +4,7 @@ import { ProviderFactory } from "../pipeline/providers/ProviderFactory.js";
 import { CoverageExtractor } from "../pipeline/analyzers/extractors/CoverageExtractor.js";
 import { CoverageAnalyzer } from "../pipeline/analyzers/coverage/CoverageAnalyzer.js";
 import { AnalysisReporter } from "../pipeline/analyzers/shared/AnalysisReporter.js";
-import type { AnalysisReport } from "../pipeline/analyzers/shared/models/AnalysisReport.js";
+import type { AnalysisReport, AnalysisInsight } from "../pipeline/analyzers/shared/models/AnalysisReport.js";
 
 /**
  * Production-ready test coverage analysis command
@@ -43,7 +43,7 @@ async function main(): Promise<void> {
       existingTests: coverageData.tests.map(t => t.name)
     });
 
-    const insights: any[] = [];
+    const insights: AnalysisInsight[] = [];
 
     // Create insights from coverage gaps
     if (uncovered.length > 0) {
@@ -74,22 +74,16 @@ async function main(): Promise<void> {
       });
     }
 
-    // Add insights from AI analysis
-    if (analysis && typeof analysis === 'object' && 'recommendation' in analysis) {
-      const recs = Array.isArray((analysis as any).recommendation) 
-        ? (analysis as any).recommendation 
-        : [(analysis as any).recommendation];
-      
-      recs.forEach((rec: string, idx: number) => {
-        insights.push({
-          severity: idx === 0 ? 'high' : 'medium',
-          category: 'Testing Strategy',
-          title: `Recommendation ${idx + 1}`,
-          description: rec,
-          affectedItems: [],
-          recommendation: rec,
-          confidence: 85
-        });
+    // Add insight from AI analysis
+    if (analysis.recommendation) {
+      insights.push({
+        severity: 'high',
+        category: 'Testing Strategy',
+        title: 'Recommendation 1',
+        description: analysis.recommendation,
+        affectedItems: [],
+        recommendation: analysis.recommendation,
+        confidence: 85
       });
     }
 

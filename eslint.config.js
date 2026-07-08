@@ -57,6 +57,7 @@ export default tseslint.config(
       "support/pages/**",     // generated POM files — may contain LLM artefacts
       "support/data/**",      // generated data files
       "playwright.config.ts", // third-party config
+      "vitest.config.ts",     // third-party config — not part of tsconfig's "include"
       "*.js",                 // compiled output / config scripts at root
     ],
   },

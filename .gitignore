@@ -57,6 +57,7 @@ reports/**
 
 # allure-results
 allure-results/**
+allure-report/**
 
 # Playwright
 /playwright-report/

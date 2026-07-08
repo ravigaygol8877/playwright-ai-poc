@@ -133,18 +133,18 @@ describe("Pipeline — PlaywrightGenerator integration (enterprise dual-viewport
     expect(output).toContain("support/fixtures/visitFixture");
   });
 
-  it("output imports from support/helper/interceptHelper", async () => {
+  it("output imports from support/helper/loginHelper", async () => {
     const pwGen  = new PlaywrightGenerator();
     const output = await pwGen.generate([makeTestCase("TC_001")], FIXTURE_KB);
 
-    expect(output).toContain("support/helper/interceptHelper");
+    expect(output).toContain("support/helper/loginHelper");
   });
 
-  it("test names follow the TC-{id} @regression pattern", async () => {
+  it("test names follow the {id} @regression pattern", async () => {
     const pwGen  = new PlaywrightGenerator();
     const output = await pwGen.generate([makeTestCase("TC_001")], FIXTURE_KB);
 
-    expect(output).toMatch(/TC-TC_001 @regression/);
+    expect(output).toMatch(/TC_001 @regression/);
   });
 
   it("generates an API spec with test.describe and test.beforeAll", async () => {
@@ -226,7 +226,7 @@ describe("PlaywrightRenderer — renderAction", () => {
     );
 
     // Fallback: raw locator using selector from KB
-    expect(output).toBe(`await page.locator("#email").fill(testData.validPassword);`);
+    expect(output).toBe(`await page.locator('#email').fill(testData.validPassword);`);
   });
 
   // ── no pomFixtureKey (raw mode) ────────────────────────────────────────────
@@ -237,7 +237,7 @@ describe("PlaywrightRenderer — renderAction", () => {
       KB_WITH_SELECTORS,
     );
 
-    expect(output).toBe(`await page.locator("#login-btn").click();`);
+    expect(output).toBe(`await page.locator('#login-btn').click();`);
   });
 
   it("emits goto statement for goto action", () => {

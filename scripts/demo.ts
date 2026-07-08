@@ -143,7 +143,7 @@ async function generateSuite(
   field("selectors", Object.keys(kb.selectors as Record<string, unknown>).join(", "));
 
   step("Generating Playwright script...");
-  (kb as any).pageKey = pageName;
+  kb.pageKey = pageName;
   const script = await new PlaywrightGenerator().generate(testCases, kb);
 
   fs.mkdirSync(path.dirname(outputFile), { recursive: true });
