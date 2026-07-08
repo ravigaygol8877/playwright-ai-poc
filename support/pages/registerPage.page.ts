@@ -32,7 +32,7 @@ export default class RegisterPage {
         this.usernameInput = page.locator('input[id="customer.username"]').first();
         this.passwordInput = page.locator('input[id="customer.password"]').first();
         this.confirmPasswordInput = page.locator('input[id="repeatedPassword"]').first();
-        this.submitButton = page.locator('input[type="submit"').or(page.locator('class="button"]')).first();
+        this.submitButton = page.locator('input[type="submit"].button').first();
         this.forgotLoginLink = page.locator('a:has-text("Forgot login info?")').first();
     }
 

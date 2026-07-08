@@ -7,7 +7,7 @@ function makeMockProvider(responseJson: string): LLMProvider {
   return { generateResponse: vi.fn().mockResolvedValue(responseJson) };
 }
 
-function makeTestCase(id: string) {
+function makeTestCase(id: string, isSmoke = false) {
   return {
     id,
     title:          `Test case ${id}`,
@@ -16,6 +16,7 @@ function makeTestCase(id: string) {
     preconditions:  [],
     steps:          ["Step 1", "Step 2"],
     expectedResult: "Expected result",
+    isSmoke,
   };
 }
 
@@ -111,6 +112,47 @@ describe("TestCaseGenerator", () => {
     // Selector names from VALID_KB must not appear — there is no KB to include them from
     expect(capturedPrompt).not.toContain("usernameField");
     expect(capturedPrompt).not.toContain("passwordField");
+  });
+
+  // ── isSmoke enforcement ─────────────────────────────────────────────────────
+  it("keeps the LLM's isSmoke choice when exactly one case is marked", async () => {
+    const cases = [
+      makeTestCase("TC_001", true),
+      makeTestCase("TC_002"),
+      makeTestCase("TC_003"),
+      makeTestCase("TC_004"),
+    ];
+    const provider = makeMockProvider(JSON.stringify(cases));
+    const gen      = new TestCaseGenerator(provider);
+
+    const result = await gen.generate(requirement, VALID_KB);
+    expect(result.filter(tc => tc.isSmoke)).toHaveLength(1);
+    expect(result[0]?.isSmoke).toBe(true);
+  });
+
+  it("promotes one case to isSmoke when the LLM marks none", async () => {
+    const cases = Array.from({ length: 5 }, (_, i) => makeTestCase(`TC_00${i + 1}`));
+    const provider = makeMockProvider(JSON.stringify(cases));
+    const gen      = new TestCaseGenerator(provider);
+
+    const result = await gen.generate(requirement, VALID_KB);
+    expect(result.filter(tc => tc.isSmoke)).toHaveLength(1);
+  });
+
+  it("keeps only the first case when the LLM marks more than one as isSmoke", async () => {
+    const cases = [
+      makeTestCase("TC_001", true),
+      makeTestCase("TC_002", true),
+      makeTestCase("TC_003"),
+      makeTestCase("TC_004"),
+    ];
+    const provider = makeMockProvider(JSON.stringify(cases));
+    const gen      = new TestCaseGenerator(provider);
+
+    const result = await gen.generate(requirement, VALID_KB);
+    expect(result.filter(tc => tc.isSmoke)).toHaveLength(1);
+    expect(result[0]?.isSmoke).toBe(true);
+    expect(result[1]?.isSmoke).toBe(false);
   });
 
   // ── Repair: markdown fences from LLM ──────────────────────────────────────

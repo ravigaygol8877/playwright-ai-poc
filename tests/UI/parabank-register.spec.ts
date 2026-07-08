@@ -13,7 +13,7 @@ testDesktop.describe('Account Registration - Desktop', () => {
     });
 
     testDesktop(
-        'TC_001 @regression : [Account Registration] Successful account registration with valid data',
+        'TC_001 @regression @smoke : [Account Registration] Successful account registration with valid data',
         async ({ page }: { page: Page }) => {
         // Enter valid personal details into the Personal Details form.
         // Input unique desired username into the Username field.
@@ -99,7 +99,7 @@ testMobile.describe('Account Registration - Mobile Web', () => {
     });
 
     testMobile(
-        'TC_001 @regression : [Account Registration][Mobile] Successful account registration with valid data',
+        'TC_001 @regression @smoke @mobile : [Account Registration][Mobile] Successful account registration with valid data',
         async ({ page }: { page: Page }) => {
         // Enter valid personal details into the Personal Details form.
         // Input unique desired username into the Username field.
@@ -111,7 +111,7 @@ testMobile.describe('Account Registration - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_002 @regression : [Account Registration][Mobile] Attempt registration with a username already in use',
+        'TC_002 @regression @mobile : [Account Registration][Mobile] Attempt registration with a username already in use',
         async ({ page }: { page: Page }) => {
         // Enter valid personal details.
         // Input 'ExistingUser' into the Username field.
@@ -122,7 +122,7 @@ testMobile.describe('Account Registration - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_003 @regression : [Account Registration][Mobile] Attempt registration with password confirmation mismatch',
+        'TC_003 @regression @mobile : [Account Registration][Mobile] Attempt registration with password confirmation mismatch',
         async ({ page }: { page: Page }) => {
         // Enter valid personal details.
         // Input unique desired username.
@@ -134,7 +134,7 @@ testMobile.describe('Account Registration - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_004 @regression : [Account Registration][Mobile] Attempt registration leaving all required fields blank',
+        'TC_004 @regression @mobile : [Account Registration][Mobile] Attempt registration leaving all required fields blank',
         async ({ page }: { page: Page }) => {
         // Leave all Personal Details fields blank.
         // Leave Username, Password, and Confirm Password fields blank.
@@ -144,7 +144,7 @@ testMobile.describe('Account Registration - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_005 @regression : [Account Registration][Mobile] Attempt registration with missing critical personal detail (e.g., Email)',
+        'TC_005 @regression @mobile : [Account Registration][Mobile] Attempt registration with missing critical personal detail (e.g., Email)',
         async ({ page }: { page: Page }) => {
         // Enter valid details for all fields EXCEPT the Email field.
         // Input unique username and password.
@@ -154,7 +154,7 @@ testMobile.describe('Account Registration - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_006 @regression : [Account Registration][Mobile] Attempt registration using SQL injection payload in username field',
+        'TC_006 @regression @mobile : [Account Registration][Mobile] Attempt registration using SQL injection payload in username field',
         async ({ page }: { page: Page }) => {
         // Enter valid personal details.
         // Input 'admin' OR '1'='1' into the Username field.
@@ -165,7 +165,7 @@ testMobile.describe('Account Registration - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_007 @regression : [Account Registration][Mobile] Attempt registration using minimum allowed password length (Boundary)',
+        'TC_007 @regression @mobile : [Account Registration][Mobile] Attempt registration using minimum allowed password length (Boundary)',
         async ({ page }: { page: Page }) => {
         // Enter valid personal details.
         // Input unique desired username.

@@ -26,6 +26,16 @@ interface TestBlock {
 }
 
 /**
+ * Steps are typed as string[], but AI-generated test cases occasionally arrive
+ * as untyped objects before validation. Fall back to common shape keys.
+ */
+function stepText(step: unknown): string {
+  if (typeof step === 'string') return step;
+  const s = step as { step?: string; description?: string; action?: string };
+  return s.step ?? s.description ?? s.action ?? JSON.stringify(step);
+}
+
+/**
  * Compiles a complete `.spec.ts` file from an array of test cases.
  *
  * Follows the enterprise pattern:
@@ -33,7 +43,9 @@ interface TestBlock {
  * - Imports from support/fixtures/visitFixture and support/helper/interceptHelper
  * - Default import of POM class
  * - No data file import — data is either in POM or loaded via fileReader
- * - Test names follow: 'TC-{id} @regression : [{describe}] {title}'
+ * - Test names follow: '{id} @regression : [{describe}] {title}'
+ *   (mobile tests additionally carry '@mobile': '{id} @regression @mobile : [{describe}][Mobile] {title}')
+ *   (test cases with isSmoke=true additionally carry '@smoke', right after '@regression')
  */
 export class PlaywrightGenerator {
   constructor(private concurrency = 8) {}
@@ -47,7 +59,7 @@ export class PlaywrightGenerator {
   ): Promise<string> {
 
     const describeName = knowledgeBase.describeName ?? knowledgeBase.pageName;
-    const pageKey      = (knowledgeBase as any).pageKey ?? '';
+    const pageKey      = knowledgeBase.pageKey ?? '';
     const className    = kbKeyToClassName(pageKey || describeName.replace(/\s+/g, '-').toLowerCase());
     const camelName    = className.charAt(0).toLowerCase() + className.slice(1);
     const pageFile     = `${camelName}.page.js`;
@@ -167,14 +179,11 @@ ${apiTestBlocks.join('\n\n')}
     const methodName     = this.toMethodName(testCase.title);
     const testTitle      = this.escSingle(testCase.title);
     const testId         = testCase.id ?? 'TC-001';
+    const smokeTag       = testCase.isSmoke ? ' @smoke' : '';
 
     // Build step comments for the test body
     const stepLines = testCase.steps
-      .map(s => {
-        const text = typeof s === 'string' ? s
-          : (s as any).step ?? (s as any).description ?? (s as any).action ?? JSON.stringify(s);
-        return `        // ${text}`;
-      })
+      .map(s => `        // ${stepText(s)}`)
       .join('\n');
 
     const bodyLines = testCase.steps.length > 0
@@ -182,14 +191,14 @@ ${apiTestBlocks.join('\n\n')}
       : `        await ${camelName}.${methodName}();`;
 
     const desktopTest = `    testDesktop(
-        '${testId} @regression : [${describeName}] ${testTitle}',
+        '${testId} @regression${smokeTag} : [${describeName}] ${testTitle}',
         async ({ page }: { page: Page }) => {
 ${bodyLines}
         },
     );`;
 
     const mobileTest = `    testMobile(
-        '${testId} @regression : [${describeName}][Mobile] ${testTitle}',
+        '${testId} @regression${smokeTag} @mobile : [${describeName}][Mobile] ${testTitle}',
         async ({ page }: { page: Page }) => {
 ${bodyLines}
         },
@@ -205,17 +214,14 @@ ${bodyLines}
 
     const testTitle = this.escSingle(testCase.title);
     const testId    = testCase.id ?? 'TC-001';
+    const smokeTag  = testCase.isSmoke ? ' @smoke' : '';
 
     const stepLines = testCase.steps
-      .map(s => {
-        const text = typeof s === 'string' ? s
-          : (s as any).step ?? (s as any).description ?? (s as any).action ?? JSON.stringify(s);
-        return `        // ${text}`;
-      })
+      .map(s => `        // ${stepText(s)}`)
       .join('\n');
 
     return `    test(
-        '${testId} @regression : [${describeName}][API] ${testTitle}',
+        '${testId} @regression${smokeTag} : [${describeName}][API] ${testTitle}',
         async ({ request }) => {
 ${stepLines}
             const { email, password } = getUserCredentials();

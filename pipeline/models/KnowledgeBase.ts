@@ -13,6 +13,9 @@ export interface KnowledgeBase {
   /** Human-readable page name — used as describe() label when describeName is absent. */
   pageName: string;
 
+  /** Optional canonical KB file key (e.g. "login-page") — used to derive the generated POM class name. */
+  pageKey?: string;
+
   /** Optional override for the describe() label in generated specs. */
   describeName?: string;
 

@@ -174,7 +174,7 @@ async function generateSuite(
         console.log(`failed (${msg}) — continuing without POM`);
       }
     }
-    testCases.forEach(tc => console.log(`       [${tc.id}] ${tc.title}`));
+    testCases.forEach(tc => console.log(`       [${tc.id}]${tc.isSmoke ? ' 🔥 smoke' : ''} ${tc.title}`));
 
     // Test data (for reference / KB enrichment — not imported in spec)
     process.stdout.write("\n  ▸ Generating test data... ");
@@ -182,7 +182,7 @@ async function generateSuite(
     console.log("done");
 
     // Attach pageKey for PlaywrightGenerator
-    (kb as any).pageKey = suite.page;
+    kb.pageKey = suite.page;
 
     // UI spec
     process.stdout.write("\n  ▸ Generating UI Playwright spec... ");
