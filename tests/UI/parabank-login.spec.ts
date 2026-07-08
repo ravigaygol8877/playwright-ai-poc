@@ -12,7 +12,7 @@ testDesktop.describe('onlineBankingLogin - Desktop', () => {
     });
 
     testDesktop(
-        'TC_001 @regression : [onlineBankingLogin] Successful Login with Valid Credentials',
+        'TC_001 @regression @smoke : [onlineBankingLogin] Successful Login with Valid Credentials',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Enter valid username into the 'username' field.
@@ -107,7 +107,7 @@ testMobile.describe('onlineBankingLogin - Mobile Web', () => {
     });
 
     testMobile(
-        'TC_001 @regression : [onlineBankingLogin][Mobile] Successful Login with Valid Credentials',
+        'TC_001 @regression @smoke @mobile : [onlineBankingLogin][Mobile] Successful Login with Valid Credentials',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Enter valid username into the 'username' field.
@@ -118,7 +118,7 @@ testMobile.describe('onlineBankingLogin - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_002 @regression : [onlineBankingLogin][Mobile] Login Attempt with Invalid Username',
+        'TC_002 @regression @mobile : [onlineBankingLogin][Mobile] Login Attempt with Invalid Username',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Enter invalid username into the 'username' field.
@@ -129,7 +129,7 @@ testMobile.describe('onlineBankingLogin - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_003 @regression : [onlineBankingLogin][Mobile] Login Attempt with Invalid Password',
+        'TC_003 @regression @mobile : [onlineBankingLogin][Mobile] Login Attempt with Invalid Password',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Enter valid username into the 'username' field.
@@ -140,7 +140,7 @@ testMobile.describe('onlineBankingLogin - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_004 @regression : [onlineBankingLogin][Mobile] Login Attempt with Both Fields Empty',
+        'TC_004 @regression @mobile : [onlineBankingLogin][Mobile] Login Attempt with Both Fields Empty',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Leave the 'username' field empty.
@@ -151,7 +151,7 @@ testMobile.describe('onlineBankingLogin - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_005 @regression : [onlineBankingLogin][Mobile] Login Attempt with Empty Username Field',
+        'TC_005 @regression @mobile : [onlineBankingLogin][Mobile] Login Attempt with Empty Username Field',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Leave the 'username' field empty.
@@ -162,7 +162,7 @@ testMobile.describe('onlineBankingLogin - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_006 @regression : [onlineBankingLogin][Mobile] Login Attempt with Empty Password Field',
+        'TC_006 @regression @mobile : [onlineBankingLogin][Mobile] Login Attempt with Empty Password Field',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Enter valid username into the 'username' field.
@@ -173,7 +173,7 @@ testMobile.describe('onlineBankingLogin - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_007 @regression : [onlineBankingLogin][Mobile] Login Attempt with SQL Injection in Username Field',
+        'TC_007 @regression @mobile : [onlineBankingLogin][Mobile] Login Attempt with SQL Injection in Username Field',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Enter SQL injection string (e.g., "' OR '1'='1") into the 'username' field.
@@ -184,7 +184,7 @@ testMobile.describe('onlineBankingLogin - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_008 @regression : [onlineBankingLogin][Mobile] Login Attempt with Maximum Length Username and Password',
+        'TC_008 @regression @mobile : [onlineBankingLogin][Mobile] Login Attempt with Maximum Length Username and Password',
         async ({ page }: { page: Page }) => {
         // Navigate to ParaBank login page.
         // Enter a username with the maximum allowed characters into the 'username' field.

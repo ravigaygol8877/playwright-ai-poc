@@ -13,7 +13,7 @@
     "usernameInput": "input[id=\"customer.username\"]",
     "passwordInput": "input[id=\"customer.password\"]",
     "confirmPasswordInput": "input[id=\"repeatedPassword\"]",
-    "submitButton": "input[type=\"submit\", class=\"button\"]",
+    "submitButton": "input[type=\"submit\"].button",
     "forgotLoginLink": "a:has-text(\"Forgot login info?\")"
   },
   "messages": {},

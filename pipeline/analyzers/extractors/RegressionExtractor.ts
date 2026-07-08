@@ -181,7 +181,7 @@ export class RegressionExtractor {
   /**
    * Get recommendation based on risk level
    */
-  private getRecommendation(riskLevel: string, failures: any[]): string {
+  private getRecommendation(riskLevel: string, failures: RegressionTest['failureHistory']): string {
     const recentFailure = failures[failures.length - 1]?.reason || 'Unknown';
 
     switch (riskLevel) {
@@ -200,7 +200,7 @@ export class RegressionExtractor {
   /**
    * Generate summary of regression analysis
    */
-  private generateSummary(tests: RegressionTest[], stats: any): string {
+  private generateSummary(tests: RegressionTest[], stats: RegressionAnalysisInput['riskAssessment']): string {
     return `Regression Analysis: ${tests.length} affected tests identified. ` +
            `Critical: ${stats.criticalCount}, High: ${stats.highCount}, ` +
            `Medium: ${stats.mediumCount}, Low: ${stats.lowCount}`;

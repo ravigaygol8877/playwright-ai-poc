@@ -9,4 +9,6 @@ export interface TestCase {
   preconditions:  string[];
   steps:          string[];
   expectedResult: string;
+  /** True for the single fastest, most critical scenario that should run in a smoke suite. */
+  isSmoke:        boolean;
 }

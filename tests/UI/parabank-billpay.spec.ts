@@ -14,7 +14,7 @@ testDesktop.describe('billPay - Desktop', () => {
     });
 
     testDesktop(
-        'TC_001 @regression : [billPay] Successful payment with valid data inputs',
+        'TC_001 @regression @smoke : [billPay] Successful payment with valid data inputs',
         async ({ page }: { page: Page }) => {
         await billpayPage.successfulPaymentWithValidDataInputs();
         },
@@ -72,49 +72,49 @@ testMobile.describe('billPay - Mobile Web', () => {
     });
 
     testMobile(
-        'TC_001 @regression : [billPay][Mobile] Successful payment with valid data inputs',
+        'TC_001 @regression @smoke @mobile : [billPay][Mobile] Successful payment with valid data inputs',
         async ({ page }: { page: Page }) => {
         await billpayPage.successfulPaymentWithValidDataInputs();
         },
     );
 
     testMobile(
-        'TC_002 @regression : [billPay][Mobile] Attempt payment with account number confirmation mismatch',
+        'TC_002 @regression @mobile : [billPay][Mobile] Attempt payment with account number confirmation mismatch',
         async ({ page }: { page: Page }) => {
         await billpayPage.attemptPaymentWithAccountNumberConfirmationMismatch();
         },
     );
 
     testMobile(
-        'TC_003 @regression : [billPay][Mobile] Attempt payment with zero amount',
+        'TC_003 @regression @mobile : [billPay][Mobile] Attempt payment with zero amount',
         async ({ page }: { page: Page }) => {
         await billpayPage.attemptPaymentWithZeroAmount();
         },
     );
 
     testMobile(
-        'TC_004 @regression : [billPay][Mobile] Attempt payment with missing required field (Account Number)',
+        'TC_004 @regression @mobile : [billPay][Mobile] Attempt payment with missing required field (Account Number)',
         async ({ page }: { page: Page }) => {
         await billpayPage.attemptPaymentWithMissingRequiredFieldAccountNumber();
         },
     );
 
     testMobile(
-        'TC_005 @regression : [billPay][Mobile] Attempt payment with negative amount input',
+        'TC_005 @regression @mobile : [billPay][Mobile] Attempt payment with negative amount input',
         async ({ page }: { page: Page }) => {
         await billpayPage.attemptPaymentWithNegativeAmountInput();
         },
     );
 
     testMobile(
-        'TC_006 @regression : [billPay][Mobile] Security test: Entering SQL injection payload in Payee Name',
+        'TC_006 @regression @mobile : [billPay][Mobile] Security test: Entering SQL injection payload in Payee Name',
         async ({ page }: { page: Page }) => {
         await billpayPage.securityTestEnteringSqlInjectionPayloadInPayeeName();
         },
     );
 
     testMobile(
-        'TC_007 @regression : [billPay][Mobile] Boundary test: Entering maximum allowed characters in Payee Name',
+        'TC_007 @regression @mobile : [billPay][Mobile] Boundary test: Entering maximum allowed characters in Payee Name',
         async ({ page }: { page: Page }) => {
         await billpayPage.boundaryTestEnteringMaximumAllowedCharactersInPayeeName();
         },

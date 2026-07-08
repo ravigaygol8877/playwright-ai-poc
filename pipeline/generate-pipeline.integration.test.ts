@@ -33,6 +33,7 @@ function makeTestCase(id: string, override?: Partial<TestCase>): TestCase {
     preconditions:  [],
     steps:          ["Click the loginButton"],
     expectedResult: "User is logged in",
+    isSmoke:        false,
     ...override,
   };
 }

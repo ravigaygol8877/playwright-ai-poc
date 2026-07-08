@@ -56,6 +56,9 @@ Rules:
     High     → core happy-path flows, main business functionality
     Medium   → negative paths, invalid input handling, error messages
     Low      → edge cases, boundary values, cosmetic validation
+- Assign "isSmoke": true to EXACTLY ONE test case — the single fastest scenario that best proves
+  the core feature works at all (normally the primary positive-path, Critical/High-priority case).
+  Every other test case must have "isSmoke": false. Never mark more than one, never mark zero.
 - Return ONLY valid JSON. No markdown. No explanation.
 
 JSON structure:
@@ -68,7 +71,8 @@ JSON structure:
     "priority": "High",
     "preconditions": [],
     "steps": [],
-    "expectedResult": ""
+    "expectedResult": "",
+    "isSmoke": false
   }
 ]
 
@@ -86,7 +90,36 @@ ${requirement}
       );
     }
 
-    return testCases.slice(0, MAX_TEST_CASES);
+    return this.enforceExactlyOneSmoke(testCases.slice(0, MAX_TEST_CASES));
+  }
+
+  /**
+   * The AI is asked to mark exactly one case isSmoke: true, but LLMs are not
+   * perfectly reliable at counting constraints — never trust the response blindly.
+   * If it marked zero, promote the best candidate (Critical/High priority positive
+   * case, else the first case). If it marked more than one, keep only the first.
+   */
+  private enforceExactlyOneSmoke(testCases: TestCase[]): TestCase[] {
+    const smokeIndexes = testCases.reduce<number[]>((acc, tc, i) => {
+      if (tc.isSmoke) acc.push(i);
+      return acc;
+    }, []);
+
+    if (smokeIndexes.length === 1) return testCases;
+
+    if (smokeIndexes.length === 0) {
+      const priorityRank: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+      let bestIndex = 0;
+      let bestRank  = Infinity;
+      testCases.forEach((tc, i) => {
+        const rank = (tc.type === "positive" ? 0 : 10) + (priorityRank[tc.priority] ?? 10);
+        if (rank < bestRank) { bestRank = rank; bestIndex = i; }
+      });
+      return testCases.map((tc, i) => ({ ...tc, isSmoke: i === bestIndex }));
+    }
+
+    const firstSmoke = smokeIndexes[0];
+    return testCases.map((tc, i) => ({ ...tc, isSmoke: i === firstSmoke }));
   }
 
   private buildKbContext(requirement: string, kb: KnowledgeBase | undefined): string {

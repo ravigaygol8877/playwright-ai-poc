@@ -4,7 +4,7 @@ import { ProviderFactory } from "../pipeline/providers/ProviderFactory.js";
 import { FlakyTestExtractor } from "../pipeline/analyzers/extractors/FlakyTestExtractor.js";
 import { FlakyTestAnalyzer } from "../pipeline/analyzers/flaky/FlakyTestAnalyzer.js";
 import { AnalysisReporter } from "../pipeline/analyzers/shared/AnalysisReporter.js";
-import type { AnalysisReport } from "../pipeline/analyzers/shared/models/AnalysisReport.js";
+import type { AnalysisReport, AnalysisInsight } from "../pipeline/analyzers/shared/models/AnalysisReport.js";
 
 /**
  * Production-ready flaky test analysis command
@@ -32,7 +32,7 @@ async function main(): Promise<void> {
     const provider = ProviderFactory.create();
     const analyzer = new FlakyTestAnalyzer(provider);
 
-    const insights: any[] = [];
+    const insights: AnalysisInsight[] = [];
     let tokensUsed = 0;
 
     // Analyze top flaky tests (cap at 3 to keep demo runtime reasonable)

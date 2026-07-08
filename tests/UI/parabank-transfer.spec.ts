@@ -14,7 +14,7 @@ testDesktop.describe('transferFunds - Desktop', () => {
     });
 
     testDesktop(
-        'TC_001 @regression : [transferFunds] Successful fund transfer with valid amount',
+        'TC_001 @regression @smoke : [transferFunds] Successful fund transfer with valid amount',
         async ({ page }: { page: Page }) => {
         // Navigate to the fund transfer module.
         // Select Source Account A and Destination Account B.
@@ -100,7 +100,7 @@ testMobile.describe('transferFunds - Mobile Web', () => {
     });
 
     testMobile(
-        'TC_001 @regression : [transferFunds][Mobile] Successful fund transfer with valid amount',
+        'TC_001 @regression @smoke @mobile : [transferFunds][Mobile] Successful fund transfer with valid amount',
         async ({ page }: { page: Page }) => {
         // Navigate to the fund transfer module.
         // Select Source Account A and Destination Account B.
@@ -111,7 +111,7 @@ testMobile.describe('transferFunds - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_002 @regression : [transferFunds][Mobile] Attempt transfer with empty amount field',
+        'TC_002 @regression @mobile : [transferFunds][Mobile] Attempt transfer with empty amount field',
         async ({ page }: { page: Page }) => {
         // Navigate to the fund transfer module.
         // Select Source Account A and Destination Account B.
@@ -122,7 +122,7 @@ testMobile.describe('transferFunds - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_003 @regression : [transferFunds][Mobile] Attempt transfer with non-numeric characters in amount field',
+        'TC_003 @regression @mobile : [transferFunds][Mobile] Attempt transfer with non-numeric characters in amount field',
         async ({ page }: { page: Page }) => {
         // Navigate to the fund transfer module.
         // Select Source Account A and Destination Account B.
@@ -133,7 +133,7 @@ testMobile.describe('transferFunds - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_004 @regression : [transferFunds][Mobile] Attempt transfer with zero amount',
+        'TC_004 @regression @mobile : [transferFunds][Mobile] Attempt transfer with zero amount',
         async ({ page }: { page: Page }) => {
         // Navigate to the fund transfer module.
         // Select Source Account A and Destination Account B.
@@ -144,7 +144,7 @@ testMobile.describe('transferFunds - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_005 @regression : [transferFunds][Mobile] Attempt transfer with a negative amount (Security Check)',
+        'TC_005 @regression @mobile : [transferFunds][Mobile] Attempt transfer with a negative amount (Security Check)',
         async ({ page }: { page: Page }) => {
         // Navigate to the fund transfer module.
         // Select Source Account A and Destination Account B.
@@ -155,7 +155,7 @@ testMobile.describe('transferFunds - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_006 @regression : [transferFunds][Mobile] Attempt transfer exceeding available balance (Insufficient Funds)',
+        'TC_006 @regression @mobile : [transferFunds][Mobile] Attempt transfer exceeding available balance (Insufficient Funds)',
         async ({ page }: { page: Page }) => {
         // Navigate to the fund transfer module.
         // Select Source Account A and Destination Account B.
@@ -166,7 +166,7 @@ testMobile.describe('transferFunds - Mobile Web', () => {
     );
 
     testMobile(
-        'TC_007 @regression : [transferFunds][Mobile] Attempt transfer at maximum allowed limit',
+        'TC_007 @regression @mobile : [transferFunds][Mobile] Attempt transfer at maximum allowed limit',
         async ({ page }: { page: Page }) => {
         // Navigate to the fund transfer module.
         // Select Source Account A and Destination Account B.

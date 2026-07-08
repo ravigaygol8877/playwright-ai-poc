@@ -113,11 +113,11 @@ export class RootCauseExtractor {
     location?: string;
     context?: string;
   } {
-    const details: any = {};
+    const details: { errorCode?: string; location?: string; context?: string } = {};
 
     // Extract error code if present
     const codeMatch = message.match(/error[:\s]+(\w+)/i);
-    if (codeMatch) details.errorCode = codeMatch[1];
+    if (codeMatch) details.errorCode = codeMatch[1]!;
 
     // Extract location from stack trace
     const locationMatch = trace.match(/at\s+(\S+)\s+\(([^)]+)\)/);
@@ -125,7 +125,7 @@ export class RootCauseExtractor {
 
     // Extract context
     const contextMatch = trace.match(/navigating to "([^"]+)"/i);
-    if (contextMatch) details.context = contextMatch[1];
+    if (contextMatch) details.context = contextMatch[1]!;
 
     return details;
   }
